@@ -6,12 +6,12 @@ public class GameCore {
 	private GamePanel gamePanel;
 	
 	public GameCore() {
+		
 		gamePanel = new GamePanel();
 		gameFrame = new GameFrame(gamePanel);
-		
-		
-		
-		
+		gamePanel.setRequestFocusEnabled(true);
+		gamePanel.requestFocus();
+	
 	}
 
 }
