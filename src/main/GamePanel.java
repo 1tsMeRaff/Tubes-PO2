@@ -9,9 +9,11 @@ import inputs.Mouse;
 
 public class GamePanel extends JPanel {
 	private static final long serialVersionUID = 1L;
+	private int fps = 0;
+	private long lastCheck = 0;
 	
 	private Mouse mouse;
-	private int deltaX = 100, deltaY = 100; 
+	private int deltaX = 100, deltaY = 100;
 	
 	public GamePanel() {
 		
@@ -24,26 +26,40 @@ public class GamePanel extends JPanel {
 	
 	public void changeDeltaX(int value) {
 		this.deltaX += value;
-		repaint();
 	}
 	
 	public void changeDeltaY(int value) {
 		this.deltaY += value;
-		repaint();
 	}
 	
 	public void setRectPos(int x, int y) {
 		this.deltaX = x;
 		this.deltaY = y;
-		repaint();
 		
 	}
 	
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		
+		updateRectangle();
+		
 		g.fillRect(deltaX, deltaY, 200, 50);
 		
+		fps++;
+		if(System.currentTimeMillis() - lastCheck >= 1000) {
+			lastCheck = System.currentTimeMillis();
+			System.out.println("FPS : " + fps);
+			fps = 0;
+			
+		}
+		
+		repaint();
+		
+	}
+
+	private void updateRectangle() {
+		deltaX++;
+		deltaY++;
 	}
 
 }

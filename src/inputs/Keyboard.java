@@ -30,7 +30,7 @@ public class Keyboard implements KeyListener {
 			gamePanel.changeDeltaY(5);
 			break;
 		case KeyEvent.VK_S:
-			gamePanel.changeDeltaX(5);
+			gamePanel.changeDeltaX(-5);
 			break;
 		case KeyEvent.VK_D:
 			gamePanel.changeDeltaX(5);

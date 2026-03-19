@@ -1,9 +1,11 @@
 package main;
 
-public class GameCore {
+public class GameCore implements Runnable {
 	
 	private GameFrame gameFrame;
 	private GamePanel gamePanel;
+	private Thread gamethread;
+	private final int FPSSET = 120;
 	
 	public GameCore() {
 		
@@ -12,6 +14,17 @@ public class GameCore {
 		gamePanel.setRequestFocusEnabled(true);
 		gamePanel.requestFocus();
 	
+	}
+
+	@Override
+	public void run() {
+		
+		double timePerFrame = 1000000000.0 / FPSSET;
+		
+		while(true) {
+			
+		}
+		
 	}
 
 }
