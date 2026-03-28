@@ -118,29 +118,31 @@ public class GamePanel extends JPanel {
 		if(moving) {
 			switch(playerDirection) {
 			case LEFT:
-				deltaX -= 5;
+				deltaX -= 2;
 				break;
 			case UP:
-				deltaY -= 5;
+				deltaY -= 2;
 				break;
 			case RIGHT:
-				deltaX += 5;
+				deltaX += 2;
 				break;
 			case DOWN:
-				deltaY += 5;
+				deltaY += 2;
 				break;
 			}
 		}
 	}
 	
+	public void myUpdate() {
+		
+		updateAnimationTick();
+		setAnimation();
+		updatePos();
+	}
+	
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		
-		updateAnimationTick();
-		
-		setAnimation();
-		updatePos();
-
 		g.drawImage(animasi[playerAction][aniIndex], (int) deltaX, (int) deltaY, 160, 128, null);
 	}
 
