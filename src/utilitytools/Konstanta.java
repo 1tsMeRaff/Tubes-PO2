@@ -2,15 +2,21 @@ package utilitytools;
 
 public class Konstanta {
 
+	public static class Directions{
+		public static final int LEFT = 0;
+		public static final int UP = 1;
+		public static final int RIGHT = 2;
+		public static final int DOWN = 3;
+	}
 	public static class KonstantaPlayerRight{
-		public static final int IDLE_CHILL = 0;
-		public static final int IDLE_ACTIVE = 1;
-		public static final int LARI = 2;
-		public static final int LOMPAT = 3;
-		public static final int JATUH = 4;
-		public static final int ATTACK_1 = 5;
-		public static final int CHARGE_ATTACK = 6;
-		public static final int GUARD = 7;
+		public static final int IDLE_ACTIVE = 0;
+		public static final int IDLE_CHILL = 1;
+		public static final int LARI = 3;
+		public static final int LOMPAT = 4;
+		public static final int JATUH = 19;
+		public static final int ATTACK_1 = 11;
+		public static final int CHARGE_ATTACK = 12;
+		public static final int GUARD = 15;
 		
 		public static int GetSpriteAmount(int player_action) {
 			
@@ -28,7 +34,7 @@ public class Konstanta {
 			case ATTACK_1:
 				return 8;
 			case CHARGE_ATTACK:
-				return 16;
+				return 10;
 			case GUARD:
 				return 6;
 			default:

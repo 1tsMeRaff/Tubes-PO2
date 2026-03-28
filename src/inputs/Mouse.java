@@ -9,6 +9,7 @@ import main.GamePanel;
 public class Mouse implements MouseListener, MouseMotionListener {
 	
 	private GamePanel gamePanel;
+	
 	public Mouse(GamePanel gamePanel) {
 		this.gamePanel = gamePanel;
 		

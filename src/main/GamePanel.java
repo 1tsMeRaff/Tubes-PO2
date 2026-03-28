@@ -13,6 +13,7 @@ import inputs.Keyboard;
 import inputs.Mouse;
 
 import static utilitytools.Konstanta.KonstantaPlayerRight.*;
+import static utilitytools.Konstanta.Directions.*;
 
 public class GamePanel extends JPanel {
 	private static final long serialVersionUID = 1L;
@@ -24,6 +25,8 @@ public class GamePanel extends JPanel {
 	private int aniTick, aniIndex, aniSpeed = 15;
 	
 	private int playerAction = IDLE_ACTIVE;
+	private int playerDirection = -1;
+	private boolean moving = false;
 	
 	public GamePanel() {
 		
@@ -43,7 +46,7 @@ public class GamePanel extends JPanel {
 	}
 	
 	private void loadAnimations() {
-		animasi = new BufferedImage[10][11];
+		animasi = new BufferedImage[10][16];
 		
 		for(int j = 0; j < animasi.length; j++) {
 			for(int i = 0; i < animasi[j].length; i ++) {
@@ -79,18 +82,13 @@ public class GamePanel extends JPanel {
 		setMaximumSize(size);
 	}
 
-	public void changeDeltaX(int value) {
-		this.deltaX += value;
+	public void setDirection(int direction) {
+		this.playerDirection = direction;
+		moving = true;
 	}
 	
-	public void changeDeltaY(int value) {
-		this.deltaY += value;
-	}
-	
-	public void setRectPos(int x, int y) {
-		this.deltaX = x;
-		this.deltaY = y;
-		
+	public void setMoving(boolean moving) {
+		this.moving = moving;
 	}
 	
 	private void updateAnimationTick() {
@@ -99,17 +97,49 @@ public class GamePanel extends JPanel {
 		if(aniTick >= aniSpeed) {
 			aniTick = 0;
 			aniIndex++;
-			if(aniIndex >= animasi.length) {
+			if(aniIndex >= GetSpriteAmount(playerAction)) {
 				aniIndex = 0;
 			}
 		}
 		
 	}
 	
+	private void setAnimation() {
+		
+		if(moving) {
+			playerAction = LARI;
+		}else {
+			playerAction = IDLE_ACTIVE;
+		}
+	}
+	
+	private void updatePos() {
+		
+		if(moving) {
+			switch(playerDirection) {
+			case LEFT:
+				deltaX -= 5;
+				break;
+			case UP:
+				deltaY -= 5;
+				break;
+			case RIGHT:
+				deltaX += 5;
+				break;
+			case DOWN:
+				deltaY += 5;
+				break;
+			}
+		}
+	}
+	
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		
 		updateAnimationTick();
+		
+		setAnimation();
+		updatePos();
 
 		g.drawImage(animasi[playerAction][aniIndex], (int) deltaX, (int) deltaY, 160, 128, null);
 	}
