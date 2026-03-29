@@ -1,5 +1,9 @@
 package main;
 
+import java.awt.Graphics;
+
+import entity.Player;
+
 public class GameCore implements Runnable {
 	
 	private GameFrame gameFrame;
@@ -8,23 +12,36 @@ public class GameCore implements Runnable {
 	private final int FPS_SET = 120;
 	private final int UPS_SET = 200;
 	
+	private Player player;
+	
 	public GameCore() {
 		
-		gamePanel = new GamePanel();
+		initClasses();
+		
+		gamePanel = new GamePanel(this);
 		gameFrame = new GameFrame(gamePanel);
 		gamePanel.setRequestFocusEnabled(true);
 		gamePanel.requestFocus();
+		
 		startGameLoop();
-	
 	}
 	
+	private void initClasses() {
+		player = new Player(200,200);
+		
+	}
+
 	private void startGameLoop() {
 		gameThread = new Thread(this);
 		gameThread.start();
 	}
 
 	public void update() {
-		gamePanel.myUpdate();
+		player.update();
+	}
+	
+	public void render(Graphics g) {
+		player.render(g);
 	}
 	
 	@Override
@@ -50,6 +67,10 @@ public class GameCore implements Runnable {
 			deltaF += (currentTime - previousTime) / timePerFrame;
 			previousTime = currentTime;
 			
+//			if (deltaU > 5) {
+//	            deltaU = 5; 
+//	        }
+			
 			if(deltaU >= 1) {
 				update();
 				ups++;
@@ -69,8 +90,21 @@ public class GameCore implements Runnable {
 				ups = 0;
 			}
 			
+//			try {
+//			    Thread.sleep(1); 
+//			} catch (InterruptedException e) {
+//			    e.printStackTrace();
+//			}
 		}
 		
+	}
+	
+	public void windowFocusLost() {
+		player.resetDirBooleans();
+	}
+	
+	public Player getPlayer() {
+		return player;
 	}
 
 }
