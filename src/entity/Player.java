@@ -8,7 +8,6 @@ import java.io.InputStream;
 import javax.imageio.ImageIO;
 
 import static utilitytools.Konstanta.KonstantaPlayerRight.*;
-import static utilitytools.Konstanta.Directions.*;
 
 public class Player extends Entity {
 
@@ -111,7 +110,7 @@ public class Player extends Entity {
 		
 		try {
 			BufferedImage image = ImageIO.read(is);
-			animasi = new BufferedImage[10][16];
+			animasi = new BufferedImage[15][16];
 			
 			for(int j = 0; j < animasi.length; j++) {
 				for(int i = 0; i < animasi[j].length; i ++) {
