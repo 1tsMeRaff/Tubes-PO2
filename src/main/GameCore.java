@@ -11,8 +11,15 @@ public class GameCore implements Runnable {
 	private Thread gameThread;
 	private final int FPS_SET = 120;
 	private final int UPS_SET = 200;
-	
 	private Player player;
+	
+	public final static int TILE_DEFAULT_SIZE = 32;
+	public final static float SCALE = 1.0f;
+	public final static int TILES_IN_WIDTH = 26;
+	public final static int TILES_IN_HEIGHT = 14;
+	public final static int TILE_SIZE = (int) (TILE_DEFAULT_SIZE * SCALE);
+	public final static int GAME_WIDTH = TILE_SIZE * TILES_IN_WIDTH;
+	public final static int GAME_HEIGHT = TILE_SIZE * TILES_IN_HEIGHT;
 	
 	public GameCore() {
 		
@@ -106,5 +113,4 @@ public class GameCore implements Runnable {
 	public Player getPlayer() {
 		return player;
 	}
-
 }

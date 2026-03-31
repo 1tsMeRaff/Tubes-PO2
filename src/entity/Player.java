@@ -7,6 +7,8 @@ import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
+import utilitytools.LoadSave;
+
 import static utilitytools.Konstanta.KonstantaPlayerRight.*;
 
 public class Player extends Entity {
@@ -106,10 +108,8 @@ public class Player extends Entity {
 	
 	private void loadAnimations() {
 		
-		InputStream is = getClass().getResourceAsStream("/player_right.png");
-		
-		try {
-			BufferedImage image = ImageIO.read(is);
+			BufferedImage image = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_SPRITE);
+			
 			animasi = new BufferedImage[15][16];
 			
 			for(int j = 0; j < animasi.length; j++) {
@@ -117,17 +117,6 @@ public class Player extends Entity {
 					animasi[j][i] = image.getSubimage(i * 80, j * 64, 80, 64); 
 				}
 			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		finally {
-			try {
-				is.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
 	}
 
 	public void resetDirBooleans() {
