@@ -36,7 +36,7 @@ public class GameCore implements Runnable {
 	}
 	
 	private void initClasses() {
-		player = new Player(200,200);
+		player = new Player(200, 200, (int) (64 * SCALE), (int) (40 * SCALE));
 		levelManager = new LevelManager(this);
 		
 	}

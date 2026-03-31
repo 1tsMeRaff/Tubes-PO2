@@ -19,9 +19,10 @@ public class Player extends Entity {
 	private boolean moving = false, attacking = false;
 	private boolean left, up, right, down;
 	private float playerSpeed = 2.0f;
+	private int[][] lvlData;
 	
-	public Player(float x, float y) {
-		super(x, y);
+	public Player(float x, float y, int width, int height) {
+		super(x, y, width, height);
 		loadAnimations();
 	}
 
@@ -29,12 +30,14 @@ public class Player extends Entity {
 	public void update() {
 		
 		updatePos();
+		updateHitBox();
 	    setAnimation();
 	    updateAnimationTick();
 	}
 	
 	public void render(Graphics g) {
-		g.drawImage(animasi[playerAction][aniIndex], (int) x, (int) y, 160, 128, null);
+		g.drawImage(animasi[playerAction][aniIndex], (int) x, (int) y, width, height, null);
+		drawHitbox(g);
 	}
 	
 	private void updateAnimationTick() {
@@ -117,6 +120,10 @@ public class Player extends Entity {
 					animasi[j][i] = image.getSubimage(i * 80, j * 64, 80, 64); 
 				}
 			}
+	}
+	
+	public void loadLvlData() {
+		this.lvlData = lvlData;
 	}
 
 	public void resetDirBooleans() {

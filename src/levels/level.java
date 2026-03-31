@@ -14,5 +14,9 @@ public class level {
 		}
 		return tilesData[y][x];
 	}
+	
+	public int[][] getLvlData(){
+		return tilesData;
+	}
 
 }
