@@ -7,9 +7,11 @@ import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
+import main.GameCore;
 import utilitytools.LoadSave;
 
 import static utilitytools.Konstanta.KonstantaPlayerRight.*;
+import static utilitytools.HelpMethods.canMoveHere;
 
 public class Player extends Entity {
 
@@ -20,23 +22,27 @@ public class Player extends Entity {
 	private boolean left, up, right, down;
 	private float playerSpeed = 2.0f;
 	private int[][] lvlData;
+	private float xDrawOffSet = 26 * GameCore.SCALE;
+	private float yDrawOffSet = 10 * GameCore.SCALE;
 	
 	public Player(float x, float y, int width, int height) {
 		super(x, y, width, height);
 		loadAnimations();
+		initHitBox(x, y, 18 * GameCore.SCALE, 24 * GameCore.SCALE);
 	}
 
 	
 	public void update() {
 		
 		updatePos();
-		updateHitBox();
+//		updateHitBox();
 	    setAnimation();
 	    updateAnimationTick();
 	}
 	
 	public void render(Graphics g) {
-		g.drawImage(animasi[playerAction][aniIndex], (int) x, (int) y, width, height, null);
+		g.drawImage(animasi[playerAction][aniIndex], (int) (hitBox.x - xDrawOffSet),
+					(int) (hitBox.y - yDrawOffSet), width, height, null);
 		drawHitbox(g);
 	}
 	
@@ -87,26 +93,41 @@ public class Player extends Entity {
 		
 		moving = false;
 		
+		if(!left && !right && !up && !down) {
+			return;	
+		}
+		
+		float xSpeed = 0, ySpeed = 0;
+		
 		if (attacking) {
 	        return; 
 	    }
 		
 		if(left && !right) {
-			x -= playerSpeed;
-			moving = true;
+			xSpeed = -playerSpeed;
 		}else if(right && ! left) {
-			x += playerSpeed;
-			moving = true;
+			xSpeed = playerSpeed;
 		}
 		
 		if(up && !down) {
-			y -= playerSpeed;
-			moving = true;
+			ySpeed = -playerSpeed;
 		}else if (down && !up) {
-			y += playerSpeed;
-			moving = true;
+			ySpeed = playerSpeed;
 		}
 		
+//		if(canMoveHere(x + xSpeed, y + ySpeed, width, height, lvlData)) {
+//			
+//			this.x += xSpeed;
+//			this.y += ySpeed;
+//			moving = true;
+//		}
+		
+		if(canMoveHere(hitBox.x + xSpeed, hitBox.y + ySpeed, hitBox.width, hitBox.height, lvlData)) {
+			
+			hitBox.x += xSpeed;
+			hitBox.y += ySpeed;
+			moving = true;
+		}
 	}
 	
 	private void loadAnimations() {
@@ -122,7 +143,7 @@ public class Player extends Entity {
 			}
 	}
 	
-	public void loadLvlData() {
+	public void loadLvlData(int[][] lvlData) {
 		this.lvlData = lvlData;
 	}
 
