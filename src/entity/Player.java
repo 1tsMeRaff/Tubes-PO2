@@ -35,7 +35,7 @@ public class Player extends Entity {
 	public Player(float x, float y, int width, int height) {
 		super(x, y, width, height);
 		loadAnimations();
-		initHitBox(x, y, 18 * GameCore.SCALE, 24 * GameCore.SCALE);
+		initHitBox(x, y, 18 * GameCore.SCALE, 23 * GameCore.SCALE);
 	}
 
 	
@@ -77,6 +77,14 @@ public class Player extends Entity {
 			playerAction = LARI;
 		}else {
 			playerAction = IDLE_ACTIVE;
+		}
+		
+		if(inAir) {
+			if(airSpeed < 0) {
+				playerAction = LOMPAT;
+			}else {
+				playerAction = JATUH;
+			}
 		}
 		
 		if(attacking) {
@@ -181,7 +189,7 @@ public class Player extends Entity {
 		
 			BufferedImage image = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_SPRITE);
 			
-			animasi = new BufferedImage[15][16];
+			animasi = new BufferedImage[22][16];
 			
 			for(int j = 0; j < animasi.length; j++) {
 				for(int i = 0; i < animasi[j].length; i ++) {
@@ -192,6 +200,9 @@ public class Player extends Entity {
 	
 	public void loadLvlData(int[][] lvlData) {
 		this.lvlData = lvlData;
+		if(!IsEntityOnFloor(hitBox, lvlData)) {
+			inAir = true;
+		}
 	}
 
 	public void resetDirBooleans() {
