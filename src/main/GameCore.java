@@ -3,7 +3,8 @@ package main;
 import java.awt.Graphics;
 
 import entity.Player;
-import levels.LevelManager;
+//import levels.LevelManager;
+import world.WorldManager;
 
 public class GameCore implements Runnable {
 	
@@ -13,7 +14,7 @@ public class GameCore implements Runnable {
 	private final int FPS_SET = 120;
 	private final int UPS_SET = 200;
 	private Player player;
-	private LevelManager levelManager;
+	private WorldManager worldManager;
 	
 	public final static int TILE_DEFAULT_SIZE = 32;
 	public final static float SCALE = 1.5f;
@@ -36,9 +37,9 @@ public class GameCore implements Runnable {
 	}
 	
 	private void initClasses() {
-		levelManager = new LevelManager(this);
+		worldManager = new WorldManager(this);
 		player = new Player(200, 200, (int) (64 * SCALE), (int) (40 * SCALE));
-		player.loadLvlData(levelManager.getCurrentLvl().getLvlData());
+		player.loadLvlData(worldManager.getCurrentLvl().getLvlData());
 		
 	}
 
@@ -49,12 +50,12 @@ public class GameCore implements Runnable {
 
 	public void update() {
 		player.update();
-		levelManager.update();
+		worldManager.update();
 	}
 	
 	public void render(Graphics g) {
 		
-		levelManager.draw(g);
+		worldManager.draw(g);
 		player.render(g);
 	}
 	

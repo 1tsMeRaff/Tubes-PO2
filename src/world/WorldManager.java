@@ -1,22 +1,23 @@
-package levels;
+package world;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
+//import levels.level;
 import main.GameCore;
 import utilitytools.LoadSave;
 
-public class LevelManager {
-
+public class WorldManager {
+	
 	private GameCore gc;
 	private BufferedImage[] levelSprite;
-	private level level_1;
+	private World world_1;
 	
-	public LevelManager(GameCore gc) {
+	public WorldManager(GameCore gc) {
 		this.gc = gc;
 //		levelSprite = LoadSave.GetSpriteAtlas(LoadSave.WORLD_SPRITE);
 		importOutsideSprites();
-		level_1 = new level(LoadSave.GetTilesData());
+		world_1 = new World(LoadSave.GetTilesData());
 		
 	}
 	
@@ -38,7 +39,7 @@ public class LevelManager {
 		
 		for(int j = 0; j < GameCore.TILES_IN_HEIGHT; j++) {
 			for(int i = 0; i < GameCore.TILES_IN_WIDTH; i++) {
-				int index = level_1.getSpriteIndex(i, j);
+				int index = world_1.getSpriteIndex(i, j);
 				g.drawImage(levelSprite[index], GameCore.TILES_SIZE * i, GameCore.TILES_SIZE * j, 
 							GameCore.TILES_SIZE, GameCore.TILES_SIZE, null);
 			}
@@ -50,7 +51,8 @@ public class LevelManager {
 		
 	}
 	
-	public level getCurrentLvl() {
-		return level_1;
+	public World getCurrentLvl() {
+		return world_1;
 	}
+
 }

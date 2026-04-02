@@ -1,10 +1,10 @@
-package levels;
+package world;
 
-public class level {
-	
+public class World {
+
 	private int[][] tilesData;
 	
-	public level(int[][] tilesData) {
+	public World(int[][] tilesData) {
 		this.tilesData = tilesData;
 	}
 	
@@ -18,5 +18,5 @@ public class level {
 	public int[][] getLvlData(){
 		return tilesData;
 	}
-
+	
 }
