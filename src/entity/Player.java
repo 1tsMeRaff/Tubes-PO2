@@ -21,7 +21,7 @@ public class Player extends Entity {
 	private boolean moving = false, attacking = false;
 	private boolean left, up, right, down, jump;
 	private float playerSpeed = 2.0f;
-	private int[][] lvlData;
+	private int[][] mapData;
 	private float xDrawOffSet = 26 * GameCore.SCALE;
 	private float yDrawOffSet = 10 * GameCore.SCALE;
 	
@@ -113,7 +113,7 @@ public class Player extends Entity {
 		}
 		
 		if(!inAir) {
-			if(!IsEntityOnFloor(hitBox, lvlData)) {
+			if(!IsEntityOnFloor(hitBox, mapData)) {
 				inAir = true;
 			}
 		}
@@ -139,7 +139,7 @@ public class Player extends Entity {
 		
 		
 		if(inAir) {
-			if(canMoveHere(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height, lvlData)){
+			if(canMoveHere(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height, mapData)){
 				hitBox.y += airSpeed;
 				airSpeed += gravity;
 				updateXPos(xSpeed);
@@ -176,7 +176,7 @@ public class Player extends Entity {
 
 
 	private void updateXPos(float xSpeed) {
-		if(canMoveHere(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height, lvlData)) {
+		if(canMoveHere(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height, mapData)) {
 			hitBox.x += xSpeed;
 		}else {
 			hitBox.x = GetEntityPosNextToWall(hitBox, xSpeed);
@@ -198,9 +198,9 @@ public class Player extends Entity {
 			}
 	}
 	
-	public void loadLvlData(int[][] lvlData) {
-		this.lvlData = lvlData;
-		if(!IsEntityOnFloor(hitBox, lvlData)) {
+	public void loadmapData(int[][] mapData) {
+		this.mapData = mapData;
+		if(!IsEntityOnFloor(hitBox, mapData)) {
 			inAir = true;
 		}
 	}

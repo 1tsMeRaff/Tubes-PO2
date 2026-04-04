@@ -39,7 +39,7 @@ public class GameCore implements Runnable {
 	private void initClasses() {
 		worldManager = new WorldManager(this);
 		player = new Player(200, 200, (int) (64 * SCALE), (int) (40 * SCALE));
-		player.loadLvlData(worldManager.getCurrentLvl().getLvlData());
+		player.loadmapData(worldManager.getCurrentMap().getWorldData());
 		
 	}
 

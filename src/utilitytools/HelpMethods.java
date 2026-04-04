@@ -6,38 +6,101 @@ import main.GameCore;
 
 public class HelpMethods {
 
+//	public static boolean canMoveHere(float x, float y, float width, float height, int[][] tilesData) {
+//		
+//		if(!isSolid(x, y, tilesData)) {
+//			if(!isSolid(x + width, y + height, tilesData)){
+//				if(!isSolid(x + width, y, tilesData)) {
+//					if(!isSolid(x , y + height, tilesData)) {
+//						return true;
+//					}
+//				}
+//			}
+//		}
+//		return false;
+//	}
+	
 	public static boolean canMoveHere(float x, float y, float width, float height, int[][] tilesData) {
-		
-		if(!isSolid(x, y, tilesData)) {
-			if(!isSolid(x + width, y + height, tilesData)){
-				if(!isSolid(x + width, y, tilesData)) {
-					if(!isSolid(x , y + height, tilesData)) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
+	    
+	    float leftX = x;
+	    float rightX = x + width - 1; 
+	    float topY = y;
+	    float bottomY = y + height - 1;
+
+	    // Asumsi menggunakan GameCore.TILES_SIZE, sesuaikan jika namamu berbeda
+	    int leftCol = (int) (leftX / GameCore.TILES_SIZE);
+	    int rightCol = (int) (rightX / GameCore.TILES_SIZE);
+	    int topRow = (int) (topY / GameCore.TILES_SIZE);
+	    int bottomRow = (int) (bottomY / GameCore.TILES_SIZE);
+
+	    for (int row = topRow; row <= bottomRow; row++) {
+	        for (int col = leftCol; col <= rightCol; col++) {
+	            
+	            // PERUBAHAN UTAMA: Menggunakan tilesData.length (Ukuran asli array)
+	            if (row < 0 || row >= tilesData.length || col < 0 || col >= tilesData[0].length) {
+	                System.out.println("STUCK KARENA OUT OF BOUNDS! Baris: " + row + " Kolom: " + col);
+	                return false; 
+	            }
+
+	            int tileID = tilesData[row][col];
+	            
+	            // Cek apakah ID udara (Misal: -1 atau 0)
+	            if (tileID != -1 && tileID != 0) { 
+	                System.out.println("Nabrak Tile Solid ID: " + tileID);
+	                return false; 
+	            }
+	        }
+	    }
+	    return true; 
 	}
 	
-	private static boolean isSolid(float x, float y, int[][] tilesData) {
-		if(x < 0 || x >= GameCore.GAME_WIDTH) {
-			return true;
-		}
-		if(y < 0 || y >= GameCore.GAME_HEIGHT) {
-			return true;
-		}
-		
-		float xIndex = x / GameCore.TILES_SIZE;
-		float yIndex = y / GameCore.TILES_SIZE;
-		
-		int value = tilesData[(int) yIndex][(int) xIndex];
-		
-		if(value >= 48 || value < 0 || value != 11) {
-			return true;
-		}
-		return false;
+	public static boolean isSolidTile(int tileID) {
+	    // Sesuaikan angka ini dengan file CSV-mu!
+	    // Biasanya -1 untuk kosong, atau 0 untuk udara/background.
+	    if (tileID == -1 || tileID == 0) { 
+	        return false; // Bukan solid, boleh dilewati
+	    }
+	    return true; // Selain itu (rumput, tanah, batu) adalah solid
 	}
+	
+	public static boolean isSolid(float x, float y, int[][] lvlData) {
+	    
+	    int xIndex = (int) (x / GameCore.TILES_SIZE);
+	    int yIndex = (int) (y / GameCore.TILES_SIZE);
+
+	    // PERUBAHAN UTAMA: Gunakan lvlData.length
+	    if (yIndex < 0 || yIndex >= lvlData.length || xIndex < 0 || xIndex >= lvlData[0].length) {
+	        return true; // Keluar map = solid
+	    }
+
+	    int value = lvlData[yIndex][xIndex];
+
+	    // Udara dari Tiled (-1) atau ruang kosong (0)
+	    if (value == -1 || value == 0) {
+	        return false;
+	    }
+
+	    return true; 
+	}
+	
+//	private static boolean isSolid(float x, float y, int[][] tilesData) {
+//		if(x < 0 || x >= GameCore.GAME_WIDTH) {
+//			return true;
+//		}
+//		if(y < 0 || y >= GameCore.GAME_HEIGHT) {
+//			return true;
+//		}
+//		
+//		float xIndex = x / GameCore.TILES_SIZE;
+//		float yIndex = y / GameCore.TILES_SIZE;
+//		
+//		int value = tilesData[(int) yIndex][(int) xIndex];
+//		
+//		if(value >= 48 || value < 0 || value != 11) {
+//			return true;
+//		}
+//		return false;
+//	}
 	
 	public static float GetEntityPosNextToWall(Rectangle2D.Float hitBox, float xSpeed) {
 		
@@ -66,13 +129,14 @@ public class HelpMethods {
 		}
 	}
 	
-	public static boolean IsEntityOnFloor(Rectangle2D.Float hitBox, int[][] lvlData) {
-		if(!isSolid(hitBox.x, hitBox.y + hitBox.height + 1, lvlData)) {
-			if(!isSolid(hitBox.x + hitBox.width, hitBox.y + hitBox.height + 1, lvlData)) {
-				return false;
-			}
-		}
-		return true;
+	public static boolean IsEntityOnFloor(Rectangle2D.Float hitbox, int[][] lvlData) {
+	    // Mengecek 1 piksel tepat di bawah sudut kiri bawah dan kanan bawah hitbox
+	    if (!isSolid(hitbox.x, hitbox.y + hitbox.height + 1, lvlData)) {
+	        if (!isSolid(hitbox.x + hitbox.width, hitbox.y + hitbox.height + 1, lvlData)) {
+	            return false; // Kedua sudut melayang di udara
+	        }
+	    }
+	    return true; // Salah satu atau kedua sudut menyentuh tanah solid
 	}
 }
 

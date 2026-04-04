@@ -15,7 +15,7 @@ public class World {
 		return tilesData[y][x];
 	}
 	
-	public int[][] getLvlData(){
+	public int[][] getWorldData(){
 		return tilesData;
 	}
 	
