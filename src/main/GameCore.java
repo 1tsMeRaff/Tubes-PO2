@@ -2,9 +2,9 @@ package main;
 
 import java.awt.Graphics;
 
-import entity.Player;
-//import levels.LevelManager;
-import world.WorldManager;
+import gameStates.GameStates;
+import gameStates.MainMenu;
+import gameStates.PlayStates;
 
 public class GameCore implements Runnable {
 	
@@ -13,8 +13,9 @@ public class GameCore implements Runnable {
 	private Thread gameThread;
 	private final int FPS_SET = 120;
 	private final int UPS_SET = 200;
-	private Player player;
-	private WorldManager worldManager;
+	
+	private PlayStates Play;
+	private MainMenu Menu;
 	
 	public final static int TILE_DEFAULT_SIZE = 32;
 	public final static float SCALE = 1.0f;
@@ -37,9 +38,9 @@ public class GameCore implements Runnable {
 	}
 	
 	private void initClasses() {
-		worldManager = new WorldManager(this);
-		player = new Player(200, 200, (int) (64 * SCALE), (int) (40 * SCALE));
-		player.loadmapData(worldManager.getCurrentMap().getWorldData());
+		
+		Menu = new MainMenu(this);
+		Play = new PlayStates(this);
 		
 	}
 
@@ -49,14 +50,34 @@ public class GameCore implements Runnable {
 	}
 
 	public void update() {
-		player.update();
-		worldManager.update();
+		
+		switch(GameStates.state) {
+		case MENU:
+			Menu.update();
+			break;
+		case PLAYING:
+			Play.update();
+			break;
+		default:
+			break;
+		
+		}
 	}
 	
 	public void render(Graphics g) {
 		
-		worldManager.draw(g);
-		player.render(g);
+		switch(GameStates.state) {
+		case MENU:
+			Menu.draw(g);
+			break;
+		case PLAYING:
+			Play.draw(g);
+			break;
+		default:
+			break;
+		
+		}
+		
 	}
 	
 	@Override
@@ -115,10 +136,17 @@ public class GameCore implements Runnable {
 	}
 	
 	public void windowFocusLost() {
-		player.resetDirBooleans();
+		
+		if(GameStates.state == GameStates.PLAYING) {
+			Play.getPlayer().resetDirBooleans();
+		}
 	}
 	
-	public Player getPlayer() {
-		return player;
+	public MainMenu getMenu() {
+		return Menu;
+	}
+	
+	public PlayStates getPlay() {
+		return Play;
 	}
 }
