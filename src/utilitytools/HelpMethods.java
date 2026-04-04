@@ -27,7 +27,6 @@ public class HelpMethods {
 	    float topY = y;
 	    float bottomY = y + height - 1;
 
-	    // Asumsi menggunakan GameCore.TILES_SIZE, sesuaikan jika namamu berbeda
 	    int leftCol = (int) (leftX / GameCore.TILES_SIZE);
 	    int rightCol = (int) (rightX / GameCore.TILES_SIZE);
 	    int topRow = (int) (topY / GameCore.TILES_SIZE);
@@ -35,16 +34,14 @@ public class HelpMethods {
 
 	    for (int row = topRow; row <= bottomRow; row++) {
 	        for (int col = leftCol; col <= rightCol; col++) {
-	            
-	            // PERUBAHAN UTAMA: Menggunakan tilesData.length (Ukuran asli array)
+
 	            if (row < 0 || row >= tilesData.length || col < 0 || col >= tilesData[0].length) {
 	                System.out.println("STUCK KARENA OUT OF BOUNDS! Baris: " + row + " Kolom: " + col);
 	                return false; 
 	            }
 
 	            int tileID = tilesData[row][col];
-	            
-	            // Cek apakah ID udara (Misal: -1 atau 0)
+
 	            if (tileID != -1 && tileID != 0) { 
 	                System.out.println("Nabrak Tile Solid ID: " + tileID);
 	                return false; 
@@ -55,12 +52,11 @@ public class HelpMethods {
 	}
 	
 	public static boolean isSolidTile(int tileID) {
-	    // Sesuaikan angka ini dengan file CSV-mu!
-	    // Biasanya -1 untuk kosong, atau 0 untuk udara/background.
+
 	    if (tileID == -1 || tileID == 0) { 
-	        return false; // Bukan solid, boleh dilewati
+	        return false;
 	    }
-	    return true; // Selain itu (rumput, tanah, batu) adalah solid
+	    return true;
 	}
 	
 	public static boolean isSolid(float x, float y, int[][] lvlData) {
@@ -68,14 +64,12 @@ public class HelpMethods {
 	    int xIndex = (int) (x / GameCore.TILES_SIZE);
 	    int yIndex = (int) (y / GameCore.TILES_SIZE);
 
-	    // PERUBAHAN UTAMA: Gunakan lvlData.length
 	    if (yIndex < 0 || yIndex >= lvlData.length || xIndex < 0 || xIndex >= lvlData[0].length) {
-	        return true; // Keluar map = solid
+	        return true;
 	    }
 
 	    int value = lvlData[yIndex][xIndex];
 
-	    // Udara dari Tiled (-1) atau ruang kosong (0)
 	    if (value == -1 || value == 0) {
 	        return false;
 	    }
