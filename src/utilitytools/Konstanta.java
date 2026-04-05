@@ -1,6 +1,17 @@
 package utilitytools;
 
+import main.GameCore;
+
 public class Konstanta {
+	
+	public static class UI{
+		public static class Frames{
+			public static final int B_WIDTH_DEFAULT = 233;
+			public static final int B_HEIGHT_DEFAULT = 138;
+			public static final int B_WIDTH = (int) (B_WIDTH_DEFAULT * GameCore.SCALE);
+			public static final int B_HEIGHT = (int) (B_HEIGHT_DEFAULT * GameCore.SCALE);
+		}
+	}
 
 	public static class Directions{
 		public static final int LEFT = 0;

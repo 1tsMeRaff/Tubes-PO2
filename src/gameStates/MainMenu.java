@@ -6,25 +6,38 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
 import main.GameCore;
+import ui.MainMenuButton;
 
 public class MainMenu extends States implements StateMethods {
+	
+	private MainMenuButton[] buttons = new MainMenuButton[3]; 
 
 	public MainMenu(GameCore gc) {
 		super(gc);
+		loadButtons();
 		// TODO Auto-generated constructor stub
+	}
+
+	private void loadButtons() {
+		buttons[0] = new MainMenuButton(GameCore.GAME_WIDTH / 2, (int) (150 * GameCore.SCALE), 0, GameStates.PLAYING);
+//		buttons[0] = new MainMenuButton(GameCore.GAME_WIDTH / 2, (int) (150 * GameCore.SCALE), 0, GameStates.OPTIONS);
+//		buttons[0] = new MainMenuButton(GameCore.GAME_WIDTH / 2, (int) (150 * GameCore.SCALE), 0, GameStates.QUIT);
+		
 	}
 
 	@Override
 	public void update() {
-		// TODO Auto-generated method stub
+		for(MainMenuButton mb : buttons) {
+			mb.update();
+		}
 		
 	}
 
 	@Override
 	public void draw(Graphics g) {
-		g.setColor(Color.BLACK);
-		g.drawString("HELLO WORLD", GameCore.GAME_WIDTH / 2, 200);
-		
+		for(MainMenuButton mb : buttons) {
+			mb.draw(g);
+		}
 	}
 
 	@Override
@@ -35,7 +48,9 @@ public class MainMenu extends States implements StateMethods {
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
+		for(MainMenuButton mb : buttons) {
+			
+		}
 		
 	}
 
