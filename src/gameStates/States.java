@@ -1,6 +1,9 @@
 package gameStates;
 
+import java.awt.event.MouseEvent;
+
 import main.GameCore;
+import ui.MainMenuButton;
 
 public class States {
 
@@ -8,6 +11,10 @@ public class States {
 	
 	public States(GameCore gc) {
 		this.gc = gc;
+	}
+	
+	public boolean isIn(MouseEvent e, MainMenuButton mb) {
+		return mb.getBounds().contains(e.getX(), e.getY());
 	}
 	
 	public GameCore GetGame() {

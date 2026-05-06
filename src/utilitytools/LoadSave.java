@@ -16,7 +16,9 @@ public class LoadSave {
 	public static final String PLAYER_SPRITE = "player_right.png";
 	public static final String WORLD_SPRITE = "main_tileset.png";
 	public static final String MAP_1_DATA = "map_1_data.png";
-	public static final String MENU_FRAMES = "Menu_Frames.png";
+	public static final String MENU_BUTTONS = "Menu_Frames.png";
+	public static final String MENU_BACKGROUND = "Frames_baru.png";
+//	public static final String MENU_BACKGROUND = "MediavelFree.png";
 	
 	public static BufferedImage GetSpriteAtlas(String fileName) {
 		

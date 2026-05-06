@@ -58,7 +58,10 @@ public class GameCore implements Runnable {
 		case PLAYING:
 			Play.update();
 			break;
+		case OPTIONS:
+		case QUIT:
 		default:
+			System.exit(0);
 			break;
 		
 		}

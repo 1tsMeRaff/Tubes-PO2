@@ -55,7 +55,7 @@ public class PlayStates extends States implements StateMethods {
 	}
 
 	@Override
-	public void mouseRelease(MouseEvent e) {
+	public void mouseReleased(MouseEvent e) {
 		// TODO Auto-generated method stub
 		
 	}

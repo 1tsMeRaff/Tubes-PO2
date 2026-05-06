@@ -32,12 +32,12 @@ public class MainMenuButton {
 	}
 
 	private void loadImages() {
-		image = new BufferedImage[2];
-		BufferedImage temp = LoadSave.GetSpriteAtlas(LoadSave.MENU_FRAMES);
-		for(int i = 0; i < image.length; i++) {
-			image[i] = temp.getSubimage(i * B_WIDTH_DEFAULT, rowIndex * B_HEIGHT_DEFAULT, 
-										B_WIDTH_DEFAULT, B_HEIGHT_DEFAULT);
-		}
+	    image = new BufferedImage[3]; // tiga state: normal, hover, pressed
+	    BufferedImage temp = LoadSave.GetSpriteAtlas(LoadSave.MENU_BUTTONS);
+	    for (int i = 0; i < image.length; i++) {
+	        image[i] = temp.getSubimage(i * B_WIDTH_DEFAULT, rowIndex * B_HEIGHT_DEFAULT,
+	                                     B_WIDTH_DEFAULT, B_HEIGHT_DEFAULT);
+	    }
 	}
 	
 	public void draw(Graphics g) {

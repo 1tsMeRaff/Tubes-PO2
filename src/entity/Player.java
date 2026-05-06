@@ -20,7 +20,7 @@ public class Player extends Entity {
 	private int playerAction = IDLE_ACTIVE;
 	private boolean moving = false, attacking = false;
 	private boolean left, up, right, down, jump;
-	private float playerSpeed = 2.0f;
+	private float playerSpeed = 1.0f * GameCore.SCALE;
 	private int[][] mapData;
 	private float xDrawOffSet = 26 * GameCore.SCALE;
 	private float yDrawOffSet = 10 * GameCore.SCALE;
@@ -35,7 +35,7 @@ public class Player extends Entity {
 	public Player(float x, float y, int width, int height) {
 		super(x, y, width, height);
 		loadAnimations();
-		initHitBox(x, y, 18 * GameCore.SCALE, 23 * GameCore.SCALE);
+		initHitBox(x, y, (int) (18 * GameCore.SCALE), (int) (23 * GameCore.SCALE));
 	}
 
 	
