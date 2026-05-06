@@ -69,6 +69,11 @@ public class PlayStates extends States implements StateMethods {
 	@Override
 	public void keyPressed(KeyEvent e) {
 
+		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+			GameStates.state = GameStates.PAUSE;
+			return;
+		}
+		
 		switch(e.getKeyCode()) {
 		case KeyEvent.VK_A:
 			player.setLeft(true);
@@ -84,6 +89,9 @@ public class PlayStates extends States implements StateMethods {
 
 	@Override
 	public void keyReleased(KeyEvent e) {
+		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+			return;
+		}
 		
 		switch(e.getKeyCode()) {
 		case KeyEvent.VK_A:

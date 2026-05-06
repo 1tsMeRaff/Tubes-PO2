@@ -4,6 +4,7 @@ import java.awt.Graphics;
 
 import gameStates.GameStates;
 import gameStates.MainMenu;
+import gameStates.PauseStates;
 import gameStates.PlayStates;
 
 public class GameCore implements Runnable {
@@ -16,6 +17,7 @@ public class GameCore implements Runnable {
 	
 	private PlayStates Play;
 	private MainMenu Menu;
+	private PauseStates Pause;
 	
 	public final static int TILE_DEFAULT_SIZE = 32;
 	public final static float SCALE = 1.0f;
@@ -41,7 +43,7 @@ public class GameCore implements Runnable {
 		
 		Menu = new MainMenu(this);
 		Play = new PlayStates(this);
-		
+		Pause = new PauseStates(this);
 	}
 
 	private void startGameLoop() {
@@ -57,6 +59,9 @@ public class GameCore implements Runnable {
 			break;
 		case PLAYING:
 			Play.update();
+			break;
+		case PAUSE:
+			Pause.update();
 			break;
 		case OPTIONS:
 		case QUIT:
@@ -75,6 +80,9 @@ public class GameCore implements Runnable {
 			break;
 		case PLAYING:
 			Play.draw(g);
+			break;
+		case PAUSE:
+			Pause.draw(g);
 			break;
 		default:
 			break;
@@ -149,7 +157,15 @@ public class GameCore implements Runnable {
 		return Menu;
 	}
 	
+	
+	
 	public PlayStates getPlay() {
 		return Play;
 	}
+	
+	public PauseStates getPause() {
+		return Pause;
+	}
+
+
 }
