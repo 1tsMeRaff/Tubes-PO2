@@ -31,9 +31,6 @@ public class Mouse implements MouseListener, MouseMotionListener {
 		case PLAYING:
 			gamePanel.getGame().getPlay().mouseMoved(e);
 			break;
-		case PAUSE:
-			gamePanel.getGame().getPause().mouseMoved(e);
-			break;
 		default:
 			break;
 		}
@@ -44,9 +41,6 @@ public class Mouse implements MouseListener, MouseMotionListener {
 		switch(GameStates.state) {
 		case PLAYING:
 			gamePanel.getGame().getPlay().mouseClicked(e);
-			break;
-		case PAUSE:
-			gamePanel.getGame().getPause().mouseClicked(e);
 			break;
 		default:
 			break;
@@ -62,9 +56,6 @@ public class Mouse implements MouseListener, MouseMotionListener {
 		case PLAYING:
 			gamePanel.getGame().getPlay().mousePressed(e);
 			break;
-		case PAUSE:
-			gamePanel.getGame().getPause().mousePressed(e);
-			break;
 		default:
 			break;
 		}
@@ -78,9 +69,6 @@ public class Mouse implements MouseListener, MouseMotionListener {
 			break;
 		case PLAYING:
 			gamePanel.getGame().getPlay().mouseReleased(e);
-			break;
-		case PAUSE:
-			gamePanel.getGame().getPause().mouseReleased(e);
 			break;
 		default:
 			break;
