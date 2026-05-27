@@ -14,6 +14,7 @@ public class GameFrame {
 		jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		jFrame.add(gamePanel);
 		jFrame.setResizable(false);
+		jFrame.setTitle("Feline Souls : Witch Curse");;
 		
 		jFrame.pack();
 		

@@ -1,11 +1,12 @@
 package ui;
 
-import java.awt.Graphics;
-import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
-
 import gameStates.GameStates;
-import utilitytools.LoadSave;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import static utilitytools.Konstanta.UI.Frames.*;
 
 public class MainMenuButton {
@@ -14,7 +15,6 @@ public class MainMenuButton {
 	private int xOffSetCenter = B_WIDTH / 2;
 	private boolean mouseOver, mousePressed;
 	private GameStates states;
-	private BufferedImage[] image;
 	private Rectangle bounds;
 	
 	public MainMenuButton(int posX, int posY, int rowIndex, GameStates states) {
@@ -22,7 +22,6 @@ public class MainMenuButton {
 		this.posY = posY;
 		this.rowIndex = rowIndex;
 		this.states = states;
-		loadImages();
 		initBounds();
 	}
 
@@ -31,18 +30,33 @@ public class MainMenuButton {
 		
 	}
 
-	private void loadImages() {
-	    image = new BufferedImage[3]; // tiga state: normal, hover, pressed
-	    BufferedImage temp = LoadSave.GetSpriteAtlas(LoadSave.MENU_BUTTONS);
-	    for (int i = 0; i < image.length; i++) {
-	        image[i] = temp.getSubimage(i * B_WIDTH_DEFAULT, rowIndex * B_HEIGHT_DEFAULT,
-	                                     B_WIDTH_DEFAULT, B_HEIGHT_DEFAULT);
-	    }
-	}
-	
 	public void draw(Graphics g) {
-		
-		g.drawImage(image[index], posX - xOffSetCenter, posY, B_WIDTH, B_HEIGHT, null);
+		Graphics2D g2 = (Graphics2D) g.create();
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		int x = posX - xOffSetCenter;
+		int y = posY;
+		Color base = new Color(34, 34, 36);
+		Color hover = new Color(60, 72, 90);
+		Color pressed = new Color(90, 76, 52);
+		Color fill = base;
+		if (index == 1) {
+			fill = hover;
+		} else if (index == 2) {
+			fill = pressed;
+		}
+		int arc = Math.max(10, B_HEIGHT / 2);
+		g2.setColor(fill);
+		g2.fillRoundRect(x, y, B_WIDTH, B_HEIGHT, arc, arc);
+		g2.setColor(new Color(210, 210, 210));
+		g2.drawRoundRect(x, y, B_WIDTH, B_HEIGHT, arc, arc);
+
+		g2.setFont(new Font("SansSerif", Font.BOLD, (int) (20 * main.GameCore.SCALE)));
+		g2.setColor(new Color(230, 230, 230));
+		String label = getLabel();
+		int textW = g2.getFontMetrics().stringWidth(label);
+		int textH = g2.getFontMetrics().getHeight();
+		g2.drawString(label, x + (B_WIDTH - textW) / 2, y + (B_HEIGHT + textH) / 2 - (int) (4 * main.GameCore.SCALE));
+		g2.dispose();
 	}
 	
 	public void update() {
@@ -52,6 +66,19 @@ public class MainMenuButton {
 		}
 		if(mousePressed) {
 			index = 2;
+		}
+	}
+
+	private String getLabel() {
+		switch (rowIndex) {
+		case 0:
+			return "PLAY";
+		case 1:
+			return "OPTIONS";
+		case 2:
+			return "QUIT";
+		default:
+			return "BUTTON";
 		}
 	}
 

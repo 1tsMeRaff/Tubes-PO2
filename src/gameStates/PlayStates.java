@@ -1,21 +1,24 @@
 package gameStates;
 
+import entity.Player;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-
-import entity.Player;
 import main.GameCore;
+import ui.PauseOverlay;
 import world.WorldManager;
 
 public class PlayStates extends States implements StateMethods {
 
 	private Player player;
 	private WorldManager worldManager;
+	private PauseOverlay pauseOverlay;
+	private boolean paused = false;
 	
 	public PlayStates(GameCore gc) {
 		super(gc);
 		initClasses();
+		pauseOverlay = new PauseOverlay(this);
 	}
 	
 	private void initClasses() {
@@ -27,6 +30,10 @@ public class PlayStates extends States implements StateMethods {
 
 	@Override
 	public void update() {
+		if (paused) {
+			pauseOverlay.update();
+			return;
+		}
 		worldManager.update();
 		player.update();
 		
@@ -36,11 +43,17 @@ public class PlayStates extends States implements StateMethods {
 	public void draw(Graphics g) {
 		worldManager.draw(g);
 		player.render(g);
+		if (paused) {
+			pauseOverlay.draw(g);
+		}
 		
 	}
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
+		if (paused) {
+			return;
+		}
 		
 		if(e.getButton() == MouseEvent.BUTTON1) {
 	        player.setAttack(true);
@@ -50,24 +63,43 @@ public class PlayStates extends States implements StateMethods {
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
+		if (paused) {
+			pauseOverlay.mousePressed(e);
+		}
 		
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
+		if (paused) {
+			pauseOverlay.mouseReleased(e);
+		}
 		
 	}
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		// TODO Auto-generated method stub
+		if (paused) {
+			pauseOverlay.mouseMoved(e);
+		}
 		
+	}
+
+	public void mouseDragged(MouseEvent e) {
+		if (paused) {
+			pauseOverlay.mouseDragged(e);
+		}
 	}
 
 	@Override
 	public void keyPressed(KeyEvent e) {
+		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+			paused = !paused;
+			return;
+		}
+		if (paused) {
+			return;
+		}
 
 		switch(e.getKeyCode()) {
 		case KeyEvent.VK_A:
@@ -84,6 +116,9 @@ public class PlayStates extends States implements StateMethods {
 
 	@Override
 	public void keyReleased(KeyEvent e) {
+		if (paused) {
+			return;
+		}
 		
 		switch(e.getKeyCode()) {
 		case KeyEvent.VK_A:
@@ -101,6 +136,19 @@ public class PlayStates extends States implements StateMethods {
 	
 	public void windowFocusLost() {
 		player.resetDirBooleans();
+	}
+
+	public void resetAll() {
+		initClasses();
+		paused = false;
+	}
+
+	public void setPaused(boolean paused) {
+		this.paused = paused;
+	}
+
+	public boolean isPaused() {
+		return paused;
 	}
 	
 	public Player getPlayer() {

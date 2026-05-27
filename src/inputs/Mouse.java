@@ -1,10 +1,9 @@
 package inputs;
 
+import gameStates.GameStates;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-
-import gameStates.GameStates;
 import main.GamePanel;
 
 public class Mouse implements MouseListener, MouseMotionListener {
@@ -18,7 +17,13 @@ public class Mouse implements MouseListener, MouseMotionListener {
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		// TODO Auto-generated method stub
+		switch(GameStates.state) {
+		case PLAYING:
+			gamePanel.getGame().getPlay().mouseDragged(e);
+			break;
+		default:
+			break;
+		}
 		
 	}
 

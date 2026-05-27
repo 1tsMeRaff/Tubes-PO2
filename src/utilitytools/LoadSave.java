@@ -1,15 +1,15 @@
 package utilitytools;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
 import javax.imageio.ImageIO;
-
 import main.GameCore;
+import static utilitytools.Konstanta.UI.PauseButtons.*;
 
 public class LoadSave {
 
@@ -18,12 +18,20 @@ public class LoadSave {
 	public static final String MAP_1_DATA = "map_1_data.png";
 	public static final String MENU_BUTTONS = "Menu_Frames.png";
 	public static final String MENU_BACKGROUND = "Frames_baru.png";
+	public static final String PAUSE_BACKGROUND = "pause_background.png";
+	public static final String SOUND_BUTTONS = "sound_buttons.png";
+	public static final String URM_BUTTONS = "urm_buttons.png";
+	public static final String VOLUME_BUTTONS = "volume_buttons.png";
+	public static final String VOLUME_SLIDER = "volume_slider.png";
 //	public static final String MENU_BACKGROUND = "MediavelFree.png";
 	
 	public static BufferedImage GetSpriteAtlas(String fileName) {
 		
 		BufferedImage image = null;
 		InputStream is = LoadSave.class.getResourceAsStream("/"+ fileName);
+		if (is == null) {
+			return createPlaceholder(fileName);
+		}
 		try {
 			image = ImageIO.read(is);
 		} catch (IOException e) {
@@ -37,6 +45,39 @@ public class LoadSave {
 				e.printStackTrace();
 			}
 		}
+		if (image == null) {
+			return createPlaceholder(fileName);
+		}
+		return image;
+	}
+
+	private static BufferedImage createPlaceholder(String fileName) {
+		int width = 64;
+		int height = 64;
+		if (PAUSE_BACKGROUND.equals(fileName)) {
+			width = (int) (GameCore.GAME_WIDTH / GameCore.SCALE);
+			height = (int) (GameCore.GAME_HEIGHT / GameCore.SCALE);
+		} else if (SOUND_BUTTONS.equals(fileName)) {
+			width = SOUND_SIZE_DEFAULT * 3;
+			height = SOUND_SIZE_DEFAULT * 2;
+		} else if (URM_BUTTONS.equals(fileName)) {
+			width = URM_DEFAULT_SIZE * 3;
+			height = URM_DEFAULT_SIZE * 3;
+		} else if (VOLUME_BUTTONS.equals(fileName)) {
+			width = VOLUME_DEFAULT_WIDTH * 3;
+			height = VOLUME_DEFAULT_HEIGHT;
+		} else if (VOLUME_SLIDER.equals(fileName)) {
+			width = SLIDER_DEFAULT_WIDTH;
+			height = VOLUME_DEFAULT_HEIGHT;
+		}
+
+		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g2 = image.createGraphics();
+		g2.setColor(new Color(30, 30, 30, 220));
+		g2.fillRect(0, 0, width, height);
+		g2.setColor(new Color(200, 200, 200, 220));
+		g2.drawRect(0, 0, width - 1, height - 1);
+		g2.dispose();
 		return image;
 	}
 	
