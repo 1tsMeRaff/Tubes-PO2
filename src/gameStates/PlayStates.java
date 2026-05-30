@@ -25,18 +25,16 @@ public class PlayStates extends States implements StateMethods {
 		worldManager = new WorldManager(gc);
 		player = new Player(200, 200, (int) (64 * GameCore.SCALE), (int) (40 * GameCore.SCALE));
 		player.loadmapData(worldManager.getCurrentMap().getWorldData());
-		
 	}
 
 	@Override
 	public void update() {
 		if (paused) {
 			pauseOverlay.update();
-			return;
+		} else {
+			worldManager.update();
+			player.update();
 		}
-		worldManager.update();
-		player.update();
-		
 	}
 
 	@Override
@@ -46,7 +44,6 @@ public class PlayStates extends States implements StateMethods {
 		if (paused) {
 			pauseOverlay.draw(g);
 		}
-		
 	}
 
 	@Override
@@ -54,11 +51,9 @@ public class PlayStates extends States implements StateMethods {
 		if (paused) {
 			return;
 		}
-		
 		if(e.getButton() == MouseEvent.BUTTON1) {
-	        player.setAttack(true);
-	    }
-		
+			player.setAttack(true);
+		}
 	}
 
 	@Override
@@ -66,7 +61,6 @@ public class PlayStates extends States implements StateMethods {
 		if (paused) {
 			pauseOverlay.mousePressed(e);
 		}
-		
 	}
 
 	@Override
@@ -74,7 +68,6 @@ public class PlayStates extends States implements StateMethods {
 		if (paused) {
 			pauseOverlay.mouseReleased(e);
 		}
-		
 	}
 
 	@Override
@@ -82,7 +75,6 @@ public class PlayStates extends States implements StateMethods {
 		if (paused) {
 			pauseOverlay.mouseMoved(e);
 		}
-		
 	}
 
 	public void mouseDragged(MouseEvent e) {
@@ -97,20 +89,21 @@ public class PlayStates extends States implements StateMethods {
 			paused = !paused;
 			return;
 		}
+		
 		if (paused) {
 			return;
 		}
 
 		switch(e.getKeyCode()) {
-		case KeyEvent.VK_A:
-			player.setLeft(true);
-			break;
-		case KeyEvent.VK_D:
-			player.setRight(true);
-			break;
-		case KeyEvent.VK_SPACE:
-			player.setJump(true);
-			break;	
+			case KeyEvent.VK_A:
+				player.setLeft(true);
+				break;
+			case KeyEvent.VK_D:
+				player.setRight(true);
+				break;
+			case KeyEvent.VK_SPACE:
+				player.setJump(true);
+				break;	
 		}
 	}
 
@@ -121,17 +114,16 @@ public class PlayStates extends States implements StateMethods {
 		}
 		
 		switch(e.getKeyCode()) {
-		case KeyEvent.VK_A:
-			player.setLeft(false);
-			break;
-		case KeyEvent.VK_D:
-			player.setRight(false);
-			break;
-		case KeyEvent.VK_SPACE:
-			player.setJump(false);
-			break;
+			case KeyEvent.VK_A:
+				player.setLeft(false);
+				break;
+			case KeyEvent.VK_D:
+				player.setRight(false);
+				break;
+			case KeyEvent.VK_SPACE:
+				player.setJump(false);
+				break;
 		}
-		
 	}
 	
 	public void windowFocusLost() {
