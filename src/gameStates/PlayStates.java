@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import main.GameCore;
+import ui.LevelCompletedOverlay;
 import ui.PauseOverlay;
 import world.WorldManager;
 
@@ -13,12 +14,15 @@ public class PlayStates extends States implements StateMethods {
 	private Player player;
 	private WorldManager worldManager;
 	private PauseOverlay pauseOverlay;
+	private LevelCompletedOverlay levelCompletedOverlay;
 	private boolean paused = false;
+	private boolean lvlCompleted = false;
 	
 	public PlayStates(GameCore gc) {
 		super(gc);
 		initClasses();
 		pauseOverlay = new PauseOverlay(this);
+		levelCompletedOverlay = new LevelCompletedOverlay(this);
 	}
 	
 	private void initClasses() {
@@ -31,9 +35,19 @@ public class PlayStates extends States implements StateMethods {
 	public void update() {
 		if (paused) {
 			pauseOverlay.update();
+		} else if (lvlCompleted) {
+			levelCompletedOverlay.update();
 		} else {
 			worldManager.update();
 			player.update();
+			checkCloseToBorder(); // Mengecek apakah player sudah di ujung layar
+		}
+	}
+
+	// [LOGIKA SEMENTARA] Jika x player melebihi layar, anggap level selesai
+	private void checkCloseToBorder() {
+		if (player.getHitbox().x >= GameCore.GAME_WIDTH - 50) {
+			setLevelCompleted(true);
 		}
 	}
 
@@ -41,16 +55,25 @@ public class PlayStates extends States implements StateMethods {
 	public void draw(Graphics g) {
 		worldManager.draw(g);
 		player.render(g);
+		
 		if (paused) {
 			pauseOverlay.draw(g);
+		} else if (lvlCompleted) {
+			levelCompletedOverlay.draw(g);
 		}
+	}
+
+	public void loadNextLevel() {
+		resetAll(); // Reset state
+		worldManager.loadNextWorld(); // Pindah ke index map berikutnya
+		// Reload collision map untuk player ke map yang baru
+		player.loadmapData(worldManager.getCurrentMap().getWorldData()); 
 	}
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		if (paused) {
-			return;
-		}
+		if (paused || lvlCompleted) return;
+
 		if(e.getButton() == MouseEvent.BUTTON1) {
 			player.setAttack(true);
 		}
@@ -60,6 +83,8 @@ public class PlayStates extends States implements StateMethods {
 	public void mousePressed(MouseEvent e) {
 		if (paused) {
 			pauseOverlay.mousePressed(e);
+		} else if (lvlCompleted) {
+			levelCompletedOverlay.mousePressed(e);
 		}
 	}
 
@@ -67,6 +92,8 @@ public class PlayStates extends States implements StateMethods {
 	public void mouseReleased(MouseEvent e) {
 		if (paused) {
 			pauseOverlay.mouseReleased(e);
+		} else if (lvlCompleted) {
+			levelCompletedOverlay.mouseReleased(e);
 		}
 	}
 
@@ -74,6 +101,8 @@ public class PlayStates extends States implements StateMethods {
 	public void mouseMoved(MouseEvent e) {
 		if (paused) {
 			pauseOverlay.mouseMoved(e);
+		} else if (lvlCompleted) {
+			levelCompletedOverlay.mouseMoved(e);
 		}
 	}
 
@@ -85,14 +114,14 @@ public class PlayStates extends States implements StateMethods {
 
 	@Override
 	public void keyPressed(KeyEvent e) {
+		if (lvlCompleted) return;
+
 		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 			paused = !paused;
 			return;
 		}
 		
-		if (paused) {
-			return;
-		}
+		if (paused) return;
 
 		switch(e.getKeyCode()) {
 			case KeyEvent.VK_A:
@@ -109,9 +138,7 @@ public class PlayStates extends States implements StateMethods {
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-		if (paused) {
-			return;
-		}
+		if (paused || lvlCompleted) return;
 		
 		switch(e.getKeyCode()) {
 			case KeyEvent.VK_A:
@@ -131,12 +158,19 @@ public class PlayStates extends States implements StateMethods {
 	}
 
 	public void resetAll() {
-		initClasses();
+		// Fungsi ini mereset posisi player dan status game.
+		// Kita tidak perlu "new WorldManager()" lagi karena ArrayList sudah disimpan
+		player.resetAll(); 
 		paused = false;
+		lvlCompleted = false;
 	}
 
 	public void setPaused(boolean paused) {
 		this.paused = paused;
+	}
+
+	public void setLevelCompleted(boolean levelCompleted) {
+		this.lvlCompleted = levelCompleted;
 	}
 
 	public boolean isPaused() {

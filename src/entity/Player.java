@@ -2,10 +2,6 @@ package entity;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
-
-import javax.imageio.ImageIO;
 
 import main.GameCore;
 import utilitytools.LoadSave;
@@ -38,13 +34,10 @@ public class Player extends Entity {
 		initHitBox(x, y, (int) (18 * GameCore.SCALE), (int) (23 * GameCore.SCALE));
 	}
 
-	
 	public void update() {
-		
 		updatePos();
-//		updateHitBox();
-	    setAnimation();
-	    updateAnimationTick();
+		setAnimation();
+		updateAnimationTick();
 	}
 	
 	public void render(Graphics g) {
@@ -54,7 +47,6 @@ public class Player extends Entity {
 	}
 	
 	private void updateAnimationTick() {
-		
 		aniTick++;
 		if(aniTick >= aniSpeed) {
 			aniTick = 0;
@@ -66,23 +58,21 @@ public class Player extends Entity {
 				}
 			}
 		}
-		
 	}
 	
 	private void setAnimation() {
-		
 		int startAni = playerAction;
 		
 		if(moving) {
 			playerAction = LARI;
-		}else {
+		} else {
 			playerAction = IDLE_ACTIVE;
 		}
 		
 		if(inAir) {
 			if(airSpeed < 0) {
 				playerAction = LOMPAT;
-			}else {
+			} else {
 				playerAction = JATUH;
 			}
 		}
@@ -94,18 +84,14 @@ public class Player extends Entity {
 		if(startAni != playerAction) {
 			resetAniTick();
 		}
-		
 	}
 	
 	private void resetAniTick() {
 		aniTick = 0;
 		aniIndex = 0;
-		
 	}
 
-
 	private void updatePos() {
-		
 		moving = false;
 		
 		if(jump) {
@@ -125,8 +111,8 @@ public class Player extends Entity {
 		float xSpeed = 0;
 		
 		if (attacking) {
-	        return; 
-	    }
+			return; 
+		}
 		
 		if(left) {
 			xSpeed -= playerSpeed;
@@ -136,23 +122,21 @@ public class Player extends Entity {
 			xSpeed += playerSpeed;
 		}
 		
-		
-		
 		if(inAir) {
 			if(canMoveHere(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height, mapData)){
 				hitBox.y += airSpeed;
 				airSpeed += gravity;
 				updateXPos(xSpeed);
-			}else {
+			} else {
 				hitBox.y = GetEntityPosUnderRoofOrAboveFloor(hitBox, airSpeed);
 				if(airSpeed > 0) {
 					resetInAir();
-				}else {
+				} else {
 					airSpeed = fallSpeedAfterCollision;
 				}
 				updateXPos(xSpeed);
 			}
-		}else {
+		} else {
 			updateXPos(xSpeed);
 		}
 		
@@ -167,35 +151,28 @@ public class Player extends Entity {
 		airSpeed = jumpSpeed;
 	}
 
-
 	private void resetInAir() {
 		inAir = false;
 		airSpeed = 0;
-		
 	}
-
 
 	private void updateXPos(float xSpeed) {
 		if(canMoveHere(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height, mapData)) {
 			hitBox.x += xSpeed;
-		}else {
+		} else {
 			hitBox.x = GetEntityPosNextToWall(hitBox, xSpeed);
 		}
-		
 	}
 
-
 	private void loadAnimations() {
+		BufferedImage image = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_SPRITE);
+		animasi = new BufferedImage[22][16];
 		
-			BufferedImage image = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_SPRITE);
-			
-			animasi = new BufferedImage[22][16];
-			
-			for(int j = 0; j < animasi.length; j++) {
-				for(int i = 0; i < animasi[j].length; i ++) {
-					animasi[j][i] = image.getSubimage(i * 80, j * 64, 80, 64); 
-				}
+		for(int j = 0; j < animasi.length; j++) {
+			for(int i = 0; i < animasi[j].length; i ++) {
+				animasi[j][i] = image.getSubimage(i * 80, j * 64, 80, 64); 
 			}
+		}
 	}
 	
 	public void loadmapData(int[][] mapData) {
@@ -211,6 +188,23 @@ public class Player extends Entity {
 		up = false;
 		down = false;
 	}
+
+	// [BARU] Menambahkan method resetAll() untuk transisi antar map
+	public void resetAll() {
+		resetDirBooleans();
+		inAir = false;
+		moving = false;
+		attacking = false;
+		playerAction = IDLE_ACTIVE;
+		
+		// Mengembalikan koordinat hitbox ke x dan y awal (dari superclass Entity)
+		hitBox.x = x;
+		hitBox.y = y;
+		
+		if (!IsEntityOnFloor(hitBox, mapData)) {
+			inAir = true;
+		}
+	}
 	
 	public void setAttack(boolean attacking) {
 		this.attacking = attacking;
@@ -220,36 +214,29 @@ public class Player extends Entity {
 		return left;
 	}
 
-
 	public void setLeft(boolean left) {
 		this.left = left;
 	}
-
 
 	public boolean isUp() {
 		return up;
 	}
 
-
 	public void setUp(boolean up) {
 		this.up = up;
 	}
-
 
 	public boolean isRight() {
 		return right;
 	}
 
-
 	public void setRight(boolean right) {
 		this.right = right;
 	}
 
-
 	public boolean isDown() {
 		return down;
 	}
-
 
 	public void setDown(boolean down) {
 		this.down = down;
@@ -257,5 +244,10 @@ public class Player extends Entity {
 	
 	public void setJump(boolean jump) {
 		this.jump = jump;
+	}
+	
+	// [PERBAIKAN] Menggunakan hitBox (huruf B besar) sesuai deklarasi di Entity
+	public java.awt.geom.Rectangle2D.Float getHitbox() {
+		return hitBox;
 	}
 }
