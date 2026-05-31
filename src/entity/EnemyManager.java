@@ -31,7 +31,7 @@ public class EnemyManager {
 		
 	}
 	
-	public void draw(Graphics g) {
+	public void draw(Graphics g, int xLvlOffset) {
 		drawSlimes(g);
 	}
 	
@@ -46,14 +46,6 @@ public class EnemyManager {
 	         c.drawHitbox(g); // Pastikan xLevelOffset bernilai 0 jika belum pakai camera
 	    }
 	}
-
-//	private void drawSlimes(Graphics g) {
-//		for(Slime c : Slimes) {
-//			g.drawImage(slimeImg[c.getEnemyState()][c.getAniIndex()], 
-//					(int)(c.getHitBox().x), (int)(c.getHitBox().y), 
-//					SLIME_WIDTH, SLIME_HEIGHT, null);
-//		}
-//	}
 
 	private void loadEnemyImages() {
 		slimeImg = new BufferedImage[5][9];

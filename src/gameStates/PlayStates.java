@@ -18,7 +18,7 @@ public class PlayStates extends States implements StateMethods {
 	private boolean paused = false;
 	
 	// Variabel Kamera (Dari dev-Rizal)
-	private int xLvlOffset;
+	public int xLvlOffset;
 	private int leftBorder = (int) (0.2 * GameCore.GAME_WIDTH);
 	private int rightBorder = (int) (0.8 * GameCore.GAME_WIDTH);
 	private int maxLvlOffsetX;
@@ -45,7 +45,7 @@ public class PlayStates extends States implements StateMethods {
 	}
 
 	private void checkCloseToBorder() {
-	    int playerX = (int) player.getHitbox().x;
+	    int playerX = (int) player.getHitBox().x;
 	    int diff = playerX - xLvlOffset;
 
 	    if (diff > rightBorder) {
