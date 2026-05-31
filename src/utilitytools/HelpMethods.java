@@ -1,6 +1,7 @@
 package utilitytools;
 
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.Rectangle2D.Float;
 
 import main.GameCore;
 
@@ -124,13 +125,16 @@ public class HelpMethods {
 	}
 	
 	public static boolean IsEntityOnFloor(Rectangle2D.Float hitbox, int[][] lvlData) {
-	    // Mengecek 1 piksel tepat di bawah sudut kiri bawah dan kanan bawah hitbox
 	    if (!isSolid(hitbox.x, hitbox.y + hitbox.height + 1, lvlData)) {
 	        if (!isSolid(hitbox.x + hitbox.width, hitbox.y + hitbox.height + 1, lvlData)) {
-	            return false; // Kedua sudut melayang di udara
+	            return false;
 	        }
 	    }
-	    return true; // Salah satu atau kedua sudut menyentuh tanah solid
+	    return true;
+	}
+	
+	public static boolean isFloor(Rectangle2D.Float hitBox, float xSpeed, int[][] tilesData) {
+		return isSolid(hitBox.x + xSpeed, hitBox.y + hitBox.height +1, tilesData);
 	}
 }
 

@@ -19,6 +19,12 @@ public class Konstanta {
 		public static final int SLIME_WIDTH = (int) (SLIME_WIDTH_DEFAULT * GameCore.SCALE);
 		public static final int SLIME_HEIGHT = (int) (SLIME_HEIGHT_DEFAULT * GameCore.SCALE);
 		
+		public static final int SLIME_HITBOX_WIDTH = (int) (16 * GameCore.SCALE);
+		public static final int SLIME_HITBOX_HEIGHT = (int) (9 * GameCore.SCALE);
+		
+		public static final int SLIME_DRAWOFFSET_X = (int) (16 * GameCore.SCALE);
+		public static final int SLIME_DRAWOFFSET_Y = (int) (52 * GameCore.SCALE);
+		
 		public static int GetSpriteAmount(int enemy_type, int enemy_state) {
 			
 			switch(enemy_type) {

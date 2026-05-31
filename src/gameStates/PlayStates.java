@@ -37,7 +37,7 @@ public class PlayStates extends States implements StateMethods {
 		if (!paused) {
 			worldManager.update();
 			player.update();
-			enemyManager.update();
+			enemyManager.update(worldManager.getCurrentMap().getWorldData());
 		} else {
 			pauseOverlay.update();
 		}

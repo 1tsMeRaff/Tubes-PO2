@@ -22,12 +22,11 @@ public class EnemyManager {
 	
 	private void addEnemies() {
 		Slimes = LoadSave.GetSlimes("/untitled1.csv");
-//		System.out.print("Size of Crabs : " + Slimes.size);
 	}
 
-	public void update() {
+	public void update(int[][] tilesData) {
 		for(Slime s : Slimes) {
-			s.update();
+			s.update(tilesData);
 		}
 		
 	}
@@ -35,15 +34,26 @@ public class EnemyManager {
 	public void draw(Graphics g) {
 		drawSlimes(g);
 	}
-
+	
 	private void drawSlimes(Graphics g) {
-		for(Slime c : Slimes) {
-			g.drawImage(slimeImg[c.getEnemyState()][c.getAniIndex()], 
-					(int)(c.getHitBox().x), (int)(c.getHitBox().y), 
-					SLIME_WIDTH, SLIME_HEIGHT, null);
-		}
-		
+	    for(Slime c : Slimes) {
+	        g.drawImage(slimeImg[c.getEnemyState()][c.getAniIndex()], 
+	            (int)(c.getHitBox().x - SLIME_DRAWOFFSET_X), // <-- Kurangi Offset X
+	            (int)(c.getHitBox().y - SLIME_DRAWOFFSET_Y), // <-- Kurangi Offset Y
+	            SLIME_WIDTH, SLIME_HEIGHT, null);
+	            
+	        // (OPSIONAL) Untuk debugging melihat kotak hitbox merah:
+	         c.drawHitbox(g); // Pastikan xLevelOffset bernilai 0 jika belum pakai camera
+	    }
 	}
+
+//	private void drawSlimes(Graphics g) {
+//		for(Slime c : Slimes) {
+//			g.drawImage(slimeImg[c.getEnemyState()][c.getAniIndex()], 
+//					(int)(c.getHitBox().x), (int)(c.getHitBox().y), 
+//					SLIME_WIDTH, SLIME_HEIGHT, null);
+//		}
+//	}
 
 	private void loadEnemyImages() {
 		slimeImg = new BufferedImage[5][9];
