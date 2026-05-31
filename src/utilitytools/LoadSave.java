@@ -29,9 +29,9 @@ public class LoadSave {
 	public static final String VOLUME_BUTTONS = "volume_buttons.png";
 	public static final String VOLUME_SLIDER = "volume_slider.png";
 	
-	
 	public static final String SLIME_SPRITE = "enemy_slime.png";
 //	public static final String MENU_BACKGROUND = "MediavelFree.png";
+	public static final String MENU_BACKGROUND_IMG = "mainn_menu.jpeg";
 	
 	public static BufferedImage GetSpriteAtlas(String fileName) {
 		
@@ -88,143 +88,94 @@ public class LoadSave {
 		return image;
 	}
 	
-//	public static int[][] GetTilesData(String filePath) {
-//	    int[][] tilesData = new int[GameCore.TILES_IN_HEIGHT][GameCore.TILES_IN_WIDTH];
-//	    
-//	    try {
-//	        InputStream is = GameCore.class.getResourceAsStream(filePath); 
-//	        BufferedReader br = new BufferedReader(new InputStreamReader(is));
-//	        
-//	        for (int row = 0; row < GameCore.TILES_IN_HEIGHT; row++) {
-//	            String line = br.readLine();
-//	            
-//	            if (line != null) {
-//	                String[] numbers = line.split(","); 
-//	                
-//	                for (int col = 0; col < GameCore.TILES_IN_WIDTH; col++) {
-//	                    tilesData[row][col] = Integer.parseInt(numbers[col].trim());
-//	                }
-//	            }
-//	        }
-//	        br.close();
-//	        
-//	    } catch (Exception e) {
-//	        System.out.println("Gagal memuat map!");
-//	        e.printStackTrace();
-//	    }
-//	    
-//	    return tilesData;
-//	}
-	
 	public static int[][] GetTilesData(String filePath) {
-	    int[][] tilesData = new int[GameCore.TILES_IN_HEIGHT][GameCore.TILES_IN_WIDTH];
-	    
-	    try {
-	        InputStream is = GameCore.class.getResourceAsStream(filePath); 
-	        BufferedReader br = new BufferedReader(new InputStreamReader(is));
-	        
-	        for (int row = 0; row < GameCore.TILES_IN_HEIGHT; row++) {
-	            String line = br.readLine();
-	            
-	            if (line != null) {
-	                String[] numbers = line.split(","); 
-	                
-	                for (int col = 0; col < GameCore.TILES_IN_WIDTH; col++) {
-	                    // 1. Ambil nilai angka dari CSV
-	                    int value = Integer.parseInt(numbers[col].trim());
-	                    
-	                    // 2. PERBAIKAN: Jika angkanya 200 (Slime), jadikan -1 (udara) agar kotak tidak digambar
-	                    if (value == 200) {
-	                        tilesData[row][col] = -1; 
-	                    } else {
-	                        tilesData[row][col] = value;
-	                    }
-	                }
-	            }
-	        }
-	        br.close();
-	        
-	    } catch (Exception e) {
-	        System.out.println("Gagal memuat map!");
-	        e.printStackTrace();
-	    }
-	    
-	    return tilesData;
+		ArrayList<int[]> rowList = new ArrayList<>();
+		
+		try {
+			InputStream is = GameCore.class.getResourceAsStream(filePath); 
+			BufferedReader br = new BufferedReader(new InputStreamReader(is));
+			String line;
+			
+			while ((line = br.readLine()) != null) {
+				// Lewati baris jika kosong (Dari dev-Rizal)
+				if (line.trim().isEmpty()) {
+					continue;
+				}
+				
+				String[] numbers = line.split(","); 
+				int[] row = new int[numbers.length]; 
+				
+				for (int col = 0; col < numbers.length; col++) {
+					// 1. Ambil nilai angka dari CSV
+					int value = Integer.parseInt(numbers[col].trim());
+					
+					// 2. PERBAIKAN: Jika angkanya 200 (Slime), jadikan -1 (udara) agar tidak digambar (Dari dev)
+					if (value == 200) {
+						row[col] = -1; 
+					} else {
+						row[col] = value;
+					}
+				}
+				rowList.add(row);
+			}
+			br.close();
+			
+		} catch (Exception e) {
+			System.out.println("Gagal memuat map!");
+			e.printStackTrace();
+		}
+		
+		int[][] tilesData = new int[rowList.size()][];
+		for (int i = 0; i < rowList.size(); i++) {
+			tilesData[i] = rowList.get(i);
+		}
+		
+		return tilesData;
 	}
 	
 	public static ArrayList<Slime> GetSlimes(String filePath) {
-	    ArrayList<Slime> list = new ArrayList<>();
-	    
-	    try {
-	        // Membaca langsung dari file luar agar bisa melihat angka 200 yang asli
-	        InputStream is = GameCore.class.getResourceAsStream(filePath); 
-	        BufferedReader br = new BufferedReader(new InputStreamReader(is));
-	        
-	        for (int row = 0; row < GameCore.TILES_IN_HEIGHT; row++) {
-	            String line = br.readLine();
-	            
-	            if (line != null) {
-	                String[] numbers = line.split(","); 
-	                
-	                for (int col = 0; col < GameCore.TILES_IN_WIDTH; col++) {
-	                    int value = Integer.parseInt(numbers[col].trim());
-	                    
-	                    // Cek ID Spawn khusus musuh (angka 200 yang kita sepakati di CSV)
-	                    if (value == 200) { 
-	                        int xPos = col * GameCore.TILES_SIZE; 
-	                        int yPos = row * GameCore.TILES_SIZE;
-	                        
-	                        list.add(new Slime(xPos, yPos));
-	                    }
-	                }
-	            }
-	        }
-	        br.close();
-	        
-	    } catch (Exception e) {
-	        System.out.println("Gagal memuat musuh Slime!");
-	        e.printStackTrace();
-	    }
-	    
-	    return list;
+		ArrayList<Slime> list = new ArrayList<>();
+		
+		try {
+			// Membaca langsung dari file luar agar bisa melihat angka 200 yang asli
+			InputStream is = GameCore.class.getResourceAsStream(filePath); 
+			BufferedReader br = new BufferedReader(new InputStreamReader(is));
+			
+			String line;
+			int row = 0; // Counter baris dinamis
+			
+			// Diubah menjadi dinamis mengikuti panjang/lebar CSV aktual
+			while ((line = br.readLine()) != null) {
+				if (line.trim().isEmpty()) {
+					continue;
+				}
+				
+				String[] numbers = line.split(","); 
+				
+				for (int col = 0; col < numbers.length; col++) {
+					int value = Integer.parseInt(numbers[col].trim());
+					
+					// Cek ID Spawn khusus musuh (angka 200 yang kita sepakati di CSV)
+					if (value == 200) { 
+						int xPos = col * GameCore.TILES_SIZE; 
+						int yPos = row * GameCore.TILES_SIZE;
+						
+						list.add(new Slime(xPos, yPos));
+					}
+				}
+				row++;
+			}
+			br.close();
+			
+		} catch (Exception e) {
+			System.out.println("Gagal memuat musuh Slime!");
+			e.printStackTrace();
+		}
+		
+		return list;
 	}
 	
-//	public static ArrayList<Slime> GetSlimes(String filePath) {
-//	    ArrayList<Slime> list = new ArrayList<>();
-//	    
-//	    int[][] levelData = GetTilesData(filePath);
-//	    
-//	    for (int row = 0; row < GameCore.TILES_IN_HEIGHT; row++) {
-//	        for (int col = 0; col < GameCore.TILES_IN_WIDTH; col++) {
-//	            
-//	            int value = levelData[row][col];
-//	            
-//	            if (value == SLIME) { 
-//	                int xPos = col * GameCore.TILES_SIZE; 
-//	                int yPos = row * GameCore.TILES_SIZE;
-//	                
-//	                list.add(new Slime(xPos, yPos));
-//	            }
-//	        }
-//	    }
-//	    return list;
-//	}
+//	public static ArrayList<Slime> GetSlimes(String filePath) { ... }
 	
-//	public static int[][] GetTilesData(){
-//		
-//		BufferedImage image = GetSpriteAtlas(MAP_1_DATA);
-//		int[][] tilesData = new int[GameCore.TILES_IN_HEIGHT][GameCore.TILES_IN_WIDTH];
-//		
-//		for(int j = 0; j < image.getHeight(); j++) {
-//			for(int i = 0; i < image.getWidth(); i++) {
-//				Color color = new Color(image.getRGB(i, j));
-//				int value = color.getRed();
-//				if(value >= 150) {
-//					value = 0;
-//				}
-//				tilesData[j][i] = color.getRed();
-//			}
-//		}
-//		return tilesData;
-//	}
+//	public static int[][] GetTilesData(){ ... }
 }

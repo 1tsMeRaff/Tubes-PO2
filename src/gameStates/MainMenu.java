@@ -13,7 +13,7 @@ import utilitytools.LoadSave;
 
 public class MainMenu extends States implements StateMethods {
 
-    private BufferedImage backgroundImage;
+    private BufferedImage backgroundImage, backgroundimagemenu;
     private int menuX, menuY, menuWidth, menuHeight;
 
     // Hitbox area tombol (tetap ada untuk deteksi klik, tapi tidak digambar)
@@ -25,6 +25,7 @@ public class MainMenu extends States implements StateMethods {
         super(gc);
         loadBackground();
         initButtonsVertically();
+        backgroundimagemenu = LoadSave.GetSpriteAtlas(LoadSave.MENU_BACKGROUND_IMG);
     }
 
     private void loadBackground() {
@@ -68,6 +69,7 @@ public class MainMenu extends States implements StateMethods {
 
     @Override
     public void draw(Graphics g) {
+    	g.drawImage(backgroundimagemenu, 0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null, null);
         // Gambar background
         g.drawImage(backgroundImage, menuX, menuY, menuWidth, menuHeight, null);
 
