@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import javax.imageio.ImageIO;
 import main.GameCore;
 import static utilitytools.Konstanta.UI.PauseButtons.*;
+import java.util.ArrayList;
 
 public class LoadSave {
 
@@ -24,6 +25,7 @@ public class LoadSave {
 	public static final String VOLUME_BUTTONS = "volume_buttons.png";
 	public static final String VOLUME_SLIDER = "volume_slider.png";
 //	public static final String MENU_BACKGROUND = "MediavelFree.png";
+	public static final String MENU_BACKGROUND_IMG = "mainn_menu.jpeg";
 	
 	public static BufferedImage GetSpriteAtlas(String fileName) {
 		
@@ -82,28 +84,42 @@ public class LoadSave {
 	}
 	
 	public static int[][] GetTilesData(String filePath) {
-	    int[][] tilesData = new int[GameCore.TILES_IN_HEIGHT][GameCore.TILES_IN_WIDTH];
+	    ArrayList<int[]> rowList = new ArrayList<>();
 	    
 	    try {
 	        InputStream is = GameCore.class.getResourceAsStream(filePath); 
 	        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+	        String line;
 	        
-	        for (int row = 0; row < GameCore.TILES_IN_HEIGHT; row++) {
-	            String line = br.readLine();
+	 
+	        while ((line = br.readLine()) != null) {
 	            
-	            if (line != null) {
-	                String[] numbers = line.split(","); 
-	                
-	                for (int col = 0; col < GameCore.TILES_IN_WIDTH; col++) {
-	                    tilesData[row][col] = Integer.parseInt(numbers[col].trim());
-	                }
+	            // Lewati baris jika kosong
+	            if (line.trim().isEmpty()) {
+	                continue;
 	            }
+	            
+	            String[] numbers = line.split(","); 
+	            int[] row = new int[numbers.length]; 
+	            
+	            for (int col = 0; col < numbers.length; col++) {
+	                row[col] = Integer.parseInt(numbers[col].trim());
+	            }
+	            
+	         
+	            rowList.add(row);
 	        }
 	        br.close();
 	        
 	    } catch (Exception e) {
 	        System.out.println("Gagal memuat map!");
 	        e.printStackTrace();
+	    }
+	    
+	
+	    int[][] tilesData = new int[rowList.size()][];
+	    for (int i = 0; i < rowList.size(); i++) {
+	        tilesData[i] = rowList.get(i);
 	    }
 	    
 	    return tilesData;

@@ -15,17 +15,46 @@ public class PlayStates extends States implements StateMethods {
 	private PauseOverlay pauseOverlay;
 	private boolean paused = false;
 	
+	// Variabel Kamera
+	private int xLvlOffset;
+	private int leftBorder = (int) (0.2 * GameCore.GAME_WIDTH);
+	private int rightBorder = (int) (0.8 * GameCore.GAME_WIDTH);
+	private int maxLvlOffsetX;
+
 	public PlayStates(GameCore gc) {
 		super(gc);
 		initClasses();
 		pauseOverlay = new PauseOverlay(this);
+		calcLvlOffset(); 
 	}
 	
 	private void initClasses() {
 		worldManager = new WorldManager(gc);
 		player = new Player(200, 200, (int) (64 * GameCore.SCALE), (int) (40 * GameCore.SCALE));
 		player.loadmapData(worldManager.getCurrentMap().getWorldData());
-		
+	}
+	
+	private void calcLvlOffset() {
+	    int mapWidth = worldManager.getCurrentMap().getWorldData()[0].length;
+	    maxLvlOffsetX = (mapWidth - GameCore.TILES_IN_WIDTH) * GameCore.TILES_SIZE;
+	}
+
+	private void checkCloseToBorder() {
+	    int playerX = (int) player.getHitbox().x;
+	    int diff = playerX - xLvlOffset;
+
+	    if (diff > rightBorder) {
+	        xLvlOffset += diff - rightBorder;
+	    } 
+	    else if (diff < leftBorder) {
+	        xLvlOffset += diff - leftBorder;
+	    }
+
+	    if (xLvlOffset > maxLvlOffsetX) {
+	        xLvlOffset = maxLvlOffsetX;
+	    } else if (xLvlOffset < 0) {
+	        xLvlOffset = 0;
+	    }
 	}
 
 	@Override
@@ -36,17 +65,17 @@ public class PlayStates extends States implements StateMethods {
 		}
 		worldManager.update();
 		player.update();
-		
+		checkCloseToBorder();
 	}
 
 	@Override
 	public void draw(Graphics g) {
-		worldManager.draw(g);
-		player.render(g);
+		worldManager.draw(g, xLvlOffset);
+		player.render(g, xLvlOffset);
+		
 		if (paused) {
 			pauseOverlay.draw(g);
 		}
-		
 	}
 
 	@Override
@@ -54,11 +83,9 @@ public class PlayStates extends States implements StateMethods {
 		if (paused) {
 			return;
 		}
-		
 		if(e.getButton() == MouseEvent.BUTTON1) {
-	        player.setAttack(true);
-	    }
-		
+			player.setAttack(true);
+		}
 	}
 
 	@Override
@@ -66,7 +93,6 @@ public class PlayStates extends States implements StateMethods {
 		if (paused) {
 			pauseOverlay.mousePressed(e);
 		}
-		
 	}
 
 	@Override
@@ -74,7 +100,6 @@ public class PlayStates extends States implements StateMethods {
 		if (paused) {
 			pauseOverlay.mouseReleased(e);
 		}
-		
 	}
 
 	@Override
@@ -82,7 +107,6 @@ public class PlayStates extends States implements StateMethods {
 		if (paused) {
 			pauseOverlay.mouseMoved(e);
 		}
-		
 	}
 
 	public void mouseDragged(MouseEvent e) {
@@ -131,7 +155,6 @@ public class PlayStates extends States implements StateMethods {
 			player.setJump(false);
 			break;
 		}
-		
 	}
 	
 	public void windowFocusLost() {
@@ -141,6 +164,7 @@ public class PlayStates extends States implements StateMethods {
 	public void resetAll() {
 		initClasses();
 		paused = false;
+		xLvlOffset = 0; 
 	}
 
 	public void setPaused(boolean paused) {

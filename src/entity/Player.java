@@ -2,10 +2,6 @@ package entity;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
-
-import javax.imageio.ImageIO;
 
 import main.GameCore;
 import utilitytools.LoadSave;
@@ -38,23 +34,21 @@ public class Player extends Entity {
 		initHitBox(x, y, (int) (18 * GameCore.SCALE), (int) (23 * GameCore.SCALE));
 	}
 
-	
 	public void update() {
-		
 		updatePos();
-//		updateHitBox();
-	    setAnimation();
-	    updateAnimationTick();
+		setAnimation();
+		updateAnimationTick();
 	}
 	
-	public void render(Graphics g) {
-		g.drawImage(animasi[playerAction][aniIndex], (int) (hitBox.x - xDrawOffSet),
+	public void render(Graphics g, int xLvlOffset) {
+		g.drawImage(animasi[playerAction][aniIndex], 
+		            (int) (hitBox.x - xDrawOffSet) - xLvlOffset, 
 					(int) (hitBox.y - yDrawOffSet), width, height, null);
-		drawHitbox(g);
+		
+		
 	}
 	
 	private void updateAnimationTick() {
-		
 		aniTick++;
 		if(aniTick >= aniSpeed) {
 			aniTick = 0;
@@ -66,11 +60,9 @@ public class Player extends Entity {
 				}
 			}
 		}
-		
 	}
 	
 	private void setAnimation() {
-		
 		int startAni = playerAction;
 		
 		if(moving) {
@@ -94,24 +86,18 @@ public class Player extends Entity {
 		if(startAni != playerAction) {
 			resetAniTick();
 		}
-		
 	}
 	
 	private void resetAniTick() {
 		aniTick = 0;
 		aniIndex = 0;
-		
 	}
 
-
 	private void updatePos() {
-		
 		moving = false;
-		
 		if(jump) {
 			jump();
 		}
-		
 		if(!inAir) {
 			if(!IsEntityOnFloor(hitBox, mapData)) {
 				inAir = true;
@@ -123,20 +109,15 @@ public class Player extends Entity {
 		}
 		
 		float xSpeed = 0;
-		
 		if (attacking) {
-	        return; 
-	    }
-		
+			return; 
+		}
 		if(left) {
 			xSpeed -= playerSpeed;
 		}
-		
 		if(right) {
 			xSpeed += playerSpeed;
 		}
-		
-		
 		
 		if(inAir) {
 			if(canMoveHere(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height, mapData)){
@@ -167,13 +148,10 @@ public class Player extends Entity {
 		airSpeed = jumpSpeed;
 	}
 
-
 	private void resetInAir() {
 		inAir = false;
 		airSpeed = 0;
-		
 	}
-
 
 	private void updateXPos(float xSpeed) {
 		if(canMoveHere(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height, mapData)) {
@@ -181,21 +159,16 @@ public class Player extends Entity {
 		}else {
 			hitBox.x = GetEntityPosNextToWall(hitBox, xSpeed);
 		}
-		
 	}
 
-
 	private void loadAnimations() {
-		
-			BufferedImage image = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_SPRITE);
-			
-			animasi = new BufferedImage[22][16];
-			
-			for(int j = 0; j < animasi.length; j++) {
-				for(int i = 0; i < animasi[j].length; i ++) {
-					animasi[j][i] = image.getSubimage(i * 80, j * 64, 80, 64); 
-				}
+		BufferedImage image = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_SPRITE);
+		animasi = new BufferedImage[22][16];
+		for(int j = 0; j < animasi.length; j++) {
+			for(int i = 0; i < animasi[j].length; i ++) {
+				animasi[j][i] = image.getSubimage(i * 80, j * 64, 80, 64); 
 			}
+		}
 	}
 	
 	public void loadmapData(int[][] mapData) {
@@ -206,56 +179,25 @@ public class Player extends Entity {
 	}
 
 	public void resetDirBooleans() {
-		left = false;
-		right = false;
-		up = false;
-		down = false;
+		left = false; right = false; up = false; down = false;
 	}
 	
 	public void setAttack(boolean attacking) {
 		this.attacking = attacking;
 	}
 
-	public boolean isLeft() {
-		return left;
-	}
-
-
-	public void setLeft(boolean left) {
-		this.left = left;
-	}
-
-
-	public boolean isUp() {
-		return up;
-	}
-
-
-	public void setUp(boolean up) {
-		this.up = up;
-	}
-
-
-	public boolean isRight() {
-		return right;
-	}
-
-
-	public void setRight(boolean right) {
-		this.right = right;
-	}
-
-
-	public boolean isDown() {
-		return down;
-	}
-
-
-	public void setDown(boolean down) {
-		this.down = down;
-	}
+	public boolean isLeft() { return left; }
+	public void setLeft(boolean left) { this.left = left; }
+	public boolean isUp() { return up; }
+	public void setUp(boolean up) { this.up = up; }
+	public boolean isRight() { return right; }
+	public void setRight(boolean right) { this.right = right; }
+	public boolean isDown() { return down; }
+	public void setDown(boolean down) { this.down = down; }
+	public void setJump(boolean jump) { this.jump = jump; }
 	
-	public void setJump(boolean jump) {
-		this.jump = jump;
+	
+	public java.awt.geom.Rectangle2D.Float getHitbox() {
+		return hitBox;
 	}
 }

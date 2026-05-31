@@ -105,7 +105,6 @@ public class HelpMethods {
 			int xOffSet = (int) (GameCore.TILES_SIZE - hitBox.width);
 			return tileXpos + xOffSet -1;
 		}else {
-			//Kiri
 			return currentTile * GameCore.TILES_SIZE;
 		}
 	}
@@ -113,24 +112,21 @@ public class HelpMethods {
 	public static float GetEntityPosUnderRoofOrAboveFloor(Rectangle2D.Float hitBox, float airSpeed) {
 		int currentTile = (int) (hitBox.y / GameCore.TILES_SIZE);
 		if(airSpeed > 0) {
-			// Falling
 			int tileYPos = currentTile * GameCore.TILES_SIZE;
 			int yOffSet = (int) (GameCore.TILES_SIZE - hitBox.height);
 			return tileYPos + yOffSet - 1;
 		}else {
-			// Jumping
 			return currentTile * GameCore.TILES_SIZE;
 		}
 	}
 	
 	public static boolean IsEntityOnFloor(Rectangle2D.Float hitbox, int[][] lvlData) {
-	    // Mengecek 1 piksel tepat di bawah sudut kiri bawah dan kanan bawah hitbox
 	    if (!isSolid(hitbox.x, hitbox.y + hitbox.height + 1, lvlData)) {
 	        if (!isSolid(hitbox.x + hitbox.width, hitbox.y + hitbox.height + 1, lvlData)) {
-	            return false; // Kedua sudut melayang di udara
+	            return false; 
 	        }
 	    }
-	    return true; // Salah satu atau kedua sudut menyentuh tanah solid
+	    return true; 
 	}
 }
 
