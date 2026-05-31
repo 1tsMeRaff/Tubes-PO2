@@ -19,6 +19,7 @@ public abstract class Enemy extends Entity {
 	protected float gravity = 0.04f * GameCore.SCALE;
 	protected float walkSpeed = 0.35f * GameCore.SCALE;
 	protected int walkDir = LEFT;
+	protected int tileY;
 
 	public Enemy(float x, float y, int width, int height, int enemyType) {
 		super(x, y, width, height);
@@ -41,6 +42,7 @@ public abstract class Enemy extends Entity {
 		}else {
 			inAir = false;
 			hitBox.y = GetEntityPosUnderRoofOrAboveFloor(hitBox, fallSpeed);
+			tileY = (int) (hitBox.y /GameCore.TILES_SIZE);
 		}
 	}
 	
@@ -61,6 +63,28 @@ public abstract class Enemy extends Entity {
 		changeWalkDir();
 	}
 	
+	protected boolean canSeePlayer(int[][] tilesData, Player player) {
+		int playerTileY = (int) (player.getHitBox().y / GameCore.TILES_SIZE);
+		if(playerTileY == tileY) {
+			if(isPlayerInRange(player)) {
+				if(isSightClear(tilesData, hitBox, player.hitBox, tileY)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	private boolean isSightClear(int[][] tilesData, Float hitBox, Float hitBox2, int tileY2) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	private boolean isPlayerInRange(Player player) {
+		
+		return false;
+	}
+
 	protected void newState(int enemyState) {
 		this.enemyState = enemyState;
 		aniTick = 0;
