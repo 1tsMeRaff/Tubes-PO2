@@ -11,15 +11,14 @@ import main.GameCore;
 
 
 public abstract class Enemy extends Entity {
-	private int aniIndex, enemyState;
-	protected static int enemyType;
-	private int aniTick, aniSpeed = 25;
-	private boolean firstUpdate = true;
-	private boolean inAir = false;
-	private float fallSpeed;
-	private float gravity = 0.04f * GameCore.SCALE;
-	private float walkSpeed = 0.35f * GameCore.SCALE;
-	private int walkDir = LEFT;
+	protected int aniIndex, enemyState, enemyType;
+	protected int aniTick, aniSpeed = 25;
+	protected boolean firstUpdate = true;
+	protected boolean inAir = false;
+	protected float fallSpeed;
+	protected float gravity = 0.04f * GameCore.SCALE;
+	protected float walkSpeed = 0.35f * GameCore.SCALE;
+	protected int walkDir = LEFT;
 
 	public Enemy(float x, float y, int width, int height, int enemyType) {
 		super(x, y, width, height);
@@ -28,7 +27,47 @@ public abstract class Enemy extends Entity {
 		
 	}
 	
-	private void updateAnimationTick() {
+	protected void firstUpdateCheck(int[][] tilesData) {
+		if(!IsEntityOnFloor(hitBox, tilesData)) {
+			inAir = true;
+			firstUpdate = false;
+		}
+	}
+	
+	protected void updateInAir(int[][] tilesData) {
+		if(canMoveHere(hitBox.x, hitBox.y + fallSpeed, hitBox.width, hitBox.height, tilesData)) {
+			hitBox.y += fallSpeed;
+			fallSpeed += gravity;
+		}else {
+			inAir = false;
+			hitBox.y = GetEntityPosUnderRoofOrAboveFloor(hitBox, fallSpeed);
+		}
+	}
+	
+	protected void move(int[][] tilesData) {
+		float xSpeed = 0;
+		
+		if(walkDir == LEFT) {
+			xSpeed = -walkSpeed;
+		}else {
+			xSpeed = walkSpeed;
+		}
+		if(canMoveHere(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height, tilesData)) {
+			if(isFloor(hitBox, xSpeed, tilesData)) {
+				hitBox.x += xSpeed;
+				return;
+			}
+		}
+		changeWalkDir();
+	}
+	
+	protected void newState(int enemyState) {
+		this.enemyState = enemyState;
+		aniTick = 0;
+		aniIndex = 0;
+	}
+	
+	protected void updateAnimationTick() {
 		aniTick++;
 		if(aniTick >= aniSpeed) {
 			aniTick = 0;
@@ -38,53 +77,8 @@ public abstract class Enemy extends Entity {
 			}
 		}
 	}
-	
-	public void update(int[][] tilesData) {
-		updateMove(tilesData);
-		updateAnimationTick();
-		
-	}
-	
-	private void updateMove(int[][] tilesData) {
-		if(firstUpdate) {
-			if(!IsEntityOnFloor(hitBox, tilesData)) {
-				inAir = true;
-				firstUpdate = false;
-			}
-		}
-		if(inAir) {
-			if(canMoveHere(hitBox.x, hitBox.y + fallSpeed, hitBox.width, hitBox.height, tilesData)) {
-				hitBox.y += fallSpeed;
-				fallSpeed += gravity;
-			}else {
-				inAir = false;
-				hitBox.y = GetEntityPosUnderRoofOrAboveFloor(hitBox, fallSpeed);
-			}
-		}else {
-			switch(enemyState) {
-			case IDLE:
-				enemyState = WALK;
-				break;
-			case WALK:
-				float xSpeed = 0;
-				
-				if(walkDir == LEFT) {
-					xSpeed = -walkSpeed;
-				}else {
-					xSpeed = walkSpeed;
-				}
-				if(canMoveHere(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height, tilesData)) {
-					if(isFloor(hitBox, xSpeed, tilesData)) {
-						hitBox.x += xSpeed;
-						return;
-					}
-				}
-				changeWalkDir();
-			}
-		}
-	}
 
-	private void changeWalkDir() {
+	protected void changeWalkDir() {
 		if(walkDir == LEFT) {
 			walkDir = RIGHT;
 		}else {
