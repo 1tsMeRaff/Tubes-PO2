@@ -1,5 +1,6 @@
 package gameStates;
 
+import entity.EnemyManager;
 import entity.Player;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
@@ -12,41 +13,45 @@ public class PlayStates extends States implements StateMethods {
 
 	private Player player;
 	private WorldManager worldManager;
+	private EnemyManager enemyManager;
 	private PauseOverlay pauseOverlay;
 	private boolean paused = false;
-	
+
 	public PlayStates(GameCore gc) {
 		super(gc);
 		initClasses();
 		pauseOverlay = new PauseOverlay(this);
 	}
-	
+
 	private void initClasses() {
 		worldManager = new WorldManager(gc);
+		enemyManager = new EnemyManager(this);
 		player = new Player(200, 200, (int) (64 * GameCore.SCALE), (int) (40 * GameCore.SCALE));
 		player.loadmapData(worldManager.getCurrentMap().getWorldData());
-		
+		pauseOverlay = new PauseOverlay(this);
+
 	}
 
 	@Override
 	public void update() {
-		if (paused) {
+		if (!paused) {
+			worldManager.update();
+			player.update();
+			enemyManager.update();
+		} else {
 			pauseOverlay.update();
-			return;
 		}
-		worldManager.update();
-		player.update();
-		
 	}
 
 	@Override
 	public void draw(Graphics g) {
 		worldManager.draw(g);
 		player.render(g);
+		enemyManager.draw(g);
 		if (paused) {
 			pauseOverlay.draw(g);
 		}
-		
+
 	}
 
 	@Override
@@ -54,11 +59,11 @@ public class PlayStates extends States implements StateMethods {
 		if (paused) {
 			return;
 		}
-		
-		if(e.getButton() == MouseEvent.BUTTON1) {
-	        player.setAttack(true);
-	    }
-		
+
+		if (e.getButton() == MouseEvent.BUTTON1) {
+			player.setAttack(true);
+		}
+
 	}
 
 	@Override
@@ -66,7 +71,7 @@ public class PlayStates extends States implements StateMethods {
 		if (paused) {
 			pauseOverlay.mousePressed(e);
 		}
-		
+
 	}
 
 	@Override
@@ -74,7 +79,7 @@ public class PlayStates extends States implements StateMethods {
 		if (paused) {
 			pauseOverlay.mouseReleased(e);
 		}
-		
+
 	}
 
 	@Override
@@ -82,7 +87,7 @@ public class PlayStates extends States implements StateMethods {
 		if (paused) {
 			pauseOverlay.mouseMoved(e);
 		}
-		
+
 	}
 
 	public void mouseDragged(MouseEvent e) {
@@ -101,7 +106,7 @@ public class PlayStates extends States implements StateMethods {
 			return;
 		}
 
-		switch(e.getKeyCode()) {
+		switch (e.getKeyCode()) {
 		case KeyEvent.VK_A:
 			player.setLeft(true);
 			break;
@@ -110,7 +115,7 @@ public class PlayStates extends States implements StateMethods {
 			break;
 		case KeyEvent.VK_SPACE:
 			player.setJump(true);
-			break;	
+			break;
 		}
 	}
 
@@ -119,8 +124,8 @@ public class PlayStates extends States implements StateMethods {
 		if (paused) {
 			return;
 		}
-		
-		switch(e.getKeyCode()) {
+
+		switch (e.getKeyCode()) {
 		case KeyEvent.VK_A:
 			player.setLeft(false);
 			break;
@@ -131,9 +136,9 @@ public class PlayStates extends States implements StateMethods {
 			player.setJump(false);
 			break;
 		}
-		
+
 	}
-	
+
 	public void windowFocusLost() {
 		player.resetDirBooleans();
 	}
@@ -150,7 +155,7 @@ public class PlayStates extends States implements StateMethods {
 	public boolean isPaused() {
 		return paused;
 	}
-	
+
 	public Player getPlayer() {
 		return player;
 	}

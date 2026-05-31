@@ -4,6 +4,42 @@ import main.GameCore;
 
 public class Konstanta {
 	
+	public static class EnemyConstants{
+		public static final int SLIME = 0;
+		
+		public static final int IDLE = 0;
+		public static final int WALK = 1;
+		public static final int ATTACK= 2;
+		public static final int JUMP = 3;
+		public static final int HURT = 4;
+		
+		public static final int SLIME_WIDTH_DEFAULT = 80;
+		public static final int SLIME_HEIGHT_DEFAULT = 80;
+		
+		public static final int SLIME_WIDTH = (int) (SLIME_WIDTH_DEFAULT * GameCore.SCALE);
+		public static final int SLIME_HEIGHT = (int) (SLIME_HEIGHT_DEFAULT * GameCore.SCALE);
+		
+		public static int GetSpriteAmount(int enemy_type, int enemy_state) {
+			
+			switch(enemy_type) {
+			case SLIME:
+				switch(enemy_state) {
+				case IDLE:
+					return 6;
+				case WALK:
+					return 6;
+				case ATTACK:
+					return 9;
+				case JUMP:
+					return 8;
+				case HURT:
+					return 3;
+				}
+			}
+			return 0;
+		}
+	}
+	
 	public static class UI{
 		public static class Frames{
 			public static final int B_WIDTH_DEFAULT = 233;

@@ -7,9 +7,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+
 import javax.imageio.ImageIO;
+
+import entity.Slime;
 import main.GameCore;
 import static utilitytools.Konstanta.UI.PauseButtons.*;
+import static utilitytools.Konstanta.EnemyConstants.SLIME;
 
 public class LoadSave {
 
@@ -23,6 +28,9 @@ public class LoadSave {
 	public static final String URM_BUTTONS = "urm_buttons.png";
 	public static final String VOLUME_BUTTONS = "volume_buttons.png";
 	public static final String VOLUME_SLIDER = "volume_slider.png";
+	
+	
+	public static final String SLIME_SPRITE = "enemy_slime.png";
 //	public static final String MENU_BACKGROUND = "MediavelFree.png";
 	
 	public static BufferedImage GetSpriteAtlas(String fileName) {
@@ -107,6 +115,27 @@ public class LoadSave {
 	    }
 	    
 	    return tilesData;
+	}
+	
+	public static ArrayList<Slime> GetSlimes(String filePath) {
+	    ArrayList<Slime> list = new ArrayList<>();
+	    
+	    int[][] levelData = GetTilesData(filePath);
+	    
+	    for (int row = 0; row < GameCore.TILES_IN_HEIGHT; row++) {
+	        for (int col = 0; col < GameCore.TILES_IN_WIDTH; col++) {
+	            
+	            int value = levelData[row][col];
+	            
+	            if (value == SLIME) { 
+	                int xPos = col * GameCore.TILES_SIZE; 
+	                int yPos = row * GameCore.TILES_SIZE;
+	                
+	                list.add(new Slime(xPos, yPos));
+	            }
+	        }
+	    }
+	    return list;
 	}
 	
 //	public static int[][] GetTilesData(){
