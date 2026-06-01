@@ -4,7 +4,7 @@ import main.GameCore;
 
 public class Konstanta {
 	
-<<<<<<< HEAD
+
 	public static class Environment {
 	    public static final int CLOUDS_01_WIDTH_DEFAULT = 448;
 	    public static final int CLOUDS_01_HEIGHT_DEFAULT = 101;
@@ -19,7 +19,7 @@ public class Konstanta {
 	
 
 	
-=======
+
 	public static class EnemyConstants{
 		public static final int SLIME = 0;
 		
@@ -62,7 +62,6 @@ public class Konstanta {
 		}
 	}
 	
->>>>>>> 81a8f6903940af8ace481c25ef09457c13451b2b
 	public static class UI{
 		public static class Frames{
 			public static final int B_WIDTH_DEFAULT = 233;
