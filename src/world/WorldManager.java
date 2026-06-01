@@ -2,6 +2,7 @@ package world;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 import main.GameCore;
 import utilitytools.LoadSave;
@@ -10,14 +11,24 @@ public class WorldManager {
 	
 	private GameCore gc;
 	private BufferedImage[] mapSprite;
-	private World world_1;
+	private ArrayList<World> worlds;
+	private int worldIndex = 0;
 	
 	public WorldManager(GameCore gc) {
 		this.gc = gc;
 		importOutsideSprites();
-		world_1 = new World(LoadSave.GetTilesData("/untitled1.csv"));
+		worlds = new ArrayList<>();
+		buildAllWorlds();
 	}
 	
+	private void buildAllWorlds() {
+		// Tambahkan semua map yang sudah dibuat ke sini.
+		// Pastikan file CSV/PNG map-nya ada di folder resources.
+		worlds.add(new World(LoadSave.GetTilesData("/untitled1.csv"))); 
+		worlds.add(new World(LoadSave.GetTilesData("/untitled.csv"))); // Contoh Map 2
+		// worlds.add(new World(LoadSave.GetTilesData("/map_3.csv"))); // Tambahkan lagi nanti
+	}
+
 	private void importOutsideSprites() {
 		BufferedImage image = LoadSave.GetSpriteAtlas(LoadSave.WORLD_SPRITE);
 		
@@ -36,12 +47,13 @@ public class WorldManager {
 	
 	public void draw(Graphics g, int xLvlOffset) {
 		
-		int mapWidth = world_1.getWorldData()[0].length;
+		World currentMap = worlds.get(worldIndex);
+		int mapWidth = currentMap.getWorldData()[0].length;
 		
 		for(int j = 0; j < GameCore.TILES_IN_HEIGHT; j++) {
 			for(int i = 0; i < mapWidth; i++) {
 				
-				int index = world_1.getSpriteIndex(i, j);
+				int index = currentMap.getSpriteIndex(i, j);
 				
 				if (index >= 0) { 
 					g.drawImage(mapSprite[index], 
@@ -56,10 +68,19 @@ public class WorldManager {
 	}
 	
 	public void update() {
-		
+		// Logika update tambahan (animasi air/awan statis) bisa ditaruh di sini nanti
 	}
 	
+	public void loadNextWorld() {
+		worldIndex++;
+		if (worldIndex >= worlds.size()) {
+			worldIndex = 0; // Balik ke map 1 jika sudah tamat
+			System.out.println("Game Tamat! Kembali ke Map 1.");
+			gameStates.GameStates.state = gameStates.GameStates.MENU; // Opsional: Balik ke Main Menu
+		}
+	}
+
 	public World getCurrentMap() {
-		return world_1;
+		return worlds.get(worldIndex);
 	}
 }
