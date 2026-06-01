@@ -1,13 +1,6 @@
 package entity;
 
 import static utilitytools.Konstanta.EnemyConstants.*;
-import static utilitytools.HelpMethods.*;
-import static utilitytools.Konstanta.Directions.*;
-
-import java.awt.Color;
-import java.awt.Graphics;
-
-import main.GameCore;
 
 public class Slime extends Enemy {
 
@@ -16,18 +9,14 @@ public class Slime extends Enemy {
 		initHitBox(x, y, SLIME_HITBOX_WIDTH, SLIME_HITBOX_HEIGHT);
 	}
 	
-	public void update(int[][] tilesData) {
-		updateMove(tilesData);
+	public void update(int[][] tilesData, Player player) {
+		updateMove(tilesData, player);
 		updateAnimationTick();
 		
 	}
 	
-	private void updateMove(int[][] tilesData) {
-		if(firstUpdate) {
-			if(!IsEntityOnFloor(hitBox, tilesData)) {
-				firstUpdateCheck(tilesData);
-			}
-		}
+	private void updateMove(int[][] tilesData, Player player) {
+		checkOnFloor(tilesData);
 		if(inAir) {
 			updateInAir(tilesData);
 		}else {
@@ -36,6 +25,14 @@ public class Slime extends Enemy {
 				newState(WALK);
 				break;
 			case WALK:
+				
+				if(canSeePlayer(tilesData, player)) {
+					turnToPlayer(player);
+				}
+				if(isPlayerCloseForAttack(player)) {
+					newState(ATTACK);
+				}
+				
 				move(tilesData);
 				break;
 			}

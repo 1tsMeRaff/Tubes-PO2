@@ -1,13 +1,9 @@
 package entity;
 
-import static utilitytools.Konstanta.EnemyConstants.*;
-
-import java.awt.geom.Rectangle2D.Float;
-
+import main.GameCore;
 import static utilitytools.HelpMethods.*;
 import static utilitytools.Konstanta.Directions.*;
-
-import main.GameCore;
+import static utilitytools.Konstanta.EnemyConstants.*;
 
 
 public abstract class Enemy extends Entity {
@@ -23,10 +19,12 @@ public abstract class Enemy extends Entity {
 	protected float attackDistance = GameCore.TILES_SIZE;
 
 	public Enemy(float x, float y, int width, int height, int enemyType) {
-		super(x, y, width, height);
-		this.enemyType = enemyType;
-		initHitBox(x, y, width, height);
-		
+	    super(x, y, width, height);
+	    this.enemyType = enemyType;
+	    initHitBox(x, y, width, height);
+	    
+	    // Tambahkan baris ini untuk inisialisasi awal koordinat Tile Y musuh
+	    this.tileY = (int) (y / GameCore.TILES_SIZE);
 	}
 	
 	protected void firstUpdateCheck(int[][] tilesData) {
@@ -44,6 +42,15 @@ public abstract class Enemy extends Entity {
 			inAir = false;
 			hitBox.y = GetEntityPosUnderRoofOrAboveFloor(hitBox, fallSpeed);
 			tileY = (int) (hitBox.y /GameCore.TILES_SIZE);
+			fallSpeed = 0;
+		}
+	}
+
+	protected void checkOnFloor(int[][] tilesData) {
+		if (!inAir && !IsEntityOnFloor(hitBox, tilesData)) {
+			inAir = true;
+			fallSpeed = 0;
+			firstUpdate = false;
 		}
 	}
 	
@@ -64,6 +71,14 @@ public abstract class Enemy extends Entity {
 		changeWalkDir();
 	}
 	
+	protected void turnToPlayer(Player player) {
+		if(player.hitBox.x  > hitBox.x) {
+			walkDir = RIGHT;
+		}else {
+			walkDir = LEFT;
+		}
+	}
+	
 	protected boolean canSeePlayer(int[][] tilesData, Player player) {
 		int playerTileY = (int) (player.getHitBox().y / GameCore.TILES_SIZE);
 		if(playerTileY == tileY) {
@@ -81,9 +96,14 @@ public abstract class Enemy extends Entity {
 //		return false;
 //	}
 
-	private boolean isPlayerInRange(Player player) {
+	protected boolean isPlayerInRange(Player player) {
 		int absValue = (int) Math.abs(player.hitBox.x - hitBox.getX());
 		return absValue <= attackDistance * 5;
+	}
+	
+	protected boolean isPlayerCloseForAttack(Player player) {
+		int absValue = (int) Math.abs(player.hitBox.x - hitBox.getX());
+		return absValue <= attackDistance;
 	}
 
 	protected void newState(int enemyState) {
@@ -99,6 +119,9 @@ public abstract class Enemy extends Entity {
 			aniIndex++;
 			if(aniIndex >= GetSpriteAmount(enemyType, enemyState)) {
 				aniIndex = 0;
+				if(enemyState == ATTACK) {
+					enemyState = IDLE;
+				}
 			}
 		}
 	}

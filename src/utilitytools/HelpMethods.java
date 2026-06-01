@@ -75,15 +75,17 @@ public class HelpMethods {
     }
 
     public static float GetEntityPosUnderRoofOrAboveFloor(Rectangle2D.Float hitBox, float airSpeed) {
-        int currentTile = (int) (hitBox.y / GameCore.TILES_SIZE);
+        float yAfterMove = hitBox.y + airSpeed;
         if (airSpeed > 0) {
-            // Jatuh ke bawah → letakkan di atas lantai (tepat sebelum tile di bawah)
+            // Jatuh ke bawah: pakai posisi setelah bergerak agar tile lantai tepat
+            int currentTile = (int) ((yAfterMove + hitBox.height) / GameCore.TILES_SIZE);
             int tileYPos = currentTile * GameCore.TILES_SIZE;
-            int yOffSet = (int) (GameCore.TILES_SIZE - hitBox.height);
-            return tileYPos + yOffSet - 1;
+            return tileYPos - hitBox.height;
         } else {
-            // Terbang ke atas → tempelkan di bawah langit-langit (batas atas tile ini)
-            return currentTile * GameCore.TILES_SIZE;
+            // Mentok ke langit-langit: pakai posisi setelah bergerak agar tile plafon tepat
+            int currentTile = (int) (yAfterMove / GameCore.TILES_SIZE);
+            int tileYPos = currentTile * GameCore.TILES_SIZE;
+            return tileYPos + GameCore.TILES_SIZE;
         }
     }
 
@@ -109,13 +111,19 @@ public class HelpMethods {
         // Periksa tile di antara, tidak termasuk tile tempat mereka berdiri
         for (int x = leftXTile + 1; x < rightXTile; x++) {
             if (isSolidTile(x, tileY, tilesData)) {
-                return false;   // ada penghalang
+                return false;   // ada penghalang 
             }
         }
         return true;   // tidak ada penghalang
     }
 
     public static boolean isFloor(Rectangle2D.Float hitBox, float xSpeed, int[][] tilesData) {
-        return isSolid(hitBox.x + xSpeed, hitBox.y + hitBox.height + 1, tilesData);
+        if (xSpeed > 0) {
+            // Jika bergerak ke kanan, cek lantai di bawah sisi KANAN (depan) hitbox
+            return isSolid(hitBox.x + hitBox.width + xSpeed, hitBox.y + hitBox.height + 1, tilesData);
+        } else {
+            // Jika bergerak ke kiri, cek lantai di bawah sisi KIRI (depan) hitbox
+            return isSolid(hitBox.x + xSpeed, hitBox.y + hitBox.height + 1, tilesData);
+        }
     }
 }

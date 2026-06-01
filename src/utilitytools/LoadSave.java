@@ -1,5 +1,6 @@
 package utilitytools;
 
+import entity.Slime;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -8,13 +9,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-
 import javax.imageio.ImageIO;
-
-import entity.Slime;
 import main.GameCore;
+import static utilitytools.Konstanta.EnemyConstants.SLIME_HITBOX_HEIGHT;
 import static utilitytools.Konstanta.UI.PauseButtons.*;
-import static utilitytools.Konstanta.EnemyConstants.SLIME;
 
 public class LoadSave {
 
@@ -135,6 +133,7 @@ public class LoadSave {
 	
 	public static ArrayList<Slime> GetSlimes(String filePath) {
 		ArrayList<Slime> list = new ArrayList<>();
+		int[][] tilesData = GetTilesData(filePath);
 		
 		try {
 			// Membaca langsung dari file luar agar bisa melihat angka 200 yang asli
@@ -159,6 +158,10 @@ public class LoadSave {
 					if (value == 200) { 
 						int xPos = col * GameCore.TILES_SIZE; 
 						int yPos = row * GameCore.TILES_SIZE;
+						int groundRow = findGroundRow(row, col, tilesData);
+						if (groundRow != -1) {
+							yPos = (groundRow * GameCore.TILES_SIZE) - SLIME_HITBOX_HEIGHT;
+						}
 						
 						list.add(new Slime(xPos, yPos));
 					}
@@ -173,6 +176,21 @@ public class LoadSave {
 		}
 		
 		return list;
+	}
+
+	private static int findGroundRow(int startRow, int col, int[][] tilesData) {
+		if (tilesData == null) {
+			return -1;
+		}
+		for (int row = startRow + 1; row < tilesData.length; row++) {
+			if (col < 0 || col >= tilesData[row].length) {
+				continue;
+			}
+			if (utilitytools.HelpMethods.isSolidTile(tilesData[row][col])) {
+				return row;
+			}
+		}
+		return -1;
 	}
 	
 //	public static ArrayList<Slime> GetSlimes(String filePath) { ... }

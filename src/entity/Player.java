@@ -26,7 +26,7 @@ public class Player extends Entity {
 	private float gravity = 0.04f * GameCore.SCALE;
 	private float jumpSpeed = -2.25f * GameCore.SCALE;
 	private float fallSpeedAfterCollision = 0.5f * GameCore.SCALE;
-	private boolean inAir = false;
+	private boolean inAir = true;
 	
 	public Player(float x, float y, int width, int height) {
 		super(x, y, width, height);
@@ -92,51 +92,55 @@ public class Player extends Entity {
 	}
 
 	private void updatePos() {
-		moving = false;
-		if(jump) {
-			jump();
-		}
-		if(!inAir) {
-			if(!IsEntityOnFloor(hitBox, mapData)) {
-				inAir = true;
-			}
-		}
-		
-		if(!left && !right && !inAir) {
-			return;	
-		}
-		
-		float xSpeed = 0;
-		if (attacking) {
-			return; 
-		}
+	    moving = false;
+	    if(jump) {
+	        jump();
+	    }
+	    
+	    // 1. EARLY RETURN (Biarkan di atas): Jika player diam di tanah, langsung keluar 
+	    // agar terhindar dari bug getaran/pembulatan floating point koordinat.
+	    if(!left && !right && !inAir) {
+	        return;	
+	    }
+	    
+	    float xSpeed = 0;
+	    if (attacking) {
+	        return; 
+	    }
 
-		if(left) {
-			xSpeed -= playerSpeed;
-		}
-		if(right) {
-			xSpeed += playerSpeed;
-		}
-		
-		if(inAir) {
-			if(canMoveHere(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height, mapData)){
-				hitBox.y += airSpeed;
-				airSpeed += gravity;
-				updateXPos(xSpeed);
-			} else {
-				hitBox.y = GetEntityPosUnderRoofOrAboveFloor(hitBox, airSpeed);
-				if(airSpeed > 0) {
+	    if(left) {
+	        xSpeed -= playerSpeed;
+	    }
+	    if(right) {
+	        xSpeed += playerSpeed;
+	    }
+	    
+	    // 2. [PINDAHKAN KE SINI] Cek lantai dilakukan SAAT player memang sedang bergerak/berpindah
+	    if(!inAir) {
+	        if(!IsEntityOnFloor(hitBox, mapData)) {
+	            inAir = true;
+	        }
+	    }
+	    
+	    if(inAir) {
+	        if(canMoveHere(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height, mapData)){
+	            hitBox.y += airSpeed;
+	            airSpeed += gravity;
+	            updateXPos(xSpeed);
+	        } else {
+	            hitBox.y = GetEntityPosUnderRoofOrAboveFloor(hitBox, airSpeed);
+	            if(airSpeed > 0) {
 					resetInAir();
-				} else {
-					airSpeed = fallSpeedAfterCollision;
-				}
-				updateXPos(xSpeed);
-			}
-		} else {
-			updateXPos(xSpeed);
-		}
-		
-		moving = true;
+	            } else {
+	                airSpeed = fallSpeedAfterCollision;
+	            }
+	            updateXPos(xSpeed);
+	        }
+	    } else {
+	        updateXPos(xSpeed);
+	    }
+	    
+	    moving = true;
 	}
 	
 	private void jump() {
@@ -182,21 +186,24 @@ public class Player extends Entity {
 		left = false; right = false; up = false; down = false;
 	}
 
-	// [BARU] Menambahkan method resetAll() untuk transisi antar map
-	public void resetAll() {
-		resetDirBooleans();
-		inAir = false;
-		moving = false;
-		attacking = false;
-		playerAction = IDLE_ACTIVE;
-		
-		// Mengembalikan koordinat hitbox ke x dan y awal (dari superclass Entity)
-		hitBox.x = x;
-		hitBox.y = y;
-		
-		if (!IsEntityOnFloor(hitBox, mapData)) {
-			inAir = true;
-		}
+	// [PERBAIKAN] Tambahkan parameter koordinat baru untuk target map selanjutnya
+	public void resetAll(float newX, float newY) {
+	    resetDirBooleans();
+	    inAir = false;
+	    moving = false;
+	    attacking = false;
+	    playerAction = IDLE_ACTIVE;
+	    
+	    // Perbarui koordinat dasar Entity dan Hitbox ke posisi map baru
+	    this.x = newX;
+	    this.y = newY;
+	    hitBox.x = newX;
+	    hitBox.y = newY;
+	    
+	    // Pastikan mapData sudah di-load terlebih dahulu sebelum mengecek ini
+	    if (mapData != null && !IsEntityOnFloor(hitBox, mapData)) {
+	        inAir = true;
+	    }
 	}
 	
 	public void setAttack(boolean attacking) {

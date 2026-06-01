@@ -18,7 +18,6 @@ public class LevelCompletedOverlay {
 	}
 
 	private void initButtons() {
-		// Menggunakan ukuran tombol URM (Unpause/Restart/Menu) dari tutorial
 		int menuX = (int) (330 * GameCore.SCALE);
 		int nextX = (int) (445 * GameCore.SCALE);
 		int y = (int) (195 * GameCore.SCALE);
@@ -29,11 +28,9 @@ public class LevelCompletedOverlay {
 	}
 
 	public void draw(Graphics g) {
-		// Efek background semi-transparan (gelap)
 		g.setColor(new Color(0, 0, 0, 200));
 		g.fillRect(0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT);
 		
-		// Nanti Orang C bisa mengganti kotak putih ini dengan gambar sprite UI yang bagus
 		g.setColor(Color.WHITE);
 		g.fillRect((int)(250 * GameCore.SCALE), (int)(100 * GameCore.SCALE), (int)(350 * GameCore.SCALE), (int)(200 * GameCore.SCALE));
 		
@@ -63,12 +60,13 @@ public class LevelCompletedOverlay {
 	public void mouseReleased(MouseEvent e) {
 		if (isIn(menu, e)) {
 			if (menu.isMousePressed()) {
-				play.resetAll();
+				// [PERBAIKAN] Berikan koordinat spawn awal saat kembali ke Menu
+				play.resetAll(200, 200);
 				GameStates.state = GameStates.MENU;
 			}
 		} else if (isIn(next, e)) {
 			if (next.isMousePressed()) {
-				play.loadNextLevel(); // Panggil fungsi transisi!
+				play.loadNextLevel(); 
 				System.out.println("Tombol NEXT ditekan: Memuat Level Berikutnya!");
 			}
 		}

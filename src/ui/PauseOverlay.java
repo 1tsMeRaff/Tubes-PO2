@@ -34,41 +34,30 @@ public class PauseOverlay {
     private void initLayout() {
         int tile = GameCore.TILES_SIZE;
         
-        // 1. PERBESAR PANEL (Lebar dan Tinggi ditambah secara signifikan)
-        panelW = tile * 12; // Cukup lebar untuk menampung teks + panjang slider Kaarin
-        panelH = tile * 11; // Cukup tinggi agar teks tombol bawah tidak tumpah
+        panelW = tile * 12; 
+        panelH = tile * 11; 
         panelX = GameCore.GAME_WIDTH / 2 - panelW / 2;
         panelY = GameCore.GAME_HEIGHT / 2 - panelH / 2;
 
-        // X posisi untuk kolom tombol di sisi kanan
         int rightColX = panelX + panelW - (int)(tile * 1.8) - SOUND_SIZE;
-        
         int startY = panelY + (int) (tile * 2.5);
         int itemDy = SOUND_SIZE + (int)(tile * 0.5); 
 
-        // Baris 1: Music
         musicButton = new SoundButton(rightColX, startY, SOUND_SIZE, SOUND_SIZE);
         
-        // Baris 2: SE (Sound Effects)
         int sfxY = startY + itemDy;
         sfxButton = new SoundButton(rightColX, sfxY, SOUND_SIZE, SOUND_SIZE);
 
-        // Baris 3: Volume Slider
         int volumeY = sfxY + itemDy;
-
-		int customSliderWidth = (int)(tile * 4.5);
-        // Pastikan ujung kanan slider sejajar dengan sisi kanan tombol Music/SE
+        int customSliderWidth = (int)(tile * 4.5);
         int sliderX = rightColX + SOUND_SIZE - customSliderWidth; 
         
         volumeButton = new VolumeButton(sliderX, volumeY, VOLUME_WIDTH, VOLUME_HEIGHT, customSliderWidth, VOLUME_HEIGHT);
-		
-        // Baris 4: Tombol URM
+        
         int gap = (int) (tile * 0.8);
         int totalW = URM_SIZE * 3 + gap * 2;
         int urmX = panelX + (panelW - totalW) / 2;
-        
-        // Posisikan tombol URM ditarik sedikit ke ATAS agar teks di bawahnya tidak keluar bingkai
-        int urmY = volumeY + VOLUME_HEIGHT + (int)(tile * 0.5); // Sebelumnya tile * 1.0
+        int urmY = volumeY + VOLUME_HEIGHT + (int)(tile * 0.5); 
 
         unpauseButton = new UrmButton(urmX, urmY, URM_SIZE, URM_SIZE, 0);
         replayButton = new UrmButton(urmX + URM_SIZE + gap, urmY, URM_SIZE, URM_SIZE, 1);
@@ -90,36 +79,28 @@ public class PauseOverlay {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
         g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        // Background transparan gelap
         g2.setColor(new Color(0, 0, 0, 150));
         g2.fillRect(0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT);
 
-        // Gambar kotak window
         drawSubWindow(g2, panelX, panelY, panelW, panelH);
 
-        // Setup Font 
         g2.setFont(new Font("Monospaced", Font.PLAIN, (int)(28 * GameCore.SCALE)));
         g2.setColor(Color.WHITE);
 
-        // Judul Options
         String title = "Options";
         int titleX = getXforCenteredText(g2, title);
         int titleY = panelY + (int)(GameCore.TILES_SIZE * 1.5);
         g2.drawString(title, titleX, titleY);
 
-        // Kordinat Teks Kiri
-        int textX = panelX + (int)(GameCore.TILES_SIZE * 1.5); // Memberi jarak margin kiri
-        int textOffsetY = (int) (SOUND_SIZE / 1.3); // Penyesuaian ke tengah tombol
+        int textX = panelX + (int)(GameCore.TILES_SIZE * 1.5); 
+        int textOffsetY = (int) (SOUND_SIZE / 1.3); 
 
-        // Gambar Teks Baris Atas
         g2.drawString("Music", textX, musicButton.getY() + textOffsetY);
         g2.drawString("SE", textX, sfxButton.getY() + textOffsetY);
         
-        // PENTING: Gambar Teks Volume disejajarkan dengan posisi Y slider
         int volumeTextY = volumeButton.getY() + (int)(VOLUME_HEIGHT / 1.5);
         g2.drawString("Volume", textX, volumeTextY);
 
-        // Nyalakan antialiasing agar gambar tombol Kaarin tidak pecah
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         musicButton.draw(g2);
@@ -129,7 +110,6 @@ public class PauseOverlay {
         replayButton.draw(g2);
         menuButton.draw(g2);
 
-        // Gambar teks tombol bawah
         g2.setFont(g2.getFont().deriveFont(Font.PLAIN, (float) (14 * GameCore.SCALE)));
         drawButtonLabel(g2, unpauseButton, "Resume");
         drawButtonLabel(g2, replayButton, "Restart");
@@ -138,7 +118,6 @@ public class PauseOverlay {
         g2.dispose();
     }
 
-    // MENGGUNAKAN KODE drawSubWindow MILIK RYISNOW SAMA PERSIS
     private void drawSubWindow(Graphics2D g2, int x, int y, int width, int height) {
         Color c = new Color(0, 0, 0, 200);
         g2.setColor(c);
@@ -183,7 +162,8 @@ public class PauseOverlay {
         } else if (isIn(e, unpauseButton) && unpauseButton.isMousePressed()) {
             playing.setPaused(false);
         } else if (isIn(e, replayButton) && replayButton.isMousePressed()) {
-            playing.resetAll();
+            // [PERBAIKAN] Berikan koordinat spawn awal saat merestart level
+            playing.resetAll(200, 200);
         } else if (isIn(e, menuButton) && menuButton.isMousePressed()) {
             GameStates.state = GameStates.MENU;
             playing.setPaused(false);
