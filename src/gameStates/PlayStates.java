@@ -1,5 +1,6 @@
 package gameStates;
 
+import entity.EnemyManager;
 import entity.Player;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
@@ -13,22 +14,56 @@ public class PlayStates extends States implements StateMethods {
 
 	private Player player;
 	private WorldManager worldManager;
+	private EnemyManager enemyManager;
 	private PauseOverlay pauseOverlay;
 	private LevelCompletedOverlay levelCompletedOverlay;
 	private boolean paused = false;
 	private boolean lvlCompleted = false;
 	
+	// Variabel Kamera (Dari branch dev)
+	public int xLvlOffset;
+	private int leftBorder = (int) (0.2 * GameCore.GAME_WIDTH);
+	private int rightBorder = (int) (0.8 * GameCore.GAME_WIDTH);
+	private int maxLvlOffsetX;
+
 	public PlayStates(GameCore gc) {
 		super(gc);
 		initClasses();
-		pauseOverlay = new PauseOverlay(this);
+		calcLvlOffset(); 
+	}
+
+	private void initClasses() {
+		worldManager = new WorldManager(gc);
+		enemyManager = new EnemyManager(this);
+		player = new Player(200, 200, (int) (64 * GameCore.SCALE), (int) (40 * GameCore.SCALE));
+		player.loadmapData(worldManager.getCurrentMap().getWorldData());
+		pauseOverlay = new PauseOverlay(this); 
 		levelCompletedOverlay = new LevelCompletedOverlay(this);
 	}
 	
-	private void initClasses() {
-		worldManager = new WorldManager(gc);
-		player = new Player(200, 200, (int) (64 * GameCore.SCALE), (int) (40 * GameCore.SCALE));
-		player.loadmapData(worldManager.getCurrentMap().getWorldData());
+	// Metode Kamera (Dari branch dev)
+	private void calcLvlOffset() {
+		int mapWidth = worldManager.getCurrentMap().getWorldData()[0].length;
+		maxLvlOffsetX = (mapWidth - GameCore.TILES_IN_WIDTH) * GameCore.TILES_SIZE;
+	}
+
+	// Mengatur pergeseran layar / kamera
+	private void checkCloseToBorder() {
+		int playerX = (int) player.getHitbox().x;
+		int diff = playerX - xLvlOffset;
+
+		if (diff > rightBorder) {
+			xLvlOffset += diff - rightBorder;
+		} 
+		else if (diff < leftBorder) {
+			xLvlOffset += diff - leftBorder;
+		}
+
+		if (xLvlOffset > maxLvlOffsetX) {
+			xLvlOffset = maxLvlOffsetX;
+		} else if (xLvlOffset < 0) {
+			xLvlOffset = 0;
+		}
 	}
 
 	@Override
@@ -40,21 +75,24 @@ public class PlayStates extends States implements StateMethods {
 		} else {
 			worldManager.update();
 			player.update();
-			checkCloseToBorder(); // Mengecek apakah player sudah di ujung layar
-		}
-	}
-
-	// [LOGIKA SEMENTARA] Jika x player melebihi layar, anggap level selesai
-	private void checkCloseToBorder() {
-		if (player.getHitbox().x >= GameCore.GAME_WIDTH - 50) {
-			setLevelCompleted(true);
+			enemyManager.update(worldManager.getCurrentMap().getWorldData());
+			checkCloseToBorder(); // Update pergerakan kamera
+			
+			// [LOGIKA SEMENTARA] Jika x player melebihi panjang aktual map, level selesai
+			int endOfMapX = (worldManager.getCurrentMap().getWorldData()[0].length * GameCore.TILES_SIZE) - 50;
+			if (player.getHitbox().x >= endOfMapX) {
+				setLevelCompleted(true);
+			}
 		}
 	}
 
 	@Override
 	public void draw(Graphics g) {
-		worldManager.draw(g);
-		player.render(g);
+		worldManager.draw(g, xLvlOffset);
+		player.render(g, xLvlOffset);
+		
+		// Pastikan class EnemyManager juga sudah diupdate untuk menerima xLvlOffset
+		enemyManager.draw(g, xLvlOffset); 
 		
 		if (paused) {
 			pauseOverlay.draw(g);
@@ -65,7 +103,10 @@ public class PlayStates extends States implements StateMethods {
 
 	public void loadNextLevel() {
 		resetAll(); // Reset state
-		worldManager.loadNextWorld(); // Pindah ke index map berikutnya
+		
+		// Catatan: Pastikan method loadNextWorld() sudah Anda buat di WorldManager
+		// worldManager.loadNextWorld(); 
+		
 		// Reload collision map untuk player ke map yang baru
 		player.loadmapData(worldManager.getCurrentMap().getWorldData()); 
 	}
@@ -152,17 +193,16 @@ public class PlayStates extends States implements StateMethods {
 				break;
 		}
 	}
-	
+
 	public void windowFocusLost() {
 		player.resetDirBooleans();
 	}
 
 	public void resetAll() {
-		// Fungsi ini mereset posisi player dan status game.
-		// Kita tidak perlu "new WorldManager()" lagi karena ArrayList sudah disimpan
 		player.resetAll(); 
 		paused = false;
 		lvlCompleted = false;
+		xLvlOffset = 0; 
 	}
 
 	public void setPaused(boolean paused) {
@@ -176,7 +216,7 @@ public class PlayStates extends States implements StateMethods {
 	public boolean isPaused() {
 		return paused;
 	}
-	
+
 	public Player getPlayer() {
 		return player;
 	}

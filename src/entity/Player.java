@@ -40,10 +40,10 @@ public class Player extends Entity {
 		updateAnimationTick();
 	}
 	
-	public void render(Graphics g) {
-		g.drawImage(animasi[playerAction][aniIndex], (int) (hitBox.x - xDrawOffSet),
+	public void render(Graphics g, int xLvlOffset) {
+		g.drawImage(animasi[playerAction][aniIndex], 
+					(int) (hitBox.x - xDrawOffSet) - xLvlOffset, 
 					(int) (hitBox.y - yDrawOffSet), width, height, null);
-		drawHitbox(g);
 	}
 	
 	private void updateAnimationTick() {
@@ -93,11 +93,9 @@ public class Player extends Entity {
 
 	private void updatePos() {
 		moving = false;
-		
 		if(jump) {
 			jump();
 		}
-		
 		if(!inAir) {
 			if(!IsEntityOnFloor(hitBox, mapData)) {
 				inAir = true;
@@ -109,15 +107,13 @@ public class Player extends Entity {
 		}
 		
 		float xSpeed = 0;
-		
 		if (attacking) {
 			return; 
 		}
-		
+
 		if(left) {
 			xSpeed -= playerSpeed;
 		}
-		
 		if(right) {
 			xSpeed += playerSpeed;
 		}
@@ -167,7 +163,7 @@ public class Player extends Entity {
 	private void loadAnimations() {
 		BufferedImage image = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_SPRITE);
 		animasi = new BufferedImage[22][16];
-		
+
 		for(int j = 0; j < animasi.length; j++) {
 			for(int i = 0; i < animasi[j].length; i ++) {
 				animasi[j][i] = image.getSubimage(i * 80, j * 64, 80, 64); 
@@ -183,10 +179,7 @@ public class Player extends Entity {
 	}
 
 	public void resetDirBooleans() {
-		left = false;
-		right = false;
-		up = false;
-		down = false;
+		left = false; right = false; up = false; down = false;
 	}
 
 	// [BARU] Menambahkan method resetAll() untuk transisi antar map
@@ -241,7 +234,8 @@ public class Player extends Entity {
 	public void setDown(boolean down) {
 		this.down = down;
 	}
-	
+
+	// Method ini ada di branch `dev` tapi hilang di branch `dev-Arya`
 	public void setJump(boolean jump) {
 		this.jump = jump;
 	}

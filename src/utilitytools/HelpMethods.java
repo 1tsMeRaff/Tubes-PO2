@@ -1,6 +1,7 @@
 package utilitytools;
 
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.Rectangle2D.Float;
 
 import main.GameCore;
 
@@ -21,60 +22,57 @@ public class HelpMethods {
 //	}
 	
 	public static boolean canMoveHere(float x, float y, float width, float height, int[][] tilesData) {
-	    
-	    float leftX = x;
-	    float rightX = x + width - 1; 
-	    float topY = y;
-	    float bottomY = y + height - 1;
+		float leftX = x;
+		float rightX = x + width - 1; 
+		float topY = y;
+		float bottomY = y + height - 1;
 
-	    int leftCol = (int) (leftX / GameCore.TILES_SIZE);
-	    int rightCol = (int) (rightX / GameCore.TILES_SIZE);
-	    int topRow = (int) (topY / GameCore.TILES_SIZE);
-	    int bottomRow = (int) (bottomY / GameCore.TILES_SIZE);
+		int leftCol = (int) (leftX / GameCore.TILES_SIZE);
+		int rightCol = (int) (rightX / GameCore.TILES_SIZE);
+		int topRow = (int) (topY / GameCore.TILES_SIZE);
+		int bottomRow = (int) (bottomY / GameCore.TILES_SIZE);
 
-	    for (int row = topRow; row <= bottomRow; row++) {
-	        for (int col = leftCol; col <= rightCol; col++) {
+		for (int row = topRow; row <= bottomRow; row++) {
+			for (int col = leftCol; col <= rightCol; col++) {
 
-	            if (row < 0 || row >= tilesData.length || col < 0 || col >= tilesData[0].length) {
-	                System.out.println("STUCK KARENA OUT OF BOUNDS! Baris: " + row + " Kolom: " + col);
-	                return false; 
-	            }
+				if (row < 0 || row >= tilesData.length || col < 0 || col >= tilesData[0].length) {
+					System.out.println("STUCK KARENA OUT OF BOUNDS! Baris: " + row + " Kolom: " + col);
+					return false; 
+				}
 
-	            int tileID = tilesData[row][col];
+				int tileID = tilesData[row][col];
 
-	            if (tileID != -1 && tileID != 0) { 
-	                System.out.println("Nabrak Tile Solid ID: " + tileID);
-	                return false; 
-	            }
-	        }
-	    }
-	    return true; 
+				if (tileID != -1 && tileID != 0) { 
+					System.out.println("Nabrak Tile Solid ID: " + tileID);
+					return false; 
+				}
+			}
+		}
+		return true; 
 	}
 	
 	public static boolean isSolidTile(int tileID) {
-
-	    if (tileID == -1 || tileID == 0) { 
-	        return false;
-	    }
-	    return true;
+		if (tileID == -1 || tileID == 0) { 
+			return false;
+		}
+		return true;
 	}
 	
 	public static boolean isSolid(float x, float y, int[][] lvlData) {
-	    
-	    int xIndex = (int) (x / GameCore.TILES_SIZE);
-	    int yIndex = (int) (y / GameCore.TILES_SIZE);
+		int xIndex = (int) (x / GameCore.TILES_SIZE);
+		int yIndex = (int) (y / GameCore.TILES_SIZE);
 
-	    if (yIndex < 0 || yIndex >= lvlData.length || xIndex < 0 || xIndex >= lvlData[0].length) {
-	        return true;
-	    }
+		if (yIndex < 0 || yIndex >= lvlData.length || xIndex < 0 || xIndex >= lvlData[0].length) {
+			return true;
+		}
 
-	    int value = lvlData[yIndex][xIndex];
+		int value = lvlData[yIndex][xIndex];
 
-	    if (value == -1 || value == 0) {
-	        return false;
-	    }
+		if (value == -1 || value == 0) {
+			return false;
+		}
 
-	    return true; 
+		return true; 
 	}
 	
 //	private static boolean isSolid(float x, float y, int[][] tilesData) {
@@ -97,15 +95,13 @@ public class HelpMethods {
 //	}
 	
 	public static float GetEntityPosNextToWall(Rectangle2D.Float hitBox, float xSpeed) {
-		
 		int currentTile = (int) (hitBox.x / GameCore.TILES_SIZE);
 		if(xSpeed > 0) {
 			//Kanan
 			int tileXpos = currentTile * GameCore.TILES_SIZE;
 			int xOffSet = (int) (GameCore.TILES_SIZE - hitBox.width);
 			return tileXpos + xOffSet -1;
-		}else {
-			//Kiri
+		} else {
 			return currentTile * GameCore.TILES_SIZE;
 		}
 	}
@@ -113,35 +109,24 @@ public class HelpMethods {
 	public static float GetEntityPosUnderRoofOrAboveFloor(Rectangle2D.Float hitBox, float airSpeed) {
 		int currentTile = (int) (hitBox.y / GameCore.TILES_SIZE);
 		if(airSpeed > 0) {
-			// Falling
 			int tileYPos = currentTile * GameCore.TILES_SIZE;
 			int yOffSet = (int) (GameCore.TILES_SIZE - hitBox.height);
 			return tileYPos + yOffSet - 1;
-		}else {
-			// Jumping
+		} else {
 			return currentTile * GameCore.TILES_SIZE;
 		}
 	}
 	
 	public static boolean IsEntityOnFloor(Rectangle2D.Float hitbox, int[][] lvlData) {
-	    // Mengecek 1 piksel tepat di bawah sudut kiri bawah dan kanan bawah hitbox
-	    if (!isSolid(hitbox.x, hitbox.y + hitbox.height + 1, lvlData)) {
-	        if (!isSolid(hitbox.x + hitbox.width, hitbox.y + hitbox.height + 1, lvlData)) {
-	            return false; // Kedua sudut melayang di udara
-	        }
-	    }
-	    return true; // Salah satu atau kedua sudut menyentuh tanah solid
+		if (!isSolid(hitbox.x, hitbox.y + hitbox.height + 1, lvlData)) {
+			if (!isSolid(hitbox.x + hitbox.width, hitbox.y + hitbox.height + 1, lvlData)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public static boolean isFloor(Rectangle2D.Float hitBox, float xSpeed, int[][] tilesData) {
+		return isSolid(hitBox.x + xSpeed, hitBox.y + hitBox.height + 1, tilesData);
 	}
 }
-
-
-
-
-
-
-
-
-
-	
-
-

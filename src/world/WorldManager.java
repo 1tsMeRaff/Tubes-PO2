@@ -22,8 +22,8 @@ public class WorldManager {
 	}
 	
 	private void buildAllWorlds() {
-		// Tambahkan semua map yang sudah dibuat Orang C ke sini.
-		// Pastikan file CSV/PNG map nya ada di folder resources.
+		// Tambahkan semua map yang sudah dibuat ke sini.
+		// Pastikan file CSV/PNG map-nya ada di folder resources.
 		worlds.add(new World(LoadSave.GetTilesData("/untitled1.csv"))); 
 		worlds.add(new World(LoadSave.GetTilesData("/untitled.csv"))); // Contoh Map 2
 		// worlds.add(new World(LoadSave.GetTilesData("/map_3.csv"))); // Tambahkan lagi nanti
@@ -45,15 +45,19 @@ public class WorldManager {
 		}
 	}
 	
-	public void draw(Graphics g) {
+	public void draw(Graphics g, int xLvlOffset) {
+		
+		World currentMap = worlds.get(worldIndex);
+		int mapWidth = currentMap.getWorldData()[0].length;
+		
 		for(int j = 0; j < GameCore.TILES_IN_HEIGHT; j++) {
-			for(int i = 0; i < GameCore.TILES_IN_WIDTH; i++) {
+			for(int i = 0; i < mapWidth; i++) {
 				
-				int index = worlds.get(worldIndex).getSpriteIndex(i, j);
+				int index = currentMap.getSpriteIndex(i, j);
 				
 				if (index >= 0) { 
 					g.drawImage(mapSprite[index], 
-								GameCore.TILES_SIZE * i, 
+								(GameCore.TILES_SIZE * i) - xLvlOffset, 
 								GameCore.TILES_SIZE * j, 
 								GameCore.TILES_SIZE, 
 								GameCore.TILES_SIZE, 
