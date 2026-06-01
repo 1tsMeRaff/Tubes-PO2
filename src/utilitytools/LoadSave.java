@@ -26,6 +26,9 @@ public class LoadSave {
 	public static final String VOLUME_SLIDER = "volume_slider.png";
 //	public static final String MENU_BACKGROUND = "MediavelFree.png";
 	public static final String MENU_BACKGROUND_IMG = "mainn_menu.jpeg";
+	public static final String PLAY_BACKGROUND_IMG = "Background_0.png";
+	public static final String CLOUDS_01 = "awan_01.png";
+	public static final String CLOUDS_02 = "awan_02.png";
 	
 	public static BufferedImage GetSpriteAtlas(String fileName) {
 		
