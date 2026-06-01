@@ -1,5 +1,6 @@
 package gameStates;
 
+import entity.EnemyManager;
 import entity.Player;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
@@ -18,10 +19,11 @@ public class PlayStates extends States implements StateMethods {
 
 	private Player player;
 	private WorldManager worldManager;
+	private EnemyManager enemyManager;
 	private PauseOverlay pauseOverlay;
 	private boolean paused = false;
 	
-	// Variabel Kamera
+	// Variabel Kamera (Dari dev-Rizal)
 	private int xLvlOffset;
 	private int leftBorder = (int) (0.2 * GameCore.GAME_WIDTH);
 	private int rightBorder = (int) (0.8 * GameCore.GAME_WIDTH);
@@ -45,13 +47,16 @@ public class PlayStates extends States implements StateMethods {
 		for(int i = 0; i < clouds_02Pos.length; i++)
 			clouds_02Pos[i] = (int)(90 * GameCore.SCALE) +  rnd.nextInt((int)(100*GameCore.SCALE));
 	}
-	
+
 	private void initClasses() {
 		worldManager = new WorldManager(gc);
+		enemyManager = new EnemyManager(this);
 		player = new Player(200, 200, (int) (64 * GameCore.SCALE), (int) (40 * GameCore.SCALE));
 		player.loadmapData(worldManager.getCurrentMap().getWorldData());
+		pauseOverlay = new PauseOverlay(this); // Menggabungkan inisialisasi dari branch dev
 	}
 	
+	// Metode Kamera (Dari dev-Rizal)
 	private void calcLvlOffset() {
 	    int mapWidth = worldManager.getCurrentMap().getWorldData()[0].length;
 	    maxLvlOffsetX = (mapWidth - GameCore.TILES_IN_WIDTH) * GameCore.TILES_SIZE;
@@ -77,13 +82,14 @@ public class PlayStates extends States implements StateMethods {
 
 	@Override
 	public void update() {
-		if (paused) {
+		if (!paused) {
+			worldManager.update();
+			player.update();
+			enemyManager.update(worldManager.getCurrentMap().getWorldData());
+			checkCloseToBorder(); // Dimasukkan ke dalam blok !paused agar tidak jalan saat pause
+		} else {
 			pauseOverlay.update();
-			return;
 		}
-		worldManager.update();
-		player.update();
-		checkCloseToBorder();
 	}
 
 	@Override
@@ -94,6 +100,10 @@ public class PlayStates extends States implements StateMethods {
 		
 		worldManager.draw(g, xLvlOffset);
 		player.render(g, xLvlOffset);
+		
+		// Catatan: Pastikan class EnemyManager juga sudah menerima parameter xLvlOffset di method draw-nya.
+		// Jika belum, ubah menjadi: enemyManager.draw(g);
+		enemyManager.draw(g, xLvlOffset); 
 		
 		if (paused) {
 			pauseOverlay.draw(g);
@@ -115,7 +125,8 @@ public class PlayStates extends States implements StateMethods {
 		if (paused) {
 			return;
 		}
-		if(e.getButton() == MouseEvent.BUTTON1) {
+
+		if (e.getButton() == MouseEvent.BUTTON1) {
 			player.setAttack(true);
 		}
 	}
@@ -157,7 +168,7 @@ public class PlayStates extends States implements StateMethods {
 			return;
 		}
 
-		switch(e.getKeyCode()) {
+		switch (e.getKeyCode()) {
 		case KeyEvent.VK_A:
 			player.setLeft(true);
 			break;
@@ -166,7 +177,7 @@ public class PlayStates extends States implements StateMethods {
 			break;
 		case KeyEvent.VK_SPACE:
 			player.setJump(true);
-			break;	
+			break;
 		}
 	}
 
@@ -175,8 +186,8 @@ public class PlayStates extends States implements StateMethods {
 		if (paused) {
 			return;
 		}
-		
-		switch(e.getKeyCode()) {
+
+		switch (e.getKeyCode()) {
 		case KeyEvent.VK_A:
 			player.setLeft(false);
 			break;
@@ -188,7 +199,7 @@ public class PlayStates extends States implements StateMethods {
 			break;
 		}
 	}
-	
+
 	public void windowFocusLost() {
 		player.resetDirBooleans();
 	}
@@ -206,7 +217,7 @@ public class PlayStates extends States implements StateMethods {
 	public boolean isPaused() {
 		return paused;
 	}
-	
+
 	public Player getPlayer() {
 		return player;
 	}
