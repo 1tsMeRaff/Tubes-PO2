@@ -42,10 +42,8 @@ public class Player extends Entity {
 	
 	public void render(Graphics g, int xLvlOffset) {
 		g.drawImage(animasi[playerAction][aniIndex], 
-		            (int) (hitBox.x - xDrawOffSet) - xLvlOffset, 
+					(int) (hitBox.x - xDrawOffSet) - xLvlOffset, 
 					(int) (hitBox.y - yDrawOffSet), width, height, null);
-		
-		
 	}
 	
 	private void updateAnimationTick() {
@@ -67,14 +65,14 @@ public class Player extends Entity {
 		
 		if(moving) {
 			playerAction = LARI;
-		}else {
+		} else {
 			playerAction = IDLE_ACTIVE;
 		}
 		
 		if(inAir) {
 			if(airSpeed < 0) {
 				playerAction = LOMPAT;
-			}else {
+			} else {
 				playerAction = JATUH;
 			}
 		}
@@ -112,6 +110,7 @@ public class Player extends Entity {
 		if (attacking) {
 			return; 
 		}
+
 		if(left) {
 			xSpeed -= playerSpeed;
 		}
@@ -124,16 +123,16 @@ public class Player extends Entity {
 				hitBox.y += airSpeed;
 				airSpeed += gravity;
 				updateXPos(xSpeed);
-			}else {
+			} else {
 				hitBox.y = GetEntityPosUnderRoofOrAboveFloor(hitBox, airSpeed);
 				if(airSpeed > 0) {
 					resetInAir();
-				}else {
+				} else {
 					airSpeed = fallSpeedAfterCollision;
 				}
 				updateXPos(xSpeed);
 			}
-		}else {
+		} else {
 			updateXPos(xSpeed);
 		}
 		
@@ -156,7 +155,7 @@ public class Player extends Entity {
 	private void updateXPos(float xSpeed) {
 		if(canMoveHere(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height, mapData)) {
 			hitBox.x += xSpeed;
-		}else {
+		} else {
 			hitBox.x = GetEntityPosNextToWall(hitBox, xSpeed);
 		}
 	}
@@ -164,6 +163,7 @@ public class Player extends Entity {
 	private void loadAnimations() {
 		BufferedImage image = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_SPRITE);
 		animasi = new BufferedImage[22][16];
+
 		for(int j = 0; j < animasi.length; j++) {
 			for(int i = 0; i < animasi[j].length; i ++) {
 				animasi[j][i] = image.getSubimage(i * 80, j * 64, 80, 64); 
@@ -181,22 +181,66 @@ public class Player extends Entity {
 	public void resetDirBooleans() {
 		left = false; right = false; up = false; down = false;
 	}
+
+	// [BARU] Menambahkan method resetAll() untuk transisi antar map
+	public void resetAll() {
+		resetDirBooleans();
+		inAir = false;
+		moving = false;
+		attacking = false;
+		playerAction = IDLE_ACTIVE;
+		
+		// Mengembalikan koordinat hitbox ke x dan y awal (dari superclass Entity)
+		hitBox.x = x;
+		hitBox.y = y;
+		
+		if (!IsEntityOnFloor(hitBox, mapData)) {
+			inAir = true;
+		}
+	}
 	
 	public void setAttack(boolean attacking) {
 		this.attacking = attacking;
 	}
 
-	public boolean isLeft() { return left; }
-	public void setLeft(boolean left) { this.left = left; }
-	public boolean isUp() { return up; }
-	public void setUp(boolean up) { this.up = up; }
-	public boolean isRight() { return right; }
-	public void setRight(boolean right) { this.right = right; }
-	public boolean isDown() { return down; }
-	public void setDown(boolean down) { this.down = down; }
-	public void setJump(boolean jump) { this.jump = jump; }
+	public boolean isLeft() {
+		return left;
+	}
+
+	public void setLeft(boolean left) {
+		this.left = left;
+	}
+
+	public boolean isUp() {
+		return up;
+	}
+
+	public void setUp(boolean up) {
+		this.up = up;
+	}
+
+	public boolean isRight() {
+		return right;
+	}
+
+	public void setRight(boolean right) {
+		this.right = right;
+	}
+
+	public boolean isDown() {
+		return down;
+	}
+
+	public void setDown(boolean down) {
+		this.down = down;
+	}
+
+	// Method ini ada di branch `dev` tapi hilang di branch `dev-Arya`
+	public void setJump(boolean jump) {
+		this.jump = jump;
+	}
 	
-	
+	// [PERBAIKAN] Menggunakan hitBox (huruf B besar) sesuai deklarasi di Entity
 	public java.awt.geom.Rectangle2D.Float getHitbox() {
 		return hitBox;
 	}
