@@ -20,6 +20,7 @@ public abstract class Enemy extends Entity {
 	protected float walkSpeed = 0.35f * GameCore.SCALE;
 	protected int walkDir = LEFT;
 	protected int tileY;
+	protected float attackDistance = GameCore.TILES_SIZE;
 
 	public Enemy(float x, float y, int width, int height, int enemyType) {
 		super(x, y, width, height);
@@ -67,7 +68,7 @@ public abstract class Enemy extends Entity {
 		int playerTileY = (int) (player.getHitBox().y / GameCore.TILES_SIZE);
 		if(playerTileY == tileY) {
 			if(isPlayerInRange(player)) {
-				if(isSightClear(tilesData, hitBox, player.hitBox, tileY)) {
+				if(IsSightClear(tilesData, hitBox, player.hitBox, tileY)) {
 					return true;
 				}
 			}
@@ -75,14 +76,14 @@ public abstract class Enemy extends Entity {
 		return false;
 	}
 	
-	private boolean isSightClear(int[][] tilesData, Float hitBox, Float hitBox2, int tileY2) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+//	private boolean IsSightClear(int[][] tilesData, Float hitBox, Float hitBox2, int tileY2) {
+//		// TODO Auto-generated method stub
+//		return false;
+//	}
 
 	private boolean isPlayerInRange(Player player) {
-		
-		return false;
+		int absValue = (int) Math.abs(player.hitBox.x - hitBox.getX());
+		return absValue <= attackDistance * 5;
 	}
 
 	protected void newState(int enemyState) {
