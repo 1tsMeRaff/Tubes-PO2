@@ -31,6 +31,8 @@ public class LoadSave {
 //	public static final String MENU_BACKGROUND = "MediavelFree.png";
 	public static final String MENU_BACKGROUND_IMG = "mainn_menu.jpeg";
 	
+	public static final String STATUS_BAR = "statusbar.png";
+	
 	public static BufferedImage GetSpriteAtlas(String fileName) {
 		
 		BufferedImage image = null;
