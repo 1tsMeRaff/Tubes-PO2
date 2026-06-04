@@ -12,6 +12,7 @@ public class Konstanta {
 		public static final int ATTACK= 2;
 		public static final int JUMP = 3;
 		public static final int HURT = 4;
+		public static final int MATI = 5;
 		
 		public static final int SLIME_WIDTH_DEFAULT = 80;
 		public static final int SLIME_HEIGHT_DEFAULT = 80;
@@ -40,9 +41,29 @@ public class Konstanta {
 					return 8;
 				case HURT:
 					return 3;
+				case MATI:
+					return 3;
 				}
 			}
 			return 0;
+		}
+		
+		public static int getMaxHealth(int enemy_type) {
+			switch(enemy_type) {
+			case SLIME:
+				return 10;
+			default:
+				return 1;
+			}
+		}
+		
+		public static int getEnemyAtt(int enemy_type) {
+			switch(enemy_type) {
+			case SLIME:
+				return 10;
+			default:
+				return 0;
+			}
 		}
 	}
 	
@@ -86,10 +107,13 @@ public class Konstanta {
 		public static final int ATTACK_1 = 11;
 		public static final int CHARGE_ATTACK = 12;
 		public static final int GUARD = 15;
+		public static final int MATI = 23;
 		
 		public static int GetSpriteAmount(int player_action) {
 			
 			switch(player_action) {
+			case MATI:
+				return 7;
 			case IDLE_CHILL:
 				return 8;
 			case IDLE_ACTIVE:
