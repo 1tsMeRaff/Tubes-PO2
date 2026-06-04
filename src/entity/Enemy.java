@@ -5,6 +5,8 @@ import static utilitytools.HelpMethods.*;
 import static utilitytools.Konstanta.Directions.*;
 import static utilitytools.Konstanta.EnemyConstants.*;
 
+import java.awt.geom.Rectangle2D;
+
 
 public abstract class Enemy extends Entity {
 	protected int aniIndex, enemyState, enemyType;
@@ -17,13 +19,18 @@ public abstract class Enemy extends Entity {
 	protected int walkDir = LEFT;
 	protected int tileY;
 	protected float attackDistance = GameCore.TILES_SIZE;
+	protected int maxHealth;
+	protected int currentHealth;
+	
+	protected boolean active = true;
+	protected boolean attackChecked;
 
 	public Enemy(float x, float y, int width, int height, int enemyType) {
 	    super(x, y, width, height);
 	    this.enemyType = enemyType;
 	    initHitBox(x, y, width, height);
-	    
-	    // Tambahkan baris ini untuk inisialisasi awal koordinat Tile Y musuh
+	    maxHealth = getMaxHealth(enemyType);
+	    currentHealth = maxHealth;
 	    this.tileY = (int) (y / GameCore.TILES_SIZE);
 	}
 	
@@ -112,6 +119,22 @@ public abstract class Enemy extends Entity {
 		aniIndex = 0;
 	}
 	
+	public void hurt(int value) {
+		currentHealth -= value;
+		if(currentHealth <= 0) {
+			newState(MATI);
+		}else {
+			newState(HURT);
+		}
+	}
+	
+	protected void checkHitEnemy(Rectangle2D.Float AttackBox, Player player) {
+		if(AttackBox.intersects(player.hitBox)) {
+			player.changeHealth(-getEnemyAtt(enemyType));
+		}
+		attackChecked = true;
+	}
+	
 	protected void updateAnimationTick() {
 		aniTick++;
 		if(aniTick >= aniSpeed) {
@@ -119,8 +142,10 @@ public abstract class Enemy extends Entity {
 			aniIndex++;
 			if(aniIndex >= GetSpriteAmount(enemyType, enemyState)) {
 				aniIndex = 0;
-				if(enemyState == ATTACK) {
-					enemyState = IDLE;
+				
+				switch(enemyState) {
+				case ATTACK, HURT -> enemyState = IDLE;
+				case MATI -> active = false;
 				}
 			}
 		}
@@ -132,6 +157,16 @@ public abstract class Enemy extends Entity {
 		}else {
 			walkDir = LEFT;
 		}
+	}
+	
+	public void resetEnemy() {
+		hitBox.x = x;
+		hitBox.y = y;
+		firstUpdate = true;
+		currentHealth = maxHealth;
+		newState(IDLE);
+		active = true;
+		fallSpeed = 0;
 		
 	}
 
@@ -143,6 +178,13 @@ public abstract class Enemy extends Entity {
 		return enemyState;
 	}
 
+	public boolean isActive() {
+		return active;
+	}
+	
+	public int getAniTick() {
+	    return aniTick;
+	}
 }
 
 

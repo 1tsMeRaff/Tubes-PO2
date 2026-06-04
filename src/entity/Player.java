@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
+import gameStates.PlayStates;
 import main.GameCore;
 import utilitytools.LoadSave;
 
@@ -44,7 +45,7 @@ public class Player extends Entity {
 	private int healthBarYStart = (int) (14 * GameCore.SCALE);
 	
 	private int maxHealth = 100;
-	private int currentHealth = 40;
+	private int currentHealth = maxHealth;
 	private int healthWidth = healthBarWidth;
 	
 	// AttackBox
@@ -53,8 +54,12 @@ public class Player extends Entity {
 	private int flipX = 0;
 	private int flipW = 1;
 	
-	public Player(float x, float y, int width, int height) {
+	private boolean attackCheck;
+	private PlayStates playStates;
+	
+	public Player(float x, float y, int width, int height, PlayStates playStates) {
 		super(x, y, width, height);
+		this.playStates = playStates;
 		loadAnimations();
 		initHitBox(x, y, (int) (18 * GameCore.SCALE), (int) (23 * GameCore.SCALE));
 		initAttackBox();
@@ -66,21 +71,48 @@ public class Player extends Entity {
 
 	public void update() {
 		updateHealthBar();
+		
+		if(currentHealth <= 0) {
+			playStates.setGameOver(true);
+			return;
+		}
+		
+		updateHealthBar();
 		updateAttackBox();
 		updatePos();
+		if(attacking) {
+			checkAttack();
+		}
 		setAnimation();
 		updateAnimationTick();
 	}
 	
-	private void updateAttackBox() {
-		
-		if (right) {
-			AttackBox.x = hitBox.x + hitBox.width + (int) (GameCore.SCALE * 10);
-		}else if (left) {
-			AttackBox.x = hitBox.x - hitBox.width - (int) (GameCore.SCALE * 10);
+	private void checkAttack() {
+		if(attackCheck) {
+			return;
 		}
-		AttackBox.y = hitBox.y + (GameCore.SCALE * 10);
+		attackCheck = true;
+		playStates.checkHitEnemy(AttackBox);
 	}
+	
+	private void updateAttackBox() {
+	    if (flipW == 1) {
+	        AttackBox.x = hitBox.x + hitBox.width + (int) (GameCore.SCALE * 5);
+	    } else if (flipW == -1) {
+	        AttackBox.x = hitBox.x - AttackBox.width - (int) (GameCore.SCALE * 5);
+	    }
+	    AttackBox.y = hitBox.y + (GameCore.SCALE * 2); 
+	}
+
+//	private void updateAttackBox() {
+//		
+//		if (right) {
+//			AttackBox.x = hitBox.x + hitBox.width + (int) (GameCore.SCALE * 10);
+//		}else if (left) {
+//			AttackBox.x = hitBox.x - hitBox.width - (int) (GameCore.SCALE * 10);
+//		}
+//		AttackBox.y = hitBox.y + (GameCore.SCALE * 10);
+//	}
 
 	private void updateHealthBar() {
 		healthWidth = (int) ((currentHealth / (float) maxHealth) * healthBarWidth);
@@ -117,6 +149,7 @@ public class Player extends Entity {
 				aniIndex = 0;
 				if(playerAction == ATTACK_1) {
 					attacking = false;
+					attackCheck = false;
 				}
 			}
 		}
@@ -141,6 +174,11 @@ public class Player extends Entity {
 		
 		if(attacking) {
 			playerAction = ATTACK_1;
+			if(startAni != ATTACK_1) {
+				aniIndex= 1;
+				aniTick = 0;
+				return;
+			}
 		}
 		
 		if(startAni != playerAction) {
@@ -269,6 +307,7 @@ public class Player extends Entity {
 	    moving = false;
 	    attacking = false;
 	    playerAction = IDLE_ACTIVE;
+	    currentHealth = maxHealth;
 	    
 	    // Perbarui koordinat dasar Entity dan Hitbox ke posisi map baru
 	    this.x = newX;
