@@ -86,10 +86,13 @@ public class Konstanta {
 		public static final int ATTACK_1 = 11;
 		public static final int CHARGE_ATTACK = 12;
 		public static final int GUARD = 15;
+		public static final int MATI = 23;
 		
 		public static int GetSpriteAmount(int player_action) {
 			
 			switch(player_action) {
+			case MATI:
+				return 7;
 			case IDLE_CHILL:
 				return 8;
 			case IDLE_ACTIVE:

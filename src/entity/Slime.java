@@ -1,6 +1,7 @@
 package entity;
 
 import static utilitytools.Konstanta.EnemyConstants.*;
+import static utilitytools.Konstanta.Directions.*;
 
 public class Slime extends Enemy {
 
@@ -38,5 +39,20 @@ public class Slime extends Enemy {
 			}
 		}
 	}
-
+	
+	public int flipX() {
+		if (walkDir == LEFT) {
+			return width;
+		}else {
+			return 0;
+		}
+	}
+	
+	public int flipW() {
+		if (walkDir == LEFT) {
+			return -1;
+		}else {
+			return 1;
+		}
+	}
 }

@@ -38,14 +38,14 @@ public class EnemyManager {
 	private void drawSlimes(Graphics g, int xLvlOffset) {
 		Graphics g2 = g.create();
 		g2.translate(-xLvlOffset, 0);
-		for (Slime c : Slimes) {
-			g2.drawImage(slimeImg[c.getEnemyState()][c.getAniIndex()],
-					(int) (c.getHitBox().x - SLIME_DRAWOFFSET_X),
-					(int) (c.getHitBox().y - SLIME_DRAWOFFSET_Y),
-					SLIME_WIDTH, SLIME_HEIGHT, null);
+		for (Slime s : Slimes) {
+			g2.drawImage(slimeImg[s.getEnemyState()][s.getAniIndex()],
+					(int) (s.getHitBox().x - SLIME_DRAWOFFSET_X + s.flipX()),
+					(int) (s.getHitBox().y - SLIME_DRAWOFFSET_Y),
+					SLIME_WIDTH * s.flipW(), SLIME_HEIGHT, null);
 
 			// (OPSIONAL) Untuk debugging melihat kotak hitbox merah:
-			c.drawHitbox(g2);
+			s.drawHitbox(g2);
 		}
 		g2.dispose();
 	}

@@ -50,6 +50,8 @@ public class Player extends Entity {
 	// AttackBox
 	private Rectangle2D.Float AttackBox;
 	
+	private int flipX = 0;
+	private int flipW = 1;
 	
 	public Player(float x, float y, int width, int height) {
 		super(x, y, width, height);
@@ -87,8 +89,9 @@ public class Player extends Entity {
 
 	public void render(Graphics g, int xLvlOffset) {
 		g.drawImage(animasi[playerAction][aniIndex], 
-					(int) (hitBox.x - xDrawOffSet) - xLvlOffset, 
-					(int) (hitBox.y - yDrawOffSet), width, height, null);
+					(int) (hitBox.x - xDrawOffSet) - xLvlOffset + flipX, 
+					(int) (hitBox.y - yDrawOffSet), 
+					width * flipW, height, null);
 		drawAttackBox(g, xLvlOffset);
 		drawUI(g);
 	}
@@ -156,8 +159,6 @@ public class Player extends Entity {
 	        jump();
 	    }
 	    
-	    // 1. EARLY RETURN (Biarkan di atas): Jika player diam di tanah, langsung keluar 
-	    // agar terhindar dari bug getaran/pembulatan floating point koordinat.
 	    if(!left && !right && !inAir) {
 	        return;	
 	    }
@@ -169,9 +170,13 @@ public class Player extends Entity {
 
 	    if(left) {
 	        xSpeed -= playerSpeed;
+	        flipX = width;
+	        flipW = -1;
 	    }
 	    if(right) {
 	        xSpeed += playerSpeed;
+	        flipX = 0;
+	        flipW = 1;
 	    }
 	    
 	    // 2. [PINDAHKAN KE SINI] Cek lantai dilakukan SAAT player memang sedang bergerak/berpindah
