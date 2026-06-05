@@ -1,6 +1,6 @@
 package gameStates;
 
-import entity.EnemyManager; // Ditambahkan agar tidak error
+import entity.EnemyManager; 
 import entity.Player;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
@@ -16,13 +16,15 @@ import ui.PauseOverlay;
 import ui.GameOverOverlay; 
 import utilitytools.LoadSave;
 import world.WorldManager;
+import objects.ObjectManager; // Tambahan Import untuk ObjectManager
 import static utilitytools.Konstanta.Environment.*;
 
 public class PlayStates extends States implements StateMethods {
 
 	private Player player;
 	private WorldManager worldManager;
-	private EnemyManager enemyManager; // Dikembalikan ke tempatnya
+	private EnemyManager enemyManager; 
+	private ObjectManager objectManager; // Tambahan Variabel ObjectManager dari Rizal
 	private PauseOverlay pauseOverlay;
 	private GameOverUI gameOverUI; 
 	private LevelCompletedOverlay levelCompletedOverlay;
@@ -59,7 +61,10 @@ public class PlayStates extends States implements StateMethods {
 		worldManager = new WorldManager(gc);
 		enemyManager = new EnemyManager(this); 
 		
-		// Menggunakan versi Rafi yang mengoper 'this' ke Player
+		// Inisialisasi ObjectManager dari Rizal
+		objectManager = new ObjectManager(this);
+		objectManager.addTestObjects(); // Memunculkan item sementara untuk tes
+		
 		player = new Player(200, 200, (int) (64 * GameCore.SCALE), (int) (40 * GameCore.SCALE), this);
 		player.loadmapData(worldManager.getCurrentMap().getWorldData());
 		
@@ -102,9 +107,8 @@ public class PlayStates extends States implements StateMethods {
 			// Saat game over, layar akan freeze
 		} else {
 			worldManager.update();
+			objectManager.update(); // Update animasi item dari Rizal
 			player.update();
-			
-			// Menggunakan versi Rafi untuk update musuh
 			enemyManager.update(worldManager.getCurrentMap().getWorldData(), player); 
 			checkCloseToBorder();
 			
@@ -123,6 +127,7 @@ public class PlayStates extends States implements StateMethods {
 		drawClouds(g);
 		
 		worldManager.draw(g, xLvlOffset);
+		objectManager.draw(g, xLvlOffset); // Gambar item ke layar (sebelum player)
 		player.render(g, xLvlOffset);
 		enemyManager.draw(g, xLvlOffset); 
 		
@@ -135,7 +140,6 @@ public class PlayStates extends States implements StateMethods {
 		}
 	}
 
-	// Memperbaiki penulisan drawClounds menjadi drawClouds
 	private void drawClouds(Graphics g) {
 		for (int i = 0; i < 3 ; i++) {
 			g.drawImage(clouds_01, i * CLOUDS_01_WIDTH - (int)(xLvlOffset * 0.3), (int) (204 * GameCore.SCALE), CLOUDS_01_WIDTH, CLOUDS_01_HEIGHT, null);
@@ -288,5 +292,10 @@ public class PlayStates extends States implements StateMethods {
 	
 	public Player getPlayer() {
 		return player;
+	}
+
+	// Tambahan Getter untuk ObjectManager dari Rizal
+	public ObjectManager getObjectManager() {
+		return objectManager;
 	}
 }
