@@ -1,13 +1,11 @@
 package entity;
 
-import static utilitytools.Konstanta.EnemyConstants.*;
-
-import java.awt.geom.Rectangle2D.Float;
-
+import main.GameCore;
 import static utilitytools.HelpMethods.*;
 import static utilitytools.Konstanta.Directions.*;
+import static utilitytools.Konstanta.EnemyConstants.*;
 
-import main.GameCore;
+import java.awt.geom.Rectangle2D;
 
 
 public abstract class Enemy extends Entity {
@@ -20,12 +18,20 @@ public abstract class Enemy extends Entity {
 	protected float walkSpeed = 0.35f * GameCore.SCALE;
 	protected int walkDir = LEFT;
 	protected int tileY;
+	protected float attackDistance = GameCore.TILES_SIZE;
+	protected int maxHealth;
+	protected int currentHealth;
+	
+	protected boolean active = true;
+	protected boolean attackChecked;
 
 	public Enemy(float x, float y, int width, int height, int enemyType) {
-		super(x, y, width, height);
-		this.enemyType = enemyType;
-		initHitBox(x, y, width, height);
-		
+	    super(x, y, width, height);
+	    this.enemyType = enemyType;
+	    initHitBox(x, y, width, height);
+	    maxHealth = getMaxHealth(enemyType);
+	    currentHealth = maxHealth;
+	    this.tileY = (int) (y / GameCore.TILES_SIZE);
 	}
 	
 	protected void firstUpdateCheck(int[][] tilesData) {
@@ -43,6 +49,15 @@ public abstract class Enemy extends Entity {
 			inAir = false;
 			hitBox.y = GetEntityPosUnderRoofOrAboveFloor(hitBox, fallSpeed);
 			tileY = (int) (hitBox.y /GameCore.TILES_SIZE);
+			fallSpeed = 0;
+		}
+	}
+
+	protected void checkOnFloor(int[][] tilesData) {
+		if (!inAir && !IsEntityOnFloor(hitBox, tilesData)) {
+			inAir = true;
+			fallSpeed = 0;
+			firstUpdate = false;
 		}
 	}
 	
@@ -63,11 +78,19 @@ public abstract class Enemy extends Entity {
 		changeWalkDir();
 	}
 	
+	protected void turnToPlayer(Player player) {
+		if(player.hitBox.x  > hitBox.x) {
+			walkDir = RIGHT;
+		}else {
+			walkDir = LEFT;
+		}
+	}
+	
 	protected boolean canSeePlayer(int[][] tilesData, Player player) {
 		int playerTileY = (int) (player.getHitBox().y / GameCore.TILES_SIZE);
 		if(playerTileY == tileY) {
 			if(isPlayerInRange(player)) {
-				if(isSightClear(tilesData, hitBox, player.hitBox, tileY)) {
+				if(IsSightClear(tilesData, hitBox, player.hitBox, tileY)) {
 					return true;
 				}
 			}
@@ -75,20 +98,41 @@ public abstract class Enemy extends Entity {
 		return false;
 	}
 	
-	private boolean isSightClear(int[][] tilesData, Float hitBox, Float hitBox2, int tileY2) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+//	private boolean IsSightClear(int[][] tilesData, Float hitBox, Float hitBox2, int tileY2) {
+//		// TODO Auto-generated method stub
+//		return false;
+//	}
 
-	private boolean isPlayerInRange(Player player) {
-		
-		return false;
+	protected boolean isPlayerInRange(Player player) {
+		int absValue = (int) Math.abs(player.hitBox.x - hitBox.getX());
+		return absValue <= attackDistance * 5;
+	}
+	
+	protected boolean isPlayerCloseForAttack(Player player) {
+		int absValue = (int) Math.abs(player.hitBox.x - hitBox.getX());
+		return absValue <= attackDistance;
 	}
 
 	protected void newState(int enemyState) {
 		this.enemyState = enemyState;
 		aniTick = 0;
 		aniIndex = 0;
+	}
+	
+	public void hurt(int value) {
+		currentHealth -= value;
+		if(currentHealth <= 0) {
+			newState(MATI);
+		}else {
+			newState(HURT);
+		}
+	}
+	
+	protected void checkHitEnemy(Rectangle2D.Float AttackBox, Player player) {
+		if(AttackBox.intersects(player.hitBox)) {
+			player.changeHealth(-getEnemyAtt(enemyType));
+		}
+		attackChecked = true;
 	}
 	
 	protected void updateAnimationTick() {
@@ -98,6 +142,11 @@ public abstract class Enemy extends Entity {
 			aniIndex++;
 			if(aniIndex >= GetSpriteAmount(enemyType, enemyState)) {
 				aniIndex = 0;
+				
+				switch(enemyState) {
+				case ATTACK, HURT -> enemyState = IDLE;
+				case MATI -> active = false;
+				}
 			}
 		}
 	} 
@@ -108,6 +157,16 @@ public abstract class Enemy extends Entity {
 		}else {
 			walkDir = LEFT;
 		}
+	}
+	
+	public void resetEnemy() {
+		hitBox.x = x;
+		hitBox.y = y;
+		firstUpdate = true;
+		currentHealth = maxHealth;
+		newState(IDLE);
+		active = true;
+		fallSpeed = 0;
 		
 	}
 
@@ -119,6 +178,13 @@ public abstract class Enemy extends Entity {
 		return enemyState;
 	}
 
+	public boolean isActive() {
+		return active;
+	}
+	
+	public int getAniTick() {
+	    return aniTick;
+	}
 }
 
 
