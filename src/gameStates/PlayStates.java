@@ -1,26 +1,30 @@
 package gameStates;
 
-import entity.EnemyManager;
+import entity.EnemyManager; // Ditambahkan agar tidak error
 import entity.Player;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.awt.geom.Rectangle2D;
+import java.util.Random;
 
 import main.GameCore;
 import ui.GameOverUI;
 import ui.LevelCompletedOverlay;
 import ui.PauseOverlay;
 import ui.GameOverOverlay; 
+import utilitytools.LoadSave;
 import world.WorldManager;
+import static utilitytools.Konstanta.Environment.*;
 
 public class PlayStates extends States implements StateMethods {
 
 	private Player player;
 	private WorldManager worldManager;
-	private EnemyManager enemyManager;
+	private EnemyManager enemyManager; // Dikembalikan ke tempatnya
 	private PauseOverlay pauseOverlay;
-	private GameOverUI gameOverUI; // Catatan: Jika tidak dipakai lagi karena ada GameOverOverlay, ini bisa dihapus
+	private GameOverUI gameOverUI; 
 	private LevelCompletedOverlay levelCompletedOverlay;
 	private GameOverOverlay gameOverOverlay; 
 
@@ -34,12 +38,23 @@ public class PlayStates extends States implements StateMethods {
 	private int rightBorder = (int) (0.8 * GameCore.GAME_WIDTH);
 	private int maxLvlOffsetX;
 
+	private BufferedImage backgroundImg, clouds_01, clouds_02; 
+	private int[] clouds_02Pos;
+	private Random rnd = new Random(); 
+	
 	public PlayStates(GameCore gc) {
 		super(gc);
 		initClasses();
 		calcLvlOffset(); 
+		
+		backgroundImg = LoadSave.GetSpriteAtlas(LoadSave.PLAY_BACKGROUND_IMG);
+		clouds_01 = LoadSave.GetSpriteAtlas(LoadSave.CLOUDS_01);
+		clouds_02 = LoadSave.GetSpriteAtlas(LoadSave.CLOUDS_01);
+		clouds_02Pos = new int[8];
+		for(int i = 0; i < clouds_02Pos.length; i++)
+			clouds_02Pos[i] = (int)(90 * GameCore.SCALE) +  rnd.nextInt((int)(100*GameCore.SCALE));
 	}
-
+	
 	private void initClasses() {
 		worldManager = new WorldManager(gc);
 		enemyManager = new EnemyManager(this); 
@@ -103,6 +118,10 @@ public class PlayStates extends States implements StateMethods {
 
 	@Override
 	public void draw(Graphics g) {
+		g.drawImage(backgroundImg, 0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
+		
+		drawClouds(g);
+		
 		worldManager.draw(g, xLvlOffset);
 		player.render(g, xLvlOffset);
 		enemyManager.draw(g, xLvlOffset); 
@@ -112,13 +131,22 @@ public class PlayStates extends States implements StateMethods {
 		} else if (lvlCompleted) {
 			levelCompletedOverlay.draw(g);
 		} else if (gameOver) {
-			// Menggunakan GameOverOverlay milik Arya
 			gameOverOverlay.draw(g); 
 		}
 	}
 
+	// Memperbaiki penulisan drawClounds menjadi drawClouds
+	private void drawClouds(Graphics g) {
+		for (int i = 0; i < 3 ; i++) {
+			g.drawImage(clouds_01, i * CLOUDS_01_WIDTH - (int)(xLvlOffset * 0.3), (int) (204 * GameCore.SCALE), CLOUDS_01_WIDTH, CLOUDS_01_HEIGHT, null);
+		}
+		
+		for (int i = 0; i < clouds_02Pos.length; i++) {
+			g.drawImage(clouds_02, CLOUDS_02_WIDTH * 4 * i - (int)(xLvlOffset * 0.7), clouds_02Pos[i], CLOUDS_02_WIDTH, CLOUDS_02_HEIGHT, null);
+		}
+	}
+
 	public void loadNextLevel() {
-		// Gabungan logika Arya (loadNextWorld) dan Rafi (reset map dengan parameter koordinat)
 		worldManager.loadNextWorld(); 
 		int[][] newMapData = worldManager.getCurrentMap().getWorldData();
 		
@@ -132,7 +160,6 @@ public class PlayStates extends States implements StateMethods {
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		// Menggunakan struktur rapi milik Arya
 		if (paused || lvlCompleted || gameOver) return;
 
 		if(e.getButton() == MouseEvent.BUTTON1) {
@@ -225,7 +252,7 @@ public class PlayStates extends States implements StateMethods {
 				break;
 		}
 	}
-
+	
 	public void windowFocusLost() {
 		player.resetDirBooleans();
 	}
@@ -258,7 +285,7 @@ public class PlayStates extends States implements StateMethods {
 	public boolean isPaused() {
 		return paused;
 	}
-
+	
 	public Player getPlayer() {
 		return player;
 	}

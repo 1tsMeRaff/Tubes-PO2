@@ -4,6 +4,22 @@ import main.GameCore;
 
 public class Konstanta {
 	
+
+	public static class Environment {
+	    public static final int CLOUDS_01_WIDTH_DEFAULT = 448;
+	    public static final int CLOUDS_01_HEIGHT_DEFAULT = 101;
+	    public static final int CLOUDS_02_WIDTH_DEFAULT = 74;
+	    public static final int CLOUDS_02_HEIGHT_DEFAULT = 24;
+	    
+	    public static final int CLOUDS_01_WIDTH = (int) (CLOUDS_01_WIDTH_DEFAULT * GameCore.SCALE);
+	    public static final int CLOUDS_01_HEIGHT = (int) (CLOUDS_01_HEIGHT_DEFAULT * GameCore.SCALE);
+	    public static final int CLOUDS_02_WIDTH = (int) (CLOUDS_01_WIDTH_DEFAULT * GameCore.SCALE);
+	    public static final int CLOUDS_02_HEIGHT = (int) (CLOUDS_01_HEIGHT_DEFAULT * GameCore.SCALE);
+	}
+	
+
+	
+
 	public static class EnemyConstants{
 		public static final int SLIME = 0;
 		
