@@ -24,8 +24,8 @@ public class WorldManager {
 	private void buildAllWorlds() {
 		// Tambahkan semua map yang sudah dibuat ke sini.
 		// Pastikan file CSV/PNG map-nya ada di folder resources.
-		worlds.add(new World(LoadSave.GetTilesData("/untitled1.csv"))); 
-		worlds.add(new World(LoadSave.GetTilesData("/untitled.csv"))); // Contoh Map 2
+		worlds.add(new World(LoadSave.GetTilesData("/map_test.txt"))); 
+//		worlds.add(new World(LoadSave.GetTilesData("/untitled.csv"))); // Contoh Map 2
 		// worlds.add(new World(LoadSave.GetTilesData("/map_3.csv"))); // Tambahkan lagi nanti
 	}
 

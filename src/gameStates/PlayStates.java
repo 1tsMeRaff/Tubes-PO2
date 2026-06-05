@@ -5,10 +5,13 @@ import entity.Player;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Rectangle2D;
+
 import main.GameCore;
+import ui.GameOverUI;
 import ui.LevelCompletedOverlay;
 import ui.PauseOverlay;
-import ui.GameOverOverlay; // Import baru untuk layar Game Over
+import ui.GameOverOverlay; 
 import world.WorldManager;
 
 public class PlayStates extends States implements StateMethods {
@@ -17,12 +20,13 @@ public class PlayStates extends States implements StateMethods {
 	private WorldManager worldManager;
 	private EnemyManager enemyManager;
 	private PauseOverlay pauseOverlay;
+	private GameOverUI gameOverUI; // Catatan: Jika tidak dipakai lagi karena ada GameOverOverlay, ini bisa dihapus
 	private LevelCompletedOverlay levelCompletedOverlay;
-	private GameOverOverlay gameOverOverlay; // Deklarasi Game Over
+	private GameOverOverlay gameOverOverlay; 
 
 	private boolean paused = false;
 	private boolean lvlCompleted = false;
-	private boolean gameOver = false; // Status kematian player
+	private boolean gameOver = false; 
 	
 	// Variabel Kamera
 	public int xLvlOffset;
@@ -39,12 +43,15 @@ public class PlayStates extends States implements StateMethods {
 	private void initClasses() {
 		worldManager = new WorldManager(gc);
 		enemyManager = new EnemyManager(this); 
-		player = new Player(200, 200, (int) (64 * GameCore.SCALE), (int) (40 * GameCore.SCALE));
+		
+		// Menggunakan versi Rafi yang mengoper 'this' ke Player
+		player = new Player(200, 200, (int) (64 * GameCore.SCALE), (int) (40 * GameCore.SCALE), this);
 		player.loadmapData(worldManager.getCurrentMap().getWorldData());
 		
 		pauseOverlay = new PauseOverlay(this); 
+		gameOverUI = new GameOverUI(this);
 		levelCompletedOverlay = new LevelCompletedOverlay(this);
-		gameOverOverlay = new GameOverOverlay(this); // Inisialisasi
+		gameOverOverlay = new GameOverOverlay(this); 
 	}
 	
 	private void calcLvlOffset() {
@@ -77,12 +84,13 @@ public class PlayStates extends States implements StateMethods {
 		} else if (lvlCompleted) {
 			levelCompletedOverlay.update();
 		} else if (gameOver) {
-			// Saat game over, layar akan freeze (tidak ada update ke player/musuh)
-			// Biarkan kosong sampai ada animasi khusus Game Over jika diperlukan
+			// Saat game over, layar akan freeze
 		} else {
 			worldManager.update();
 			player.update();
-			enemyManager.update(worldManager.getCurrentMap().getWorldData()); 
+			
+			// Menggunakan versi Rafi untuk update musuh
+			enemyManager.update(worldManager.getCurrentMap().getWorldData(), player); 
 			checkCloseToBorder();
 			
 			// Cek Transisi Level
@@ -104,18 +112,27 @@ public class PlayStates extends States implements StateMethods {
 		} else if (lvlCompleted) {
 			levelCompletedOverlay.draw(g);
 		} else if (gameOver) {
-			gameOverOverlay.draw(g); // Gambar layar gelap & teks Game Over
+			// Menggunakan GameOverOverlay milik Arya
+			gameOverOverlay.draw(g); 
 		}
 	}
 
 	public void loadNextLevel() {
-		resetAll(); 
+		// Gabungan logika Arya (loadNextWorld) dan Rafi (reset map dengan parameter koordinat)
 		worldManager.loadNextWorld(); 
-		player.loadmapData(worldManager.getCurrentMap().getWorldData()); 
+		int[][] newMapData = worldManager.getCurrentMap().getWorldData();
+		
+		float newX = 200;
+		float newY = 200;
+
+		resetAll(newX, newY); 
+		player.loadmapData(newMapData); 
+		calcLvlOffset();
 	}
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
+		// Menggunakan struktur rapi milik Arya
 		if (paused || lvlCompleted || gameOver) return;
 
 		if(e.getButton() == MouseEvent.BUTTON1) {
@@ -125,7 +142,7 @@ public class PlayStates extends States implements StateMethods {
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		if (gameOver) return; // Tidak ada klik mouse saat Game Over saat ini
+		if (gameOver) return; 
 
 		if (paused) {
 			pauseOverlay.mousePressed(e);
@@ -157,6 +174,8 @@ public class PlayStates extends States implements StateMethods {
 	}
 
 	public void mouseDragged(MouseEvent e) {
+		if (gameOver) return;
+
 		if (paused) {
 			pauseOverlay.mouseDragged(e);
 		}
@@ -186,7 +205,7 @@ public class PlayStates extends States implements StateMethods {
 				break;
 			case KeyEvent.VK_SPACE:
 				player.setJump(true);
-				break;	
+				break; 
 		}
 	}
 
@@ -211,12 +230,21 @@ public class PlayStates extends States implements StateMethods {
 		player.resetDirBooleans();
 	}
 
-	public void resetAll() {
-		player.resetAll(); 
+	public void resetAll(float targetX, float targetY) {
+		enemyManager.resetAllEnemies();
+		player.resetAll(targetX, targetY); 
 		paused = false;
 		lvlCompleted = false;
-		gameOver = false; // Reset game over
+		gameOver = false; 
 		xLvlOffset = 0; 
+	}
+	
+	public void setGameOver(boolean gameOver) {
+		this.gameOver = gameOver;
+	}
+	
+	public void checkHitEnemy(Rectangle2D.Float AttackBox) {
+		enemyManager.checkEnemyHit(AttackBox);
 	}
 
 	public void setPaused(boolean paused) {
@@ -225,10 +253,6 @@ public class PlayStates extends States implements StateMethods {
 
 	public void setLevelCompleted(boolean levelCompleted) {
 		this.lvlCompleted = levelCompleted;
-	}
-
-	public void setGameOver(boolean gameOver) {
-		this.gameOver = gameOver;
 	}
 
 	public boolean isPaused() {

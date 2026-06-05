@@ -41,6 +41,7 @@ public class LevelCompletedOverlay {
 		int nextX = (int) (445 * GameCore.SCALE);
 		int y = (int) (195 * GameCore.SCALE);
 
+		// Menggunakan inisialisasi tombol dari Arya
 		next = new UrmButton(nextX, y, URM_DEFAULT_SIZE, URM_DEFAULT_SIZE, 0);
 		menu = new UrmButton(menuX, y, URM_DEFAULT_SIZE, URM_DEFAULT_SIZE, 2);
 	}
@@ -54,6 +55,7 @@ public class LevelCompletedOverlay {
 		g.setColor(new Color(0, 0, 0, 200));
 		g.fillRect(0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT);
 
+		// Menggunakan gambar background yang disiapkan Arya
 		g.drawImage(img, bgX, bgY, bgW, bgH, null);
 
 		next.draw(g);
@@ -74,14 +76,15 @@ public class LevelCompletedOverlay {
 	public void mouseReleased(MouseEvent e) {
 		if (isIn(menu, e)) {
 			if (menu.isMousePressed()) {
-				// LOGIKA: Kembali ke Main Menu
-				playStates.resetAll();
+				// Memasukkan koordinat Rafi dan memperbaiki nama variabel menjadi playStates
+				playStates.resetAll(200, 200);
 				GameStates.state = GameStates.MENU;
 			}
 		} else if (isIn(next, e)) {
 			if (next.isMousePressed()) {
-				// LOGIKA: Muat Map Selanjutnya!
-				playStates.loadNextLevel();
+				// Memperbaiki nama variabel menjadi playStates dan mempertahankan log Rafi
+				playStates.loadNextLevel(); 
+				System.out.println("Tombol NEXT ditekan: Memuat Level Berikutnya!");
 			}
 		}
 
