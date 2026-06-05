@@ -149,7 +149,7 @@ public abstract class Enemy extends Entity {
 				}
 			}
 		}
-	}
+	} 
 
 	protected void changeWalkDir() {
 		if(walkDir == LEFT) {
