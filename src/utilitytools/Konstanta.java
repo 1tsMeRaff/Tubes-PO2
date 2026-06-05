@@ -4,6 +4,67 @@ import main.GameCore;
 
 public class Konstanta {
 	
+	public static class ObjectConstants {
+	    // ID Potion Merah (3 Tipe)
+	    public static final int RED_POTION_1 = 0;
+	    public static final int RED_POTION_2 = 1;
+	    public static final int RED_POTION_3 = 2;
+
+	    // ID Potion Biru (3 Tipe)
+	    public static final int BLUE_POTION_1 = 3;
+	    public static final int BLUE_POTION_2 = 4;
+	    public static final int BLUE_POTION_3 = 5;
+
+	    // ID Kontainer
+	    public static final int BARREL = 6;
+	    public static final int BOX = 7;
+
+	    // Nilai Potion (Contoh: makin besar tipenya, makin besar heal-nya)
+	    public static final int RED_VAL_1 = 5,  RED_VAL_2 = 10, RED_VAL_3 = 15;
+	    public static final int BLUE_VAL_1 = 5, BLUE_VAL_2 = 10, BLUE_VAL_3 = 15;
+
+	    // Ukuran Default
+	    public static final int CONTAINER_WIDTH_DEFAULT = 40;
+	    public static final int CONTAINER_HEIGHT_DEFAULT = 30;
+	 // Ukuran Default Potion disesuaikan ke 16x16
+	    public static final int POTION_WIDTH_DEFAULT = 16;
+	    public static final int POTION_HEIGHT_DEFAULT = 16;
+
+	    // Ukuran Ter-skala
+	    public static final int CONTAINER_WIDTH = (int) (GameCore.SCALE * CONTAINER_WIDTH_DEFAULT);
+	    public static final int CONTAINER_HEIGHT = (int) (GameCore.SCALE * CONTAINER_HEIGHT_DEFAULT);
+	    public static final int POTION_WIDTH = (int) (GameCore.SCALE * POTION_WIDTH_DEFAULT);
+	    public static final int POTION_HEIGHT = (int) (GameCore.SCALE * POTION_HEIGHT_DEFAULT);
+
+	    public static int GetSpriteAmount(int object_type) {
+	        switch (object_type) {
+	            case RED_POTION_1: case RED_POTION_2: case RED_POTION_3:
+	            case BLUE_POTION_1: case BLUE_POTION_2: case BLUE_POTION_3:
+	                return 3; // 3 frame animasi sesuai asetmu
+	            case BARREL:
+	            case BOX:
+	                return 8; // Tetap 8 frame untuk hancur
+	            default:
+	                return 1;
+	        }
+	    }
+	}
+	
+	public static class Environment {
+	    public static final int CLOUDS_01_WIDTH_DEFAULT = 448;
+	    public static final int CLOUDS_01_HEIGHT_DEFAULT = 101;
+	    public static final int CLOUDS_02_WIDTH_DEFAULT = 74;
+	    public static final int CLOUDS_02_HEIGHT_DEFAULT = 24;
+	    
+	    public static final int CLOUDS_01_WIDTH = (int) (CLOUDS_01_WIDTH_DEFAULT * GameCore.SCALE);
+	    public static final int CLOUDS_01_HEIGHT = (int) (CLOUDS_01_HEIGHT_DEFAULT * GameCore.SCALE);
+	    public static final int CLOUDS_02_WIDTH = (int) (CLOUDS_01_WIDTH_DEFAULT * GameCore.SCALE);
+	    public static final int CLOUDS_02_HEIGHT = (int) (CLOUDS_01_HEIGHT_DEFAULT * GameCore.SCALE);
+	}
+	
+
+	
+
 	public static class EnemyConstants{
 		public static final int SLIME = 0;
 		
