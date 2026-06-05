@@ -100,7 +100,7 @@ public abstract class Enemy extends Entity {
 				aniIndex = 0;
 			}
 		}
-	}
+	} 
 
 	protected void changeWalkDir() {
 		if(walkDir == LEFT) {
