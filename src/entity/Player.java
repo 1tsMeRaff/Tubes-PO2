@@ -1,9 +1,12 @@
 package entity;
 
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+
+import java.util.ArrayList;
 
 import gameStates.PlayStates;
 import main.GameCore;
@@ -11,6 +14,8 @@ import utilitytools.LoadSave;
 
 import static utilitytools.Konstanta.KonstantaPlayerRight.*;
 import static utilitytools.HelpMethods.*;
+
+import objects.GameContainer;
 
 public class Player extends Entity {
 
@@ -70,22 +75,76 @@ public class Player extends Entity {
 	}
 
 	public void update() {
-		updateHealthBar();
-		
-		if(currentHealth <= 0) {
-			playStates.setGameOver(true);
-			return;
-		}
-		
-		updateHealthBar();
-		updateAttackBox();
-		updatePos();
-		if(attacking) {
-			checkAttack();
-		}
-		setAnimation();
-		updateAnimationTick();
-	}
+        updateHealthBar();
+        updateManaBar(); // Tambahan untuk update mana
+
+        if(currentHealth <= 0) {
+            playStates.setGameOver(true);
+            return;
+        }
+
+        updateAttackBox();
+        updatePos();
+        if(attacking) {
+            checkAttack();
+        }
+        setAnimation();
+        updateAnimationTick();
+    }
+
+    private void updateManaBar() {
+        manaWidth = (int) ((currentMana / (float) maxMana) * manaBarWidth);
+    }
+
+
+
+    public void addItemToInventory(int objType) {
+        if (inventory.size() < maxInventorySize) {
+            inventory.add(objType);
+            System.out.println("Item masuk tas. Tipe ID: " + objType);
+        } else {
+            System.out.println("Penyimpanan Penuh!");
+        }
+    }
+
+    public void useItem(int itemIndex) {
+        if (itemIndex < inventory.size()) {
+            int potionType = inventory.get(itemIndex);
+            int value = 0;
+            boolean isRed = potionType <= 2;
+            
+            switch (potionType) {
+                case utilitytools.Konstanta.ObjectConstants.RED_POTION_1: value = utilitytools.Konstanta.ObjectConstants.RED_VAL_1; break;
+                case utilitytools.Konstanta.ObjectConstants.RED_POTION_2: value = utilitytools.Konstanta.ObjectConstants.RED_VAL_2; break;
+                case utilitytools.Konstanta.ObjectConstants.RED_POTION_3: value = utilitytools.Konstanta.ObjectConstants.RED_VAL_3; break;
+                case utilitytools.Konstanta.ObjectConstants.BLUE_POTION_1: value = utilitytools.Konstanta.ObjectConstants.BLUE_VAL_1; break;
+                case utilitytools.Konstanta.ObjectConstants.BLUE_POTION_2: value = utilitytools.Konstanta.ObjectConstants.BLUE_VAL_2; break;
+                case utilitytools.Konstanta.ObjectConstants.BLUE_POTION_3: value = utilitytools.Konstanta.ObjectConstants.BLUE_VAL_3; break;
+            }
+            
+            if (isRed) {
+                changeHealth(value);
+                System.out.println("Berhasil minum Ramuan Merah! Darah sekarang: " + currentHealth);
+            } else {
+                changeMana(value); 
+                System.out.println("Berhasil minum Ramuan Biru! Mana sekarang: " + currentMana);
+            }
+            
+   
+            updateHealthBar();
+            updateManaBar();
+            
+            // Hapus item dari tas
+            inventory.remove(itemIndex); 
+        } else {
+            System.out.println("Slot ini kosong!");
+        }
+    }
+    public void changeMana(int value) {
+        currentMana += value;
+        if (currentMana < 0) currentMana = 0;
+        else if (currentMana > maxMana) currentMana = maxMana;
+    }
 	
 	private void checkAttack() {
 		if(attackCheck) {
@@ -104,6 +163,23 @@ public class Player extends Entity {
 	    AttackBox.y = hitBox.y + (GameCore.SCALE * 2); 
 	}
 
+	
+	
+	
+	// Variabel Status Mana & Inventory
+    private int maxMana = 100;
+    private int currentMana = 50; 
+    private int manaBarWidth = (int) (150 * GameCore.SCALE);
+    private int manaBarHeight = (int) (9 * GameCore.SCALE);
+    private int manaBarYStart = (int) (25 * GameCore.SCALE); 
+    private int manaWidth = manaBarWidth;
+
+    public ArrayList<Integer> inventory = new ArrayList<>();
+    public final int maxInventorySize = 20;
+    
+    
+    
+	
 //	private void updateAttackBox() {
 //		
 //		if (right) {
@@ -134,11 +210,18 @@ public class Player extends Entity {
 	}
 	
 	private void drawUI(Graphics g) {
-		g.drawImage(statusBarImg, statusBarX, statusBarY, statusBarWidth, statusBarHeight, null);
-		g.setColor(Color.red);
-		g.fillRect(healthBarXStart + statusBarX + GameCore.TILES_SIZE, healthBarYStart + statusBarY
-					, healthWidth - GameCore.TILES_SIZE, healthBarHeight);
-	}
+        g.drawImage(statusBarImg, statusBarX, statusBarY, statusBarWidth, statusBarHeight, null);
+        
+        // Render Health Bar (Merah)
+        g.setColor(Color.red);
+        g.fillRect(healthBarXStart + statusBarX + GameCore.TILES_SIZE, healthBarYStart + statusBarY,
+                    healthWidth - GameCore.TILES_SIZE, healthBarHeight);
+                    
+        // Render Mana Bar (Biru)
+        g.setColor(Color.blue);
+        g.fillRect(healthBarXStart + statusBarX + GameCore.TILES_SIZE, manaBarYStart + statusBarY,
+                    manaWidth - GameCore.TILES_SIZE, manaBarHeight);
+    }
 
 	private void updateAnimationTick() {
 		aniTick++;
@@ -196,14 +279,14 @@ public class Player extends Entity {
 	    if(jump) {
 	        jump();
 	    }
-	    
+
 	    if(!left && !right && !inAir) {
-	        return;	
+	        return;
 	    }
-	    
+
 	    float xSpeed = 0;
 	    if (attacking) {
-	        return; 
+	        return;
 	    }
 
 	    if(left) {
@@ -216,32 +299,49 @@ public class Player extends Entity {
 	        flipX = 0;
 	        flipW = 1;
 	    }
-	    
-	    // 2. [PINDAHKAN KE SINI] Cek lantai dilakukan SAAT player memang sedang bergerak/berpindah
+
+	    // Cek apakah pemain sedang berdiri di atas kotak/barrel
 	    if(!inAir) {
 	        if(!IsEntityOnFloor(hitBox, mapData)) {
-	            inAir = true;
+	            Rectangle2D.Float boxUnderneath = new Rectangle2D.Float(hitBox.x, hitBox.y + 1, hitBox.width, hitBox.height);
+	            if (playStates.getObjectManager().getIntersectingContainer(boxUnderneath) == null) {
+	                inAir = true; // Jatuh jika tidak ada lantai dan tidak ada kotak di bawahnya
+	            }
 	        }
 	    }
-	    
+
 	    if(inAir) {
-	        if(canMoveHere(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height, mapData)){
+	        // Fisika Vertikal (Lompat / Jatuh)
+	        Rectangle2D.Float nextYHitbox = new Rectangle2D.Float(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height);
+	        GameContainer gcY = playStates.getObjectManager().getIntersectingContainer(nextYHitbox);
+
+	        if(canMoveHere(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height, mapData) && gcY == null){
 	            hitBox.y += airSpeed;
 	            airSpeed += gravity;
 	            updateXPos(xSpeed);
 	        } else {
-	            hitBox.y = GetEntityPosUnderRoofOrAboveFloor(hitBox, airSpeed);
-	            if(airSpeed > 0) {
-					resetInAir();
+	            if (gcY != null) {
+	                if (airSpeed > 0) { // Jatuh menimpa kotak
+	                    hitBox.y = gcY.getHitbox().y - hitBox.height - 1f;
+	                    resetInAir();
+	                } else { // Lompat nabrak bawah kotak
+	                    hitBox.y = gcY.getHitbox().y + gcY.getHitbox().height + 1f;
+	                    airSpeed = fallSpeedAfterCollision;
+	                }
 	            } else {
-	                airSpeed = fallSpeedAfterCollision;
+	                hitBox.y = GetEntityPosUnderRoofOrAboveFloor(hitBox, airSpeed);
+	                if(airSpeed > 0) {
+	                    resetInAir();
+	                } else {
+	                    airSpeed = fallSpeedAfterCollision;
+	                }
 	            }
 	            updateXPos(xSpeed);
 	        }
 	    } else {
 	        updateXPos(xSpeed);
 	    }
-	    
+
 	    moving = true;
 	}
 	
@@ -259,11 +359,23 @@ public class Player extends Entity {
 	}
 
 	private void updateXPos(float xSpeed) {
-		if(canMoveHere(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height, mapData)) {
-			hitBox.x += xSpeed;
-		} else {
-			hitBox.x = GetEntityPosNextToWall(hitBox, xSpeed);
-		}
+	    // Fisika Horizontal (Kiri / Kanan)
+	    Rectangle2D.Float nextXHitbox = new Rectangle2D.Float(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height);
+	    GameContainer gcX = playStates.getObjectManager().getIntersectingContainer(nextXHitbox);
+
+	    if(canMoveHere(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height, mapData) && gcX == null) {
+	        hitBox.x += xSpeed;
+	    } else {
+	        if (gcX != null) {
+	            if (xSpeed > 0) { // Berjalan ke kanan nabrak sisi kiri kotak
+	                hitBox.x = gcX.getHitbox().x - hitBox.width - 1f;
+	            } else if (xSpeed < 0) { // Berjalan ke kiri nabrak sisi kanan kotak
+	                hitBox.x = gcX.getHitbox().x + gcX.getHitbox().width + 1f;
+	            }
+	        } else {
+	            hitBox.x = GetEntityPosNextToWall(hitBox, xSpeed);
+	        }
+	    }
 	}
 	
 	public void changeHealth(int value) {

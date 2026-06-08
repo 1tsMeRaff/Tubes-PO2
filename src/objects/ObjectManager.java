@@ -24,7 +24,8 @@ public class ObjectManager {
         for (Potion p : potions) {
             if (p.isActive() && hitbox.intersects(p.getHitbox())) {
                 p.setActive(false);
-                applyEffectToPlayer(p);
+                // Langsung masukkan ke penyimpanan
+                playStates.getPlayer().addItemToInventory(p.getObjType());
             }
         }
     }
@@ -55,18 +56,18 @@ public class ObjectManager {
 
     public void checkObjectHit(Rectangle2D.Float attackbox) {
         for (GameContainer gc : containers) {
-            if (gc.isActive() && gc.getHitbox().intersects(attackbox)) {
+            // Tambahkan !gc.doAnimation agar tidak dipukul berkali-kali
+            if (gc.isActive() && !gc.doAnimation && gc.getHitbox().intersects(attackbox)) {
                 gc.setAnimation(true);
-                
-                // Menentukan potion apa yang keluar saat box/barrel hancur
-                int droppedPotionType = RED_POTION_1;
+
+                int droppedPotionType = RED_POTION_1; // Barrel menjatuhkan ramuan merah
                 if (gc.getObjType() == BOX) {
-                    droppedPotionType = BLUE_POTION_1;
+                    droppedPotionType = BLUE_POTION_1; // Box menjatuhkan ramuan biru
                 }
-                
+
                 potions.add(new Potion(
-                    (int) (gc.getHitbox().x + gc.getHitbox().width / 2), 
-                    (int) (gc.getHitbox().y - gc.getHitbox().height / 2), 
+                    (int) (gc.getHitbox().x + gc.getHitbox().width / 2),
+                    (int) (gc.getHitbox().y - gc.getHitbox().height / 2),
                     droppedPotionType)
                 );
                 return;
@@ -165,12 +166,34 @@ public class ObjectManager {
         for (GameContainer gc : containers) gc.reset();
     }
 
-    // Method uji coba untuk memunculkan item secara manual
     public void addTestObjects() {
-        // Koordinat x dan y disesuaikan agar terlihat di layar
-        potions.add(new Potion(300, 200, 0)); // Memunculkan Potion Merah Tipe 1
-        potions.add(new Potion(350, 200, 3)); // Memunculkan Potion Biru Tipe 1
-        
-        containers.add(new GameContainer(450, 200, 7)); // Memunculkan Box
+        potions.add(new Potion(300, 200, 0));
+        potions.add(new Potion(350, 200, 3));
+
+        containers.add(new GameContainer(450, 200, BOX));
+        containers.add(new GameContainer(600, 200, BARREL)); // BARREL SEKARANG BISA DIHANCURKAN
+    }
+    
+    
+    
+    
+    public BufferedImage getPotionImg(int type) {
+        if (potionImgs != null && type >= 0 && type < potionImgs.length) {
+            return potionImgs[type][0];
+        }
+        return null;
+    }
+    
+ // Method untuk mengecek tabrakan pemain dengan objek yang solid
+    public GameContainer getIntersectingContainer(Rectangle2D.Float nextHitbox) {
+        for (GameContainer gc : containers) {
+            // Objek dianggap solid hanya jika dia masih aktif dan BUKAN sedang hancur
+            if (gc.isActive() && !gc.doAnimation) {
+                if (nextHitbox.intersects(gc.getHitbox())) {
+                    return gc; // Kembalikan data kotak yang ditabrak
+                }
+            }
+        }
+        return null; // Tidak nabrak apa-apa
     }
 }

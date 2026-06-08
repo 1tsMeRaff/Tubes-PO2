@@ -14,8 +14,9 @@ import ui.GameOverOverlay;
 import ui.GameOverUI;
 import ui.LevelCompletedOverlay;
 import ui.PauseOverlay;
+import ui.InventoryOverlay; // <--- INI TAMBAHAN YANG SEBELUMNYA TERLEWAT
 import static utilitytools.Konstanta.Environment.*;
-import utilitytools.LoadSave; // Tambahan Import untuk ObjectManager
+import utilitytools.LoadSave; 
 import world.WorldManager;
 
 public class PlayStates extends States implements StateMethods {
@@ -23,7 +24,7 @@ public class PlayStates extends States implements StateMethods {
     private Player player;
     private WorldManager worldManager;
     private EnemyManager enemyManager; 
-    private ObjectManager objectManager; // Tambahan Variabel ObjectManager dari Rizal
+    private ObjectManager objectManager; 
     private PauseOverlay pauseOverlay;
     private GameOverUI gameOverUI; 
     private LevelCompletedOverlay levelCompletedOverlay;
@@ -32,6 +33,9 @@ public class PlayStates extends States implements StateMethods {
     private boolean paused = false;
     private boolean lvlCompleted = false;
     private boolean gameOver = false; 
+    
+    private InventoryOverlay inventoryOverlay;
+    private boolean inventoryOpen = false;
     
     // Variabel Kamera
     public int xLvlOffset;
@@ -50,7 +54,7 @@ public class PlayStates extends States implements StateMethods {
         
         backgroundImg = LoadSave.GetSpriteAtlas(LoadSave.PLAY_BACKGROUND_IMG);
         clouds_01 = LoadSave.GetSpriteAtlas(LoadSave.CLOUDS_01);
-        clouds_02 = LoadSave.GetSpriteAtlas(LoadSave.CLOUDS_01); // Pastikan ini pakai gambar clouds_02 jika ada
+        clouds_02 = LoadSave.GetSpriteAtlas(LoadSave.CLOUDS_01); 
         clouds_02Pos = new int[8];
         for(int i = 0; i < clouds_02Pos.length; i++) {
             clouds_02Pos[i] = (int)(90 * GameCore.SCALE) + rnd.nextInt((int)(100*GameCore.SCALE));
@@ -61,9 +65,8 @@ public class PlayStates extends States implements StateMethods {
         worldManager = new WorldManager(gc);
         enemyManager = new EnemyManager(this); 
         
-        // Inisialisasi ObjectManager dari Rizal
         objectManager = new ObjectManager(this);
-        objectManager.addTestObjects(); // Memunculkan item sementara untuk tes
+        objectManager.addTestObjects(); 
         
         player = new Player(200, 200, (int) (64 * GameCore.SCALE), (int) (40 * GameCore.SCALE), this);
         player.loadmapData(worldManager.getCurrentMap().getWorldData());
@@ -72,6 +75,7 @@ public class PlayStates extends States implements StateMethods {
         gameOverUI = new GameOverUI(this);
         levelCompletedOverlay = new LevelCompletedOverlay(this);
         gameOverOverlay = new GameOverOverlay(this); 
+        inventoryOverlay = new InventoryOverlay(this);
     }
     
     private void calcLvlOffset() {
@@ -104,30 +108,36 @@ public class PlayStates extends States implements StateMethods {
         } else if (lvlCompleted) {
             levelCompletedOverlay.update();
         } else if (gameOver) {
-            // Saat game over, layar akan freeze
+            // logika game over
+        } else if (inventoryOpen) {
+            // Pause pergerakan dunia saat menu inventory dibuka
         } else {
             worldManager.update();
-            objectManager.update(); // Update animasi item dari Rizal
+            objectManager.update();
             player.update();
-            enemyManager.update(worldManager.getCurrentMap().getWorldData(), player); 
-            checkCloseToBorder();
+            enemyManager.update(worldManager.getCurrentMap().getWorldData(), player);
             
-            // Cek Transisi Level
+            // ---> TAMBAHKAN BARIS INI AGAR BARANG BISA DIAMBIL <---
+            objectManager.checkObjectTouched(player.getHitbox());
+            
+            checkCloseToBorder();
+
             int endOfMapX = (worldManager.getCurrentMap().getWorldData()[0].length * GameCore.TILES_SIZE) - 50;
             if (player.getHitbox().x >= endOfMapX) {
                 setLevelCompleted(true);
             }
         }
     }
-
+    
     @Override
     public void draw(Graphics g) {
         g.drawImage(backgroundImg, 0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
         
-        drawClouds(g);
+        //fitur awan/background
+      //  drawClouds(g);
         
         worldManager.draw(g, xLvlOffset);
-        objectManager.draw(g, xLvlOffset); // Gambar item ke layar (sebelum player)
+        objectManager.draw(g, xLvlOffset); 
         player.render(g, xLvlOffset);
         enemyManager.draw(g, xLvlOffset); 
         
@@ -137,6 +147,8 @@ public class PlayStates extends States implements StateMethods {
             levelCompletedOverlay.draw(g);
         } else if (gameOver) {
             gameOverOverlay.draw(g); 
+        } else if (inventoryOpen) {
+            inventoryOverlay.draw(g); 
         }
     }
 
@@ -164,7 +176,8 @@ public class PlayStates extends States implements StateMethods {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if (paused || lvlCompleted || gameOver) return;
+        //new for  iinventory 
+        if (paused || lvlCompleted || gameOver || inventoryOpen) return;
 
         if(e.getButton() == MouseEvent.BUTTON1) {
             player.setAttack(true);
@@ -174,6 +187,12 @@ public class PlayStates extends States implements StateMethods {
     @Override
     public void mousePressed(MouseEvent e) {
         if (gameOver) return; 
+
+        // Kalau inventory terbuka, klik hanya untuk UI, bukan untuk menyerang
+        if (inventoryOpen) {
+            inventoryOverlay.mousePressed(e);
+            return; 
+        }
 
         if (paused) {
             pauseOverlay.mousePressed(e);
@@ -196,6 +215,12 @@ public class PlayStates extends States implements StateMethods {
     @Override
     public void mouseMoved(MouseEvent e) {
         if (gameOver) return;
+
+        // mouse buat tas
+        if (inventoryOpen) {
+            inventoryOverlay.mouseMoved(e);
+            return;
+        }
 
         if (paused) {
             pauseOverlay.mouseMoved(e);
@@ -225,6 +250,21 @@ public class PlayStates extends States implements StateMethods {
             return;
         }
         
+        if (e.getKeyCode() == KeyEvent.VK_F) {
+            inventoryOpen = !inventoryOpen;
+            
+           
+            if (inventoryOpen) {
+                inventoryOverlay.resetMenu();
+            }
+            return;
+        }
+
+     
+        if (inventoryOpen) {
+            return; 
+        }
+
         if (paused) return;
 
         switch(e.getKeyCode()) {
@@ -236,14 +276,14 @@ public class PlayStates extends States implements StateMethods {
                 break;
             case KeyEvent.VK_SPACE:
                 player.setJump(true);
-                break; 
+                break;
         }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        if (paused || lvlCompleted || gameOver) return;
-        
+        if (paused || lvlCompleted || gameOver || inventoryOpen) return;
+
         switch(e.getKeyCode()) {
             case KeyEvent.VK_A:
                 player.setLeft(false);
@@ -267,6 +307,7 @@ public class PlayStates extends States implements StateMethods {
         paused = false;
         lvlCompleted = false;
         gameOver = false; 
+        inventoryOpen = false;
         xLvlOffset = 0; 
     }
     
@@ -276,6 +317,7 @@ public class PlayStates extends States implements StateMethods {
     
     public void checkHitEnemy(Rectangle2D.Float AttackBox) {
         enemyManager.checkEnemyHit(AttackBox);
+        objectManager.checkObjectHit(AttackBox);
     }
 
     public void setPaused(boolean paused) {
@@ -294,7 +336,6 @@ public class PlayStates extends States implements StateMethods {
         return player;
     }
 
-    // Tambahan Getter untuk ObjectManager dari Rizal
     public ObjectManager getObjectManager() {
         return objectManager;
     }
