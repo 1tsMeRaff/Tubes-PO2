@@ -77,9 +77,9 @@ public class Player extends Entity {
 			return;
 		}
 		
-		updateHealthBar();
-		updateAttackBox();
 		updatePos();
+		updateAttackBox();
+		
 		if(attacking) {
 			checkAttack();
 		}
@@ -96,23 +96,13 @@ public class Player extends Entity {
 	}
 	
 	private void updateAttackBox() {
-	    if (flipW == 1) {
-	        AttackBox.x = hitBox.x + hitBox.width + (int) (GameCore.SCALE * 5);
-	    } else if (flipW == -1) {
-	        AttackBox.x = hitBox.x - AttackBox.width - (int) (GameCore.SCALE * 5);
+	    AttackBox.y = hitBox.y + (GameCore.SCALE * 2);
+	    if (flipW == 1) { // hadap KANAN
+	        AttackBox.x = hitBox.x + hitBox.width;
+	    } else {         // hadap KIRI
+	        AttackBox.x = hitBox.x - AttackBox.width;
 	    }
-	    AttackBox.y = hitBox.y + (GameCore.SCALE * 2); 
 	}
-
-//	private void updateAttackBox() {
-//		
-//		if (right) {
-//			AttackBox.x = hitBox.x + hitBox.width + (int) (GameCore.SCALE * 10);
-//		}else if (left) {
-//			AttackBox.x = hitBox.x - hitBox.width - (int) (GameCore.SCALE * 10);
-//		}
-//		AttackBox.y = hitBox.y + (GameCore.SCALE * 10);
-//	}
 
 	private void updateHealthBar() {
 		healthWidth = (int) ((currentHealth / (float) maxHealth) * healthBarWidth);
@@ -138,6 +128,7 @@ public class Player extends Entity {
 		g.setColor(Color.red);
 		g.fillRect(healthBarXStart + statusBarX + GameCore.TILES_SIZE, healthBarYStart + statusBarY
 					, healthWidth - GameCore.TILES_SIZE, healthBarHeight);
+		this.drawHitbox(g);
 	}
 
 	private void updateAnimationTick() {
@@ -217,7 +208,6 @@ public class Player extends Entity {
 	        flipW = 1;
 	    }
 	    
-	    // 2. [PINDAHKAN KE SINI] Cek lantai dilakukan SAAT player memang sedang bergerak/berpindah
 	    if(!inAir) {
 	        if(!IsEntityOnFloor(hitBox, mapData)) {
 	            inAir = true;
@@ -300,7 +290,6 @@ public class Player extends Entity {
 		left = false; right = false; up = false; down = false;
 	}
 
-	// [PERBAIKAN] Tambahkan parameter koordinat baru untuk target map selanjutnya
 	public void resetAll(float newX, float newY) {
 	    resetDirBooleans();
 	    inAir = false;
@@ -309,13 +298,11 @@ public class Player extends Entity {
 	    playerAction = IDLE_ACTIVE;
 	    currentHealth = maxHealth;
 	    
-	    // Perbarui koordinat dasar Entity dan Hitbox ke posisi map baru
 	    this.x = newX;
 	    this.y = newY;
 	    hitBox.x = newX;
 	    hitBox.y = newY;
 	    
-	    // Pastikan mapData sudah di-load terlebih dahulu sebelum mengecek ini
 	    if (mapData != null && !IsEntityOnFloor(hitBox, mapData)) {
 	        inAir = true;
 	    }
@@ -357,12 +344,10 @@ public class Player extends Entity {
 		this.down = down;
 	}
 
-	// Method ini ada di branch `dev` tapi hilang di branch `dev-Arya`
 	public void setJump(boolean jump) {
 		this.jump = jump;
 	}
 	
-	// [PERBAIKAN] Menggunakan hitBox (huruf B besar) sesuai deklarasi di Entity
 	public java.awt.geom.Rectangle2D.Float getHitbox() {
 		return hitBox;
 	}

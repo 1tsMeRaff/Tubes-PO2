@@ -23,8 +23,8 @@ public class Slime extends Enemy {
 	}
 	
 	private void initAttackBox() {
-		AttackBox = new Rectangle2D.Float(x, y, (int) (60 * GameCore.SCALE), (int) (20 * GameCore.SCALE));
-		attackBoxOffSetX = (int) (GameCore.SCALE * 30);
+		AttackBox = new Rectangle2D.Float(x, y, (int) (30 * GameCore.SCALE), (int) (15 * GameCore.SCALE));
+		attackBoxOffSetX = (int) (GameCore.SCALE * 25);
 	}
 
 	public void update(int[][] tilesData, Player player) {
@@ -34,10 +34,14 @@ public class Slime extends Enemy {
 	}
 	
 	private void updateAttackBox() {
-		AttackBox.x = hitBox.x - attackBoxOffSetX;
-		AttackBox.y = hitBox.y;
+	    AttackBox.y = hitBox.y;
+	    if (walkDir == LEFT) {
+	        AttackBox.x = hitBox.x - AttackBox.width;
+	    } else { // RIGHT
+	        AttackBox.x = hitBox.x + hitBox.width;
+	    }
 	}
-
+	
 	private void updateBehaviour(int[][] tilesData, Player player) {
 		checkOnFloor(tilesData);
 		if(inAir) {

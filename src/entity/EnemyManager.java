@@ -60,8 +60,8 @@ public class EnemyManager {
 	                    (int) (s.getHitBox().y - SLIME_DRAWOFFSET_Y),
 	                    SLIME_WIDTH * s.flipW(), SLIME_HEIGHT, null);
 
-	            // s.drawHitbox(g2); 
-	            // s.drawAttackBox(g2, xLvlOffset);
+	             s.drawHitbox(g2); 
+	             s.drawAttackBox(g2, xLvlOffset);
 	        }
 	    } 
 	    g2.dispose();
