@@ -47,7 +47,6 @@ public class MainMenu extends States implements StateMethods {
         int frameWidth = (int) (menuWidth * frameWidthPercent);
         int frameHeight = (int) (menuHeight * frameHeightPercent);
 
-  
         int btnWidth = (int) (frameWidth * 0.6);
         int btnHeight = (int) (40 * GameCore.SCALE);
 
@@ -69,7 +68,7 @@ public class MainMenu extends States implements StateMethods {
 
     @Override
     public void draw(Graphics g) {
-    	g.drawImage(backgroundimagemenu, 0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null, null);
+        g.drawImage(backgroundimagemenu, 0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null, null);
         // Gambar background
         g.drawImage(backgroundImage, menuX, menuY, menuWidth, menuHeight, null);
 
@@ -79,7 +78,6 @@ public class MainMenu extends States implements StateMethods {
     }
 
     private void drawTransparentButton(Graphics g, Rectangle bounds, String text, boolean isHover, boolean isPressed) {
-
         // Warna teks berdasarkan status
         if (isPressed) {
             g.setColor(new Color(150, 50, 50));  // merah gelap saat ditekan
@@ -116,6 +114,9 @@ public class MainMenu extends States implements StateMethods {
     public void mouseReleased(MouseEvent e) {
         if (playHover && playPressed) {
             GameStates.state = GameStates.PLAYING;
+            // [PEMICU BGM] Ganti lagu ke Level 1 saat Start Game diklik
+            gc.getAudioPlayer().playSong(audio.AudioPlayer.LEVEL_1);
+            
         } else if (optionsHover && optionsPressed) {
             GameStates.state = GameStates.OPTIONS;
         }
@@ -136,6 +137,8 @@ public class MainMenu extends States implements StateMethods {
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
             GameStates.state = GameStates.PLAYING;
+            // [PEMICU BGM] Ganti lagu ke Level 1 saat Start Game (Pakai tombol Enter)
+            gc.getAudioPlayer().playSong(audio.AudioPlayer.LEVEL_1);
         }
     }
 

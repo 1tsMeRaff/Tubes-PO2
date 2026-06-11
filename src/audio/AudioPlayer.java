@@ -30,7 +30,7 @@ public class AudioPlayer {
 
 	private Clip[] songs, effects;
 	private int currentSongId;
-	private float volume = 0.5f; // Volume standar (50%)
+	private float volume = 0.8f; // Volume standar (50%)
 	private boolean songMute, effectMute;
 	private Random rand = new Random();
 
@@ -87,8 +87,10 @@ public class AudioPlayer {
 	}
 
 	public void stopSong() {
-		if (songs[currentSongId].isActive()) {
-			songs[currentSongId].stop();
+		if (songs[currentSongId] != null) {
+			if (songs[currentSongId].isActive()) {
+				songs[currentSongId].stop();
+			}
 		}
 	}
 

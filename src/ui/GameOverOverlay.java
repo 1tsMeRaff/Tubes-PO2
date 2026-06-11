@@ -32,8 +32,12 @@ public class GameOverOverlay {
 		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 			playStates.resetAll(200, 200);
 			GameStates.state = GameStates.MENU;
+			
+			// [PEMICU BGM] Kembali ke lagu Menu
+			playStates.getGameCore().getAudioPlayer().playSong(audio.AudioPlayer.MENU_1);
+			
 		} else if (e.getKeyCode() == KeyEvent.VK_R) {
-			playStates.resetAll(200, 200); // Reset player posisi x=200, y=200
+			playStates.resetAll(200, 200); 
 		}
 	}
 }

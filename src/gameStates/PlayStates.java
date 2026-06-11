@@ -157,6 +157,9 @@ public class PlayStates extends States implements StateMethods {
 		resetAll(newX, newY); 
 		player.loadmapData(newMapData); 
 		calcLvlOffset();
+		
+		// [PEMICU BGM] Ganti lagu ke Level 2 saat map baru dimuat
+		gc.getAudioPlayer().playSong(audio.AudioPlayer.LEVEL_2);
 	}
 
 	@Override
