@@ -47,6 +47,8 @@ public class Player extends Entity {
 	private int maxHealth = 100;
 	private int currentHealth = maxHealth;
 	private int healthWidth = healthBarWidth;
+	private int maxMana = 100;
+	private int currentMana = 50; 
 	
 	// AttackBox
 	private Rectangle2D.Float AttackBox;
@@ -280,6 +282,15 @@ public class Player extends Entity {
 		} else if (currentHealth >= maxHealth) {
 			currentHealth = maxHealth;
 		}	
+	}
+	
+	public void changeMana(int value) {
+	    currentMana += value;
+	    if (currentMana >= maxMana) {
+	        currentMana = maxMana;
+	    } else if (currentMana <= 0) {
+	        currentMana = 0;
+	    }
 	}
 
 	private void loadAnimations() {
