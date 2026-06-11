@@ -92,6 +92,8 @@ public class Player extends Entity {
 		}
 		attackCheck = true;
 		playStates.checkHitEnemy(AttackBox);
+		
+		playStates.getGameCore().getAudioPlayer().playAttackSound();
 	}
 	
 	private void updateAttackBox() {
@@ -240,6 +242,7 @@ public class Player extends Entity {
 		}
 		inAir = true;
 		airSpeed = jumpSpeed;
+		playStates.getGameCore().getAudioPlayer().playEffect(audio.AudioPlayer.JUMP);
 	}
 
 	private void resetInAir() {

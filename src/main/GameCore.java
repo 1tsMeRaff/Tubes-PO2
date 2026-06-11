@@ -16,6 +16,7 @@ public class GameCore implements Runnable {
 	// Perubahan: Menggunakan huruf kecil sesuai konvensi Java CamelCase
 	private PlayStates play;
 	private MainMenu menu;
+	private audio.AudioPlayer audioPlayer;
 	
 	public final static int TILE_DEFAULT_SIZE = 32;
 	public final static float SCALE = 1.0f;
@@ -32,6 +33,7 @@ public class GameCore implements Runnable {
 		gameFrame = new GameFrame(gamePanel);
 		gamePanel.setRequestFocusEnabled(true);
 		gamePanel.requestFocus();
+		audioPlayer = new audio.AudioPlayer();
 		
 		startGameLoop();
 	}
@@ -132,5 +134,9 @@ public class GameCore implements Runnable {
 	
 	public PlayStates getPlay() {
 		return play;
+	}
+	
+	public audio.AudioPlayer getAudioPlayer() {
+	    return audioPlayer;
 	}
 }

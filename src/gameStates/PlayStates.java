@@ -15,7 +15,7 @@ import ui.PauseOverlay;
 import ui.GameOverOverlay; 
 import utilitytools.LoadSave;
 import world.WorldManager;
-import objects.ObjectManager; // Tambahan Import untuk ObjectManager
+import objects.ObjectManager; 
 import static utilitytools.Konstanta.Environment.*;
 
 public class PlayStates extends States implements StateMethods {
@@ -23,7 +23,7 @@ public class PlayStates extends States implements StateMethods {
 	private Player player;
 	private WorldManager worldManager;
 	private EnemyManager enemyManager; 
-	private ObjectManager objectManager; // Tambahan Variabel ObjectManager dari Rizal
+	private ObjectManager objectManager; 
 	private PauseOverlay pauseOverlay; 
 	private LevelCompletedOverlay levelCompletedOverlay;
 	private GameOverOverlay gameOverOverlay; 
@@ -59,9 +59,8 @@ public class PlayStates extends States implements StateMethods {
 		worldManager = new WorldManager(gc);
 		enemyManager = new EnemyManager(this); 
 		
-		// Inisialisasi ObjectManager dari Rizal
 		objectManager = new ObjectManager(this);
-		objectManager.addTestObjects(); // Memunculkan item sementara untuk tes
+		objectManager.addTestObjects(); 
 		
 		player = new Player(200, 200, (int) (64 * GameCore.SCALE), (int) (40 * GameCore.SCALE), this);
 		player.loadmapData(worldManager.getCurrentMap().getWorldData());
@@ -104,15 +103,16 @@ public class PlayStates extends States implements StateMethods {
 			// Saat game over, layar akan freeze
 		} else {
 			worldManager.update();
-			objectManager.update(); // Update animasi item dari Rizal
+			objectManager.update(); 
 			player.update();
 			enemyManager.update(worldManager.getCurrentMap().getWorldData(), player); 
 			checkCloseToBorder();
 			
-			// Cek Transisi Level
+			// Cek Transisi Level & Memicu Suara Menang
 			int endOfMapX = (worldManager.getCurrentMap().getWorldData()[0].length * GameCore.TILES_SIZE) - 50;
 			if (player.getHitbox().x >= endOfMapX) {
 				setLevelCompleted(true);
+				gc.getAudioPlayer().lvlCompleted(); // [AUDIO DITAMBAHKAN DI SINI]
 			}
 		}
 	}
@@ -124,7 +124,7 @@ public class PlayStates extends States implements StateMethods {
 		drawClouds(g);
 		
 		worldManager.draw(g, xLvlOffset);
-		objectManager.draw(g, xLvlOffset); // Gambar item ke layar (sebelum player)
+		objectManager.draw(g, xLvlOffset); 
 		player.render(g, xLvlOffset);
 		enemyManager.draw(g, xLvlOffset); 
 		
@@ -267,8 +267,13 @@ public class PlayStates extends States implements StateMethods {
 		xLvlOffset = 0; 
 	}
 	
+	// [MODIFIKASI] Mematikan lagu dan memainkan efek suara saat mati
 	public void setGameOver(boolean gameOver) {
 		this.gameOver = gameOver;
+		if (gameOver) {
+			gc.getAudioPlayer().stopSong(); 
+			gc.getAudioPlayer().playEffect(audio.AudioPlayer.GAMEOVER); 
+		}
 	}
 	
 	public void checkHitEnemy(Rectangle2D.Float AttackBox) {
@@ -291,8 +296,12 @@ public class PlayStates extends States implements StateMethods {
 		return player;
 	}
 
-	// Tambahan Getter untuk ObjectManager dari Rizal
 	public ObjectManager getObjectManager() {
 		return objectManager;
+	}
+	
+	// [TAMBAHAN] Getter GameCore agar Player.java bisa mengakses AudioPlayer
+	public GameCore getGameCore() {
+		return gc;
 	}
 }
