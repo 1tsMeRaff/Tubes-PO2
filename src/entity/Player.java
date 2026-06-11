@@ -31,7 +31,7 @@ public class Player extends Entity {
 	private float fallSpeedAfterCollision = 0.5f * GameCore.SCALE;
 	private boolean inAir = true;
 	
-	//status
+	// Status
 	private BufferedImage statusBarImg;
 	
 	private int statusBarWidth = (int) (192 * GameCore.SCALE);
@@ -39,10 +39,10 @@ public class Player extends Entity {
 	private int statusBarX = (int) (10 * GameCore.SCALE);
 	private int statusBarY = (int) (10 * GameCore.SCALE);
 
-	private int healthBarWidth = (int) (150 * GameCore.SCALE);
-	private int healthBarHeight = (int) (9 * GameCore.SCALE);
-	private int healthBarXStart = (int) (34 * GameCore.SCALE);
-	private int healthBarYStart = (int) (14 * GameCore.SCALE);
+	private int healthBarWidth = (int) (105 * GameCore.SCALE);
+	private int healthBarHeight = (int) (5 * GameCore.SCALE);
+	private int healthBarXStart = (int) (65 * GameCore.SCALE);
+	private int healthBarYStart = (int) (15 * GameCore.SCALE);
 	
 	private int maxHealth = 100;
 	private int currentHealth = maxHealth;
@@ -72,23 +72,22 @@ public class Player extends Entity {
 	public void update() {
 		updateHealthBar();
 		
-		if(currentHealth <= 0) {
+		if (currentHealth <= 0) {
 			playStates.setGameOver(true);
-			return;
+		} else {
+			updateAttackBox();
+			updatePos();
+			if (attacking) {
+				checkAttack();
+			}
 		}
 		
-		updateHealthBar();
-		updateAttackBox();
-		updatePos();
-		if(attacking) {
-			checkAttack();
-		}
 		setAnimation();
 		updateAnimationTick();
 	}
 	
 	private void checkAttack() {
-		if(attackCheck) {
+		if (attackCheck) {
 			return;
 		}
 		attackCheck = true;
@@ -96,27 +95,16 @@ public class Player extends Entity {
 	}
 	
 	private void updateAttackBox() {
-	    if (flipW == 1) {
-	        AttackBox.x = hitBox.x + hitBox.width + (int) (GameCore.SCALE * 5);
-	    } else if (flipW == -1) {
-	        AttackBox.x = hitBox.x - AttackBox.width - (int) (GameCore.SCALE * 5);
-	    }
-	    AttackBox.y = hitBox.y + (GameCore.SCALE * 2); 
+		if (flipW == 1) {
+			AttackBox.x = hitBox.x + hitBox.width + (int) (GameCore.SCALE * 5);
+		} else if (flipW == -1) {
+			AttackBox.x = hitBox.x - AttackBox.width - (int) (GameCore.SCALE * 5);
+		}
+		AttackBox.y = hitBox.y + (GameCore.SCALE * 2);
 	}
-
-//	private void updateAttackBox() {
-//		
-//		if (right) {
-//			AttackBox.x = hitBox.x + hitBox.width + (int) (GameCore.SCALE * 10);
-//		}else if (left) {
-//			AttackBox.x = hitBox.x - hitBox.width - (int) (GameCore.SCALE * 10);
-//		}
-//		AttackBox.y = hitBox.y + (GameCore.SCALE * 10);
-//	}
 
 	private void updateHealthBar() {
 		healthWidth = (int) ((currentHealth / (float) maxHealth) * healthBarWidth);
-		
 	}
 
 	public void render(Graphics g, int xLvlOffset) {
@@ -134,20 +122,22 @@ public class Player extends Entity {
 	}
 	
 	private void drawUI(Graphics g) {
+		// Gambar bingkai UI-nya
 		g.drawImage(statusBarImg, statusBarX, statusBarY, statusBarWidth, statusBarHeight, null);
+		
+		// Gambar darah merahnya (tanpa rumus yang aneh-aneh)
 		g.setColor(Color.red);
-		g.fillRect(healthBarXStart + statusBarX + GameCore.TILES_SIZE, healthBarYStart + statusBarY
-					, healthWidth - GameCore.TILES_SIZE, healthBarHeight);
+		g.fillRect(statusBarX + healthBarXStart, statusBarY + healthBarYStart, healthWidth, healthBarHeight);
 	}
 
 	private void updateAnimationTick() {
 		aniTick++;
-		if(aniTick >= aniSpeed) {
+		if (aniTick >= aniSpeed) {
 			aniTick = 0;
 			aniIndex++;
-			if(aniIndex >= GetSpriteAmount(playerAction)) {
+			if (aniIndex >= GetSpriteAmount(playerAction)) {
 				aniIndex = 0;
-				if(playerAction == ATTACK_1) {
+				if (playerAction == ATTACK_1) {
 					attacking = false;
 					attackCheck = false;
 				}
@@ -158,30 +148,30 @@ public class Player extends Entity {
 	private void setAnimation() {
 		int startAni = playerAction;
 		
-		if(moving) {
+		if (moving) {
 			playerAction = LARI;
 		} else {
 			playerAction = IDLE_ACTIVE;
 		}
 		
-		if(inAir) {
-			if(airSpeed < 0) {
+		if (inAir) {
+			if (airSpeed < 0) {
 				playerAction = LOMPAT;
 			} else {
 				playerAction = JATUH;
 			}
 		}
 		
-		if(attacking) {
+		if (attacking) {
 			playerAction = ATTACK_1;
-			if(startAni != ATTACK_1) {
-				aniIndex= 1;
+			if (startAni != ATTACK_1) {
+				aniIndex = 1;
 				aniTick = 0;
 				return;
 			}
 		}
 		
-		if(startAni != playerAction) {
+		if (startAni != playerAction) {
 			resetAniTick();
 		}
 	}
@@ -192,61 +182,60 @@ public class Player extends Entity {
 	}
 
 	private void updatePos() {
-	    moving = false;
-	    if(jump) {
-	        jump();
-	    }
-	    
-	    if(!left && !right && !inAir) {
-	        return;	
-	    }
-	    
-	    float xSpeed = 0;
-	    if (attacking) {
-	        return; 
-	    }
+		moving = false;
+		if (jump) {
+			jump();
+		}
+		
+		if (!left && !right && !inAir) {
+			return;	
+		}
+		
+		float xSpeed = 0;
+		if (attacking) {
+			return; 
+		}
 
-	    if(left) {
-	        xSpeed -= playerSpeed;
-	        flipX = width;
-	        flipW = -1;
-	    }
-	    if(right) {
-	        xSpeed += playerSpeed;
-	        flipX = 0;
-	        flipW = 1;
-	    }
-	    
-	    // 2. [PINDAHKAN KE SINI] Cek lantai dilakukan SAAT player memang sedang bergerak/berpindah
-	    if(!inAir) {
-	        if(!IsEntityOnFloor(hitBox, mapData)) {
-	            inAir = true;
-	        }
-	    }
-	    
-	    if(inAir) {
-	        if(canMoveHere(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height, mapData)){
-	            hitBox.y += airSpeed;
-	            airSpeed += gravity;
-	            updateXPos(xSpeed);
-	        } else {
-	            hitBox.y = GetEntityPosUnderRoofOrAboveFloor(hitBox, airSpeed);
-	            if(airSpeed > 0) {
+		if (left) {
+			xSpeed -= playerSpeed;
+			flipX = width;
+			flipW = -1;
+		}
+		if (right) {
+			xSpeed += playerSpeed;
+			flipX = 0;
+			flipW = 1;
+		}
+		
+		if (!inAir) {
+			if (!IsEntityOnFloor(hitBox, mapData)) {
+				inAir = true;
+			}
+		}
+		
+		if (inAir) {
+			if (canMoveHere(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height, mapData)){
+				hitBox.y += airSpeed;
+				airSpeed += gravity;
+				updateXPos(xSpeed);
+			} else {
+				hitBox.y = GetEntityPosUnderRoofOrAboveFloor(hitBox, airSpeed);
+				if (airSpeed > 0) {
 					resetInAir();
-	            } else {
-	                airSpeed = fallSpeedAfterCollision;
-	            }
-	            updateXPos(xSpeed);
-	        }
-	    } else {
-	        updateXPos(xSpeed);
-	    }
-	    
-	    moving = true;
+				} else {
+					airSpeed = fallSpeedAfterCollision;
+				}
+				updateXPos(xSpeed);
+			}
+		} else {
+			updateXPos(xSpeed);
+		}
+		
+		moving = true;
 	}
 	
 	private void jump() {
-		if(inAir) {
+		if (inAir) {
 			return;
 		}
 		inAir = true;
@@ -259,7 +248,7 @@ public class Player extends Entity {
 	}
 
 	private void updateXPos(float xSpeed) {
-		if(canMoveHere(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height, mapData)) {
+		if (canMoveHere(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height, mapData)) {
 			hitBox.x += xSpeed;
 		} else {
 			hitBox.x = GetEntityPosNextToWall(hitBox, xSpeed);
@@ -271,8 +260,7 @@ public class Player extends Entity {
 
 		if (currentHealth <= 0) {
 			currentHealth = 0;
-			// gameOver();
-		}else if (currentHealth >= maxHealth) {
+		} else if (currentHealth >= maxHealth) {
 			currentHealth = maxHealth;
 		}	
 	}
@@ -281,8 +269,8 @@ public class Player extends Entity {
 		BufferedImage image = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_SPRITE);
 		animasi = new BufferedImage[22][16];
 
-		for(int j = 0; j < animasi.length; j++) {
-			for(int i = 0; i < animasi[j].length; i ++) {
+		for (int j = 0; j < animasi.length; j++) {
+			for (int i = 0; i < animasi[j].length; i ++) {
 				animasi[j][i] = image.getSubimage(i * 80, j * 64, 80, 64); 
 			}
 		}
@@ -291,7 +279,7 @@ public class Player extends Entity {
 	
 	public void loadmapData(int[][] mapData) {
 		this.mapData = mapData;
-		if(!IsEntityOnFloor(hitBox, mapData)) {
+		if (!IsEntityOnFloor(hitBox, mapData)) {
 			inAir = true;
 		}
 	}
@@ -300,25 +288,22 @@ public class Player extends Entity {
 		left = false; right = false; up = false; down = false;
 	}
 
-	// [PERBAIKAN] Tambahkan parameter koordinat baru untuk target map selanjutnya
 	public void resetAll(float newX, float newY) {
-	    resetDirBooleans();
-	    inAir = false;
-	    moving = false;
-	    attacking = false;
-	    playerAction = IDLE_ACTIVE;
-	    currentHealth = maxHealth;
-	    
-	    // Perbarui koordinat dasar Entity dan Hitbox ke posisi map baru
-	    this.x = newX;
-	    this.y = newY;
-	    hitBox.x = newX;
-	    hitBox.y = newY;
-	    
-	    // Pastikan mapData sudah di-load terlebih dahulu sebelum mengecek ini
-	    if (mapData != null && !IsEntityOnFloor(hitBox, mapData)) {
-	        inAir = true;
-	    }
+		resetDirBooleans();
+		inAir = false;
+		moving = false;
+		attacking = false;
+		playerAction = IDLE_ACTIVE;
+		currentHealth = maxHealth;
+		
+		this.x = newX;
+		this.y = newY;
+		hitBox.x = newX;
+		hitBox.y = newY;
+		
+		if (mapData != null && !IsEntityOnFloor(hitBox, mapData)) {
+			inAir = true;
+		}
 	}
 	
 	public void setAttack(boolean attacking) {
@@ -357,12 +342,10 @@ public class Player extends Entity {
 		this.down = down;
 	}
 
-	// Method ini ada di branch `dev` tapi hilang di branch `dev-Arya`
 	public void setJump(boolean jump) {
 		this.jump = jump;
 	}
 	
-	// [PERBAIKAN] Menggunakan hitBox (huruf B besar) sesuai deklarasi di Entity
 	public java.awt.geom.Rectangle2D.Float getHitbox() {
 		return hitBox;
 	}

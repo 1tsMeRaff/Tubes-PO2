@@ -10,7 +10,6 @@ import java.awt.geom.Rectangle2D;
 import java.util.Random;
 
 import main.GameCore;
-import ui.GameOverUI;
 import ui.LevelCompletedOverlay;
 import ui.PauseOverlay;
 import ui.GameOverOverlay; 
@@ -25,8 +24,7 @@ public class PlayStates extends States implements StateMethods {
 	private WorldManager worldManager;
 	private EnemyManager enemyManager; 
 	private ObjectManager objectManager; // Tambahan Variabel ObjectManager dari Rizal
-	private PauseOverlay pauseOverlay;
-	private GameOverUI gameOverUI; 
+	private PauseOverlay pauseOverlay; 
 	private LevelCompletedOverlay levelCompletedOverlay;
 	private GameOverOverlay gameOverOverlay; 
 
@@ -69,7 +67,6 @@ public class PlayStates extends States implements StateMethods {
 		player.loadmapData(worldManager.getCurrentMap().getWorldData());
 		
 		pauseOverlay = new PauseOverlay(this); 
-		gameOverUI = new GameOverUI(this);
 		levelCompletedOverlay = new LevelCompletedOverlay(this);
 		gameOverOverlay = new GameOverOverlay(this); 
 	}
