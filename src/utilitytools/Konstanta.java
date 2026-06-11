@@ -164,6 +164,7 @@ public class Konstanta {
 		public static final int IDLE_CHILL = 1;
 		public static final int LARI = 3;
 		public static final int LOMPAT = 4;
+		public static final int DASH = 16;
 		public static final int JATUH = 19;
 		public static final int ATTACK_1 = 11;
 		public static final int CHARGE_ATTACK = 12;
@@ -188,9 +189,11 @@ public class Konstanta {
 			case ATTACK_1:
 				return 8;
 			case CHARGE_ATTACK:
-				return 10;
+				return 15;
 			case GUARD:
 				return 6;
+			case DASH:
+				return 10;
 			default:
 				return 1;
 			}

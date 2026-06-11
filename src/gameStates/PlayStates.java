@@ -24,7 +24,7 @@ public class PlayStates extends States implements StateMethods {
 	private Player player;
 	private WorldManager worldManager;
 	private EnemyManager enemyManager; 
-	private ObjectManager objectManager; // Tambahan Variabel ObjectManager dari Rizal
+	private ObjectManager objectManager;
 	private PauseOverlay pauseOverlay;
 	private GameOverUI gameOverUI; 
 	private LevelCompletedOverlay levelCompletedOverlay;
@@ -61,7 +61,6 @@ public class PlayStates extends States implements StateMethods {
 		worldManager = new WorldManager(gc);
 		enemyManager = new EnemyManager(this); 
 		
-		// Inisialisasi ObjectManager dari Rizal
 		objectManager = new ObjectManager(this);
 		objectManager.addTestObjects(); // Memunculkan item sementara untuk tes
 		
@@ -107,7 +106,7 @@ public class PlayStates extends States implements StateMethods {
 			// Saat game over, layar akan freeze
 		} else {
 			worldManager.update();
-			objectManager.update(); // Update animasi item dari Rizal
+			objectManager.update();
 			player.update();
 			enemyManager.update(worldManager.getCurrentMap().getWorldData(), player); 
 			checkCloseToBorder();
@@ -164,11 +163,7 @@ public class PlayStates extends States implements StateMethods {
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		if (paused || lvlCompleted || gameOver) return;
-
-		if(e.getButton() == MouseEvent.BUTTON1) {
-			player.setAttack(true);
-		}
+		
 	}
 
 	@Override
@@ -179,6 +174,8 @@ public class PlayStates extends States implements StateMethods {
 			pauseOverlay.mousePressed(e);
 		} else if (lvlCompleted) {
 			levelCompletedOverlay.mousePressed(e);
+		} else if(e.getButton() == MouseEvent.BUTTON1) {
+			player.setCharging(true);
 		}
 	}
 
@@ -190,6 +187,8 @@ public class PlayStates extends States implements StateMethods {
 			pauseOverlay.mouseReleased(e);
 		} else if (lvlCompleted) {
 			levelCompletedOverlay.mouseReleased(e);
+		} else if (e.getButton() == MouseEvent.BUTTON1) {
+			player.releaseAttack();
 		}
 	}
 
@@ -236,7 +235,10 @@ public class PlayStates extends States implements StateMethods {
 				break;
 			case KeyEvent.VK_SPACE:
 				player.setJump(true);
-				break; 
+				break;
+			case KeyEvent.VK_Q:
+				player.setDash(true);
+				break;
 		}
 	}
 
@@ -274,8 +276,8 @@ public class PlayStates extends States implements StateMethods {
 		this.gameOver = gameOver;
 	}
 	
-	public void checkHitEnemy(Rectangle2D.Float AttackBox) {
-		enemyManager.checkEnemyHit(AttackBox);
+	public void checkHitEnemy(Rectangle2D.Float AttackBox, int damage) {
+		enemyManager.checkEnemyHit(AttackBox, damage);
 	}
 
 	public void setPaused(boolean paused) {
@@ -294,7 +296,6 @@ public class PlayStates extends States implements StateMethods {
 		return player;
 	}
 
-	// Tambahan Getter untuk ObjectManager dari Rizal
 	public ObjectManager getObjectManager() {
 		return objectManager;
 	}

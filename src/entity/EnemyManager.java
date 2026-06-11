@@ -66,31 +66,12 @@ public class EnemyManager {
 	    } 
 	    g2.dispose();
 	}
-
-//	private void drawSlimes(Graphics g, int xLvlOffset) {
-//		Graphics g2 = g.create();
-//		g2.translate(-xLvlOffset, 0);
-//		for (Slime s : Slimes) {
-//			if(s.isActive()) {
-//			g2.drawImage(slimeImg[s.getEnemyState()][s.getAniIndex()],
-//					(int) (s.getHitBox().x - SLIME_DRAWOFFSET_X + s.flipX()),
-//					(int) (s.getHitBox().y - SLIME_DRAWOFFSET_Y),
-//					SLIME_WIDTH * s.flipW(), SLIME_HEIGHT, null);
-//
-//			// (OPSIONAL) Untuk debugging melihat kotak hitbox merah:
-//			s.drawHitbox(g2);
-//			s.drawAttackBox(g2, xLvlOffset);
-//			}
-//		}
-//		g2.dispose();
-//	}
 	
-	
-	public void checkEnemyHit(Rectangle2D.Float attackBox) {
+	public void checkEnemyHit(Rectangle2D.Float attackBox, int damage) {
 		for (Slime s : Slimes) {
 			if(s.isActive()) {
 				if (attackBox.intersects(s.getHitBox())) {
-					s.hurt(10);
+					s.hurt(damage); 
 					return;
 				}
 			}
