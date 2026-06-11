@@ -77,6 +77,10 @@ public class Player extends Entity {
 		} else {
 			updateAttackBox();
 			updatePos();
+			
+			// [SENSOR POTION DITAMBAHKAN DI SINI]
+			checkPotionTouched();
+			
 			if (attacking) {
 				checkAttack();
 			}
@@ -86,12 +90,22 @@ public class Player extends Entity {
 		updateAnimationTick();
 	}
 	
+	// [METHOD SENSOR POTION]
+	private void checkPotionTouched() {
+		playStates.checkPotionTouched(hitBox);
+	}
+	
 	private void checkAttack() {
 		if (attackCheck) {
 			return;
 		}
 		attackCheck = true;
+		
+		// [SENSOR PEDANG KE MUSUH]
 		playStates.checkHitEnemy(AttackBox);
+		
+		// [SENSOR PEDANG KE BARREL DITAMBAHKAN DI SINI]
+		playStates.checkObjectHit(AttackBox);
 		
 		playStates.getGameCore().getAudioPlayer().playAttackSound();
 	}

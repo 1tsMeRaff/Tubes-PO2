@@ -281,7 +281,19 @@ public class PlayStates extends States implements StateMethods {
 	
 	public void checkHitEnemy(Rectangle2D.Float AttackBox) {
 		enemyManager.checkEnemyHit(AttackBox);
+		
 	}
+	
+	// Untuk mendeteksi tebasan pedang ke barel/kotak
+		public void checkObjectHit(Rectangle2D.Float attackBox) {
+			objectManager.checkObjectHit(attackBox);
+		}
+
+		// Untuk mendeteksi sentuhan badan ke potion
+		public void checkPotionTouched(Rectangle2D.Float hitbox) {
+			objectManager.checkObjectTouched(hitbox);
+		}
+	
 
 	public void setPaused(boolean paused) {
 		this.paused = paused;

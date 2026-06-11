@@ -168,8 +168,8 @@ public class ObjectManager {
     // Method uji coba untuk memunculkan item secara manual
     public void addTestObjects() {
         // Koordinat x dan y disesuaikan agar terlihat di layar
-        potions.add(new Potion(300, 200, 0)); // Memunculkan Potion Merah Tipe 1
-        potions.add(new Potion(350, 200, 3)); // Memunculkan Potion Biru Tipe 1
+        potions.add(new Potion(300, 550, 0)); // Memunculkan Potion Merah Tipe 1
+        potions.add(new Potion(350, 550, 3)); // Memunculkan Potion Biru Tipe 1
         
         containers.add(new GameContainer(450, 200, 7)); // Memunculkan Box
     }

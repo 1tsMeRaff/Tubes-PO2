@@ -19,7 +19,7 @@ public class GameCore implements Runnable {
 	private audio.AudioPlayer audioPlayer;
 	
 	public final static int TILE_DEFAULT_SIZE = 32;
-	public final static float SCALE = 1.0f;
+	public final static float SCALE = 2.5f;
 	public final static int TILES_IN_WIDTH = 26;
 	public final static int TILES_IN_HEIGHT = 14;
 	public final static int TILES_SIZE = (int) (TILE_DEFAULT_SIZE * SCALE);
