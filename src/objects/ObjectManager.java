@@ -24,7 +24,8 @@ public class ObjectManager {
         for (Potion p : potions) {
             if (p.isActive() && hitbox.intersects(p.getHitbox())) {
                 p.setActive(false);
-                applyEffectToPlayer(p);
+                // Langsung masukkan ke penyimpanan
+                playStates.getPlayer().addItemToInventory(p.getObjType());
             }
         }
     }
@@ -47,17 +48,18 @@ public class ObjectManager {
 
     public void checkObjectHit(Rectangle2D.Float attackbox) {
         for (GameContainer gc : containers) {
-            if (gc.isActive() && gc.getHitbox().intersects(attackbox)) {
+            // Tambahkan !gc.doAnimation agar tidak dipukul berkali-kali
+            if (gc.isActive() && !gc.doAnimation && gc.getHitbox().intersects(attackbox)) {
                 gc.setAnimation(true);
-                
-                int droppedPotionType = RED_POTION_1;
+
+                int droppedPotionType = RED_POTION_1; // Barrel menjatuhkan ramuan merah
                 if (gc.getObjType() == BOX) {
-                    droppedPotionType = BLUE_POTION_1;
+                    droppedPotionType = BLUE_POTION_1; // Box menjatuhkan ramuan biru
                 }
-                
+
                 potions.add(new Potion(
-                    (int) (gc.getHitbox().x + gc.getHitbox().width / 2), 
-                    (int) (gc.getHitbox().y - gc.getHitbox().height / 2), 
+                    (int) (gc.getHitbox().x + gc.getHitbox().width / 2),
+                    (int) (gc.getHitbox().y - gc.getHitbox().height / 2),
                     droppedPotionType)
                 );
                 return;
@@ -137,9 +139,34 @@ public class ObjectManager {
     }
 
     public void addTestObjects() {
-        // Angka 580 adalah posisi Y agar mereka mendarat di lantai
+        // Objek dari cabang dev-Rizal
+        potions.add(new Potion(300, 200, 0));
+        potions.add(new Potion(350, 200, 3));
+        // Objek tambahan dari cabang dev
         potions.add(new Potion(650, 800, 0)); 
         potions.add(new Potion(700, 800, 3)); 
-        containers.add(new GameContainer(580, 800, 7)); 
+        // Container uji (BOX & BARREL) dari dev-Rizal
+        containers.add(new GameContainer(450, 200, BOX));
+        containers.add(new GameContainer(600, 200, BARREL));
+    }
+    
+    public BufferedImage getPotionImg(int type) {
+        if (potionImgs != null && type >= 0 && type < potionImgs.length) {
+            return potionImgs[type][0];
+        }
+        return null;
+    }
+    
+    // Method untuk mengecek tabrakan pemain dengan objek yang solid
+    public GameContainer getIntersectingContainer(Rectangle2D.Float nextHitbox) {
+        for (GameContainer gc : containers) {
+            // Objek dianggap solid hanya jika dia masih aktif dan BUKAN sedang hancur
+            if (gc.isActive() && !gc.doAnimation) {
+                if (nextHitbox.intersects(gc.getHitbox())) {
+                    return gc; // Kembalikan data kotak yang ditabrak
+                }
+            }
+        }
+        return null; // Tidak nabrak apa-apa
     }
 }

@@ -4,10 +4,12 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 import gameStates.PlayStates;
 import main.GameCore;
 import utilitytools.LoadSave;
+import objects.GameContainer;
 
 import static utilitytools.Konstanta.KonstantaPlayerRight.*;
 import static utilitytools.HelpMethods.*;
@@ -63,8 +65,17 @@ public class Player extends Entity {
     private int maxHealth = 100;
     private int currentHealth = maxHealth;
     private int healthWidth = healthBarWidth;
+
     private int maxMana = 100;
     private int currentMana = 50;
+    private int manaBarWidth = (int) (150 * GameCore.SCALE);
+    private int manaBarHeight = (int) (9 * GameCore.SCALE);
+    private int manaBarYStart = (int) (25 * GameCore.SCALE);
+    private int manaWidth = manaBarWidth;
+
+    // Inventory (dari dev-Rizal)
+    public ArrayList<Integer> inventory = new ArrayList<>();
+    public final int maxInventorySize = 20;
 
     // AttackBox
     private Rectangle2D.Float AttackBox;
@@ -90,30 +101,31 @@ public class Player extends Entity {
 
     public void update() {
         updateHealthBar();
+        updateManaBar(); // dari dev-Rizal
 
         if (currentHealth <= 0) {
             playStates.setGameOver(true);
-        } else {
-            updateAttackBox();
-            updatePos();
+            return;
+        }
 
-            checkPotionTouched();
+        // Logika dari dev (dash/charge) + potion
+        updateAttackBox();
+        updatePos();
+        checkPotionTouched();
 
-            if (attacking) {
-                checkAttack();
-            }
+        if (attacking) {
+            checkAttack();
+        }
 
-            // logika charging & dash cooldown
-            if (charging) {
-                chargeTick++;
-            }
+        if (charging) {
+            chargeTick++;
+        }
 
-            if (!canDash && !dashing) {
-                dashCooldownTick++;
-                if (dashCooldownTick >= dashCooldown) {
-                    canDash = true;
-                    dashCooldownTick = 0;
-                }
+        if (!canDash && !dashing) {
+            dashCooldownTick++;
+            if (dashCooldownTick >= dashCooldown) {
+                canDash = true;
+                dashCooldownTick = 0;
             }
         }
 
@@ -121,6 +133,60 @@ public class Player extends Entity {
         updateAnimationTick();
     }
 
+    private void updateManaBar() {
+        manaWidth = (int) ((currentMana / (float) maxMana) * manaBarWidth);
+    }
+
+    // Inventory methods (dari dev-Rizal)
+    public void addItemToInventory(int objType) {
+        if (inventory.size() < maxInventorySize) {
+            inventory.add(objType);
+            System.out.println("Item masuk tas. Tipe ID: " + objType);
+        } else {
+            System.out.println("Penyimpanan Penuh!");
+        }
+    }
+
+    public void useItem(int itemIndex) {
+        if (itemIndex < inventory.size()) {
+            int potionType = inventory.get(itemIndex);
+            int value = 0;
+            boolean isRed = potionType <= 2;
+            
+            switch (potionType) {
+                case utilitytools.Konstanta.ObjectConstants.RED_POTION_1: value = utilitytools.Konstanta.ObjectConstants.RED_VAL_1; break;
+                case utilitytools.Konstanta.ObjectConstants.RED_POTION_2: value = utilitytools.Konstanta.ObjectConstants.RED_VAL_2; break;
+                case utilitytools.Konstanta.ObjectConstants.RED_POTION_3: value = utilitytools.Konstanta.ObjectConstants.RED_VAL_3; break;
+                case utilitytools.Konstanta.ObjectConstants.BLUE_POTION_1: value = utilitytools.Konstanta.ObjectConstants.BLUE_VAL_1; break;
+                case utilitytools.Konstanta.ObjectConstants.BLUE_POTION_2: value = utilitytools.Konstanta.ObjectConstants.BLUE_VAL_2; break;
+                case utilitytools.Konstanta.ObjectConstants.BLUE_POTION_3: value = utilitytools.Konstanta.ObjectConstants.BLUE_VAL_3; break;
+            }
+            
+            if (isRed) {
+                changeHealth(value);
+                System.out.println("Berhasil minum Ramuan Merah! Darah sekarang: " + currentHealth);
+            } else {
+                changeMana(value);
+                System.out.println("Berhasil minum Ramuan Biru! Mana sekarang: " + currentMana);
+            }
+            
+            updateHealthBar();
+            updateManaBar();
+            
+            // Hapus item dari tas
+            inventory.remove(itemIndex);
+        } else {
+            System.out.println("Slot ini kosong!");
+        }
+    }
+
+    public void changeMana(int value) {
+        currentMana += value;
+        if (currentMana < 0) currentMana = 0;
+        else if (currentMana > maxMana) currentMana = maxMana;
+    }
+
+    // Sensor potion (dari dev)
     private void checkPotionTouched() {
         playStates.checkPotionTouched(hitBox);
     }
@@ -147,7 +213,6 @@ public class Player extends Entity {
             }
             playStates.checkHitEnemy(AttackBox, damageToDeal);
             playStates.checkObjectHit(AttackBox);
-            // suara serangan
             playStates.getGameCore().getAudioPlayer().playAttackSound();
         }
     }
@@ -192,11 +257,15 @@ public class Player extends Entity {
     private void drawUI(Graphics g) {
         g.drawImage(statusBarImg, statusBarX, statusBarY, statusBarWidth, statusBarHeight, null);
 
-        // Gambar darah
+        // Health bar (merah)
         g.setColor(Color.red);
         g.fillRect(healthBarXStart + statusBarX + GameCore.TILES_SIZE, healthBarYStart + statusBarY,
                 healthWidth - GameCore.TILES_SIZE, healthBarHeight);
-        this.drawHitbox(g);
+
+        // Mana bar (biru) dari dev-Rizal
+        g.setColor(Color.blue);
+        g.fillRect(healthBarXStart + statusBarX + GameCore.TILES_SIZE, manaBarYStart + statusBarY,
+                manaWidth - GameCore.TILES_SIZE, manaBarHeight);
     }
 
     private void updateAnimationTick() {
@@ -307,7 +376,7 @@ public class Player extends Entity {
             jump();
         }
 
-        // Logika Dash
+        // Dash logic (dari dev)
         if (dashing) {
             dashTick++;
             if (dashTick >= dashDuration) {
@@ -326,6 +395,7 @@ public class Player extends Entity {
 
         float xSpeed = 0;
 
+        // Gerakan horizontal (bisa di udara walaupun attacking, tapi tidak saat charging di tanah)
         if (!attacking || inAir) {
             if (left) {
                 xSpeed -= playerSpeed;
@@ -339,27 +409,47 @@ public class Player extends Entity {
             }
         }
 
+        // Cek di tanah atau tidak (dengan map)
         if (!inAir) {
             if (!IsEntityOnFloor(hitBox, mapData)) {
-                inAir = true;
+                // Cek tambahan: mungkin berdiri di atas kontainer
+                Rectangle2D.Float boxUnderneath = new Rectangle2D.Float(hitBox.x, hitBox.y + 1, hitBox.width, hitBox.height);
+                if (playStates.getObjectManager().getIntersectingContainer(boxUnderneath) == null) {
+                    inAir = true;
+                }
             }
         }
 
         if (inAir) {
-            if (canMoveHere(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height, mapData)) {
+            // Fisika vertikal dengan kontainer (dari dev-Rizal)
+            Rectangle2D.Float nextYHitbox = new Rectangle2D.Float(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height);
+            GameContainer gcY = playStates.getObjectManager().getIntersectingContainer(nextYHitbox);
+
+            if (canMoveHere(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height, mapData) && gcY == null) {
                 hitBox.y += airSpeed;
                 airSpeed += gravity;
                 updateXPos(xSpeed);
             } else {
-                hitBox.y = GetEntityPosUnderRoofOrAboveFloor(hitBox, airSpeed);
-                if (airSpeed > 0) {
-                    resetInAir();
+                if (gcY != null) {
+                    if (airSpeed > 0) { // Jatuh menimpa kotak
+                        hitBox.y = gcY.getHitbox().y - hitBox.height - 1f;
+                        resetInAir();
+                    } else { // Lompat nabrak bawah kotak
+                        hitBox.y = gcY.getHitbox().y + gcY.getHitbox().height + 1f;
+                        airSpeed = fallSpeedAfterCollision;
+                    }
                 } else {
-                    airSpeed = fallSpeedAfterCollision;
+                    hitBox.y = GetEntityPosUnderRoofOrAboveFloor(hitBox, airSpeed);
+                    if (airSpeed > 0) {
+                        resetInAir();
+                    } else {
+                        airSpeed = fallSpeedAfterCollision;
+                    }
                 }
                 updateXPos(xSpeed);
             }
         } else {
+            // Di tanah, hanya bisa bergerak jika tidak attacking dan tidak charging
             if (!attacking && !charging) {
                 updateXPos(xSpeed);
             }
@@ -393,10 +483,22 @@ public class Player extends Entity {
     }
 
     private void updateXPos(float xSpeed) {
-        if (canMoveHere(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height, mapData)) {
+        // Fisika horizontal dengan kontainer (dari dev-Rizal)
+        Rectangle2D.Float nextXHitbox = new Rectangle2D.Float(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height);
+        GameContainer gcX = playStates.getObjectManager().getIntersectingContainer(nextXHitbox);
+
+        if (canMoveHere(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height, mapData) && gcX == null) {
             hitBox.x += xSpeed;
         } else {
-            hitBox.x = GetEntityPosNextToWall(hitBox, xSpeed);
+            if (gcX != null) {
+                if (xSpeed > 0) { // Kanan, nabrak sisi kiri kontainer
+                    hitBox.x = gcX.getHitbox().x - hitBox.width - 1f;
+                } else if (xSpeed < 0) { // Kiri, nabrak sisi kanan kontainer
+                    hitBox.x = gcX.getHitbox().x + gcX.getHitbox().width + 1f;
+                }
+            } else {
+                hitBox.x = GetEntityPosNextToWall(hitBox, xSpeed);
+            }
         }
     }
 
@@ -407,15 +509,6 @@ public class Player extends Entity {
             currentHealth = 0;
         } else if (currentHealth >= maxHealth) {
             currentHealth = maxHealth;
-        }
-    }
-
-    public void changeMana(int value) {
-        currentMana += value;
-        if (currentMana >= maxMana) {
-            currentMana = maxMana;
-        } else if (currentMana <= 0) {
-            currentMana = 0;
         }
     }
 
