@@ -14,10 +14,10 @@ import ui.GameOverOverlay;
 import ui.GameOverUI;
 import ui.LevelCompletedOverlay;
 import ui.PauseOverlay;
-import ui.InventoryOverlay; // <--- INI TAMBAHAN YANG SEBELUMNYA TERLEWAT
-import static utilitytools.Konstanta.Environment.*;
-import utilitytools.LoadSave; 
+import ui.InventoryOverlay;
+import utilitytools.LoadSave;
 import world.WorldManager;
+import static utilitytools.Konstanta.Environment.*;
 
 public class PlayStates extends States implements StateMethods {
 
@@ -26,7 +26,7 @@ public class PlayStates extends States implements StateMethods {
     private EnemyManager enemyManager; 
     private ObjectManager objectManager; 
     private PauseOverlay pauseOverlay;
-    private GameOverUI gameOverUI; 
+    private GameOverUI gameOverUI;               // dari dev-Rizal (tambahan UI)
     private LevelCompletedOverlay levelCompletedOverlay;
     private GameOverOverlay gameOverOverlay; 
 
@@ -34,8 +34,8 @@ public class PlayStates extends States implements StateMethods {
     private boolean lvlCompleted = false;
     private boolean gameOver = false; 
     
-    private InventoryOverlay inventoryOverlay;
-    private boolean inventoryOpen = false;
+    private InventoryOverlay inventoryOverlay;   // dari dev-Rizal
+    private boolean inventoryOpen = false;       // dari dev-Rizal
     
     // Variabel Kamera
     public int xLvlOffset;
@@ -54,11 +54,10 @@ public class PlayStates extends States implements StateMethods {
         
         backgroundImg = LoadSave.GetSpriteAtlas(LoadSave.PLAY_BACKGROUND_IMG);
         clouds_01 = LoadSave.GetSpriteAtlas(LoadSave.CLOUDS_01);
-        clouds_02 = LoadSave.GetSpriteAtlas(LoadSave.CLOUDS_01); 
+        clouds_02 = LoadSave.GetSpriteAtlas(LoadSave.CLOUDS_01);
         clouds_02Pos = new int[8];
-        for(int i = 0; i < clouds_02Pos.length; i++) {
-            clouds_02Pos[i] = (int)(90 * GameCore.SCALE) + rnd.nextInt((int)(100*GameCore.SCALE));
-        }
+        for(int i = 0; i < clouds_02Pos.length; i++)
+            clouds_02Pos[i] = (int)(90 * GameCore.SCALE) +  rnd.nextInt((int)(100*GameCore.SCALE));
     }
     
     private void initClasses() {
@@ -72,10 +71,10 @@ public class PlayStates extends States implements StateMethods {
         player.loadmapData(worldManager.getCurrentMap().getWorldData());
         
         pauseOverlay = new PauseOverlay(this); 
-        gameOverUI = new GameOverUI(this);
+        gameOverUI = new GameOverUI(this);                   // dari dev-Rizal
         levelCompletedOverlay = new LevelCompletedOverlay(this);
         gameOverOverlay = new GameOverOverlay(this); 
-        inventoryOverlay = new InventoryOverlay(this);
+        inventoryOverlay = new InventoryOverlay(this);       // dari dev-Rizal
     }
     
     private void calcLvlOffset() {
@@ -108,33 +107,30 @@ public class PlayStates extends States implements StateMethods {
         } else if (lvlCompleted) {
             levelCompletedOverlay.update();
         } else if (gameOver) {
-            // logika game over
+            // Saat game over, layar akan freeze
         } else if (inventoryOpen) {
-            // Pause pergerakan dunia saat menu inventory dibuka
+            // Pause pergerakan dunia saat menu inventory dibuka (dari dev-Rizal)
         } else {
             worldManager.update();
             objectManager.update();
             player.update();
-            enemyManager.update(worldManager.getCurrentMap().getWorldData(), player);
-            
-            // ---> TAMBAHKAN BARIS INI AGAR BARANG BISA DIAMBIL <---
-            objectManager.checkObjectTouched(player.getHitbox());
-            
+            enemyManager.update(worldManager.getCurrentMap().getWorldData(), player); 
             checkCloseToBorder();
-
+            
+            // Cek Transisi Level & Memicu Suara Menang (dari dev)
             int endOfMapX = (worldManager.getCurrentMap().getWorldData()[0].length * GameCore.TILES_SIZE) - 50;
             if (player.getHitbox().x >= endOfMapX) {
                 setLevelCompleted(true);
+                gc.getAudioPlayer().lvlCompleted();
             }
         }
     }
-    
+
     @Override
     public void draw(Graphics g) {
         g.drawImage(backgroundImg, 0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
         
-        //fitur awan/background
-      //  drawClouds(g);
+        drawClouds(g);      // awan tetap digambar (dari dev)
         
         worldManager.draw(g, xLvlOffset);
         objectManager.draw(g, xLvlOffset); 
@@ -148,7 +144,7 @@ public class PlayStates extends States implements StateMethods {
         } else if (gameOver) {
             gameOverOverlay.draw(g); 
         } else if (inventoryOpen) {
-            inventoryOverlay.draw(g); 
+            inventoryOverlay.draw(g);        // dari dev-Rizal
         }
     }
 
@@ -172,23 +168,21 @@ public class PlayStates extends States implements StateMethods {
         resetAll(newX, newY); 
         player.loadmapData(newMapData); 
         calcLvlOffset();
+        
+        // [PEMICU BGM] Ganti lagu ke Level 2 saat map baru dimuat (dari dev)
+        gc.getAudioPlayer().playSong(audio.AudioPlayer.LEVEL_2);
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        //new for  iinventory 
-        if (paused || lvlCompleted || gameOver || inventoryOpen) return;
-
-        if(e.getButton() == MouseEvent.BUTTON1) {
-            player.setAttack(true);
-        }
+        // tidak digunakan
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
         if (gameOver) return; 
 
-        // Kalau inventory terbuka, klik hanya untuk UI, bukan untuk menyerang
+        // Kalau inventory terbuka, klik hanya untuk UI, bukan untuk menyerang (dari dev-Rizal)
         if (inventoryOpen) {
             inventoryOverlay.mousePressed(e);
             return; 
@@ -198,6 +192,8 @@ public class PlayStates extends States implements StateMethods {
             pauseOverlay.mousePressed(e);
         } else if (lvlCompleted) {
             levelCompletedOverlay.mousePressed(e);
+        } else if(e.getButton() == MouseEvent.BUTTON1) {
+            player.setCharging(true);       // charge attack (dari dev)
         }
     }
 
@@ -209,6 +205,8 @@ public class PlayStates extends States implements StateMethods {
             pauseOverlay.mouseReleased(e);
         } else if (lvlCompleted) {
             levelCompletedOverlay.mouseReleased(e);
+        } else if (e.getButton() == MouseEvent.BUTTON1) {
+            player.releaseAttack();         // lepas charge (dari dev)
         }
     }
 
@@ -216,7 +214,7 @@ public class PlayStates extends States implements StateMethods {
     public void mouseMoved(MouseEvent e) {
         if (gameOver) return;
 
-        // mouse buat tas
+        // mouse buat inventory (dari dev-Rizal)
         if (inventoryOpen) {
             inventoryOverlay.mouseMoved(e);
             return;
@@ -250,17 +248,16 @@ public class PlayStates extends States implements StateMethods {
             return;
         }
         
+        // Tombol F untuk buka/tutup inventory (dari dev-Rizal)
         if (e.getKeyCode() == KeyEvent.VK_F) {
             inventoryOpen = !inventoryOpen;
-            
-           
             if (inventoryOpen) {
                 inventoryOverlay.resetMenu();
             }
             return;
         }
 
-     
+        // Jangan proses input game jika inventory terbuka
         if (inventoryOpen) {
             return; 
         }
@@ -277,13 +274,17 @@ public class PlayStates extends States implements StateMethods {
             case KeyEvent.VK_SPACE:
                 player.setJump(true);
                 break;
+            case KeyEvent.VK_Q:                  // dash (dari dev)
+                player.setDash(true);
+                break;
         }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
+        // Tidak menerima input jika game di pause, level selesai, game over, atau inventory terbuka
         if (paused || lvlCompleted || gameOver || inventoryOpen) return;
-
+        
         switch(e.getKeyCode()) {
             case KeyEvent.VK_A:
                 player.setLeft(false);
@@ -307,17 +308,32 @@ public class PlayStates extends States implements StateMethods {
         paused = false;
         lvlCompleted = false;
         gameOver = false; 
-        inventoryOpen = false;
+        inventoryOpen = false;        // dari dev-Rizal
         xLvlOffset = 0; 
     }
     
+    // [MODIFIKASI] Mematikan lagu dan memainkan efek suara saat mati (dari dev)
     public void setGameOver(boolean gameOver) {
         this.gameOver = gameOver;
+        if (gameOver) {
+            gc.getAudioPlayer().stopSong(); 
+            gc.getAudioPlayer().playEffect(audio.AudioPlayer.GAMEOVER); 
+        }
     }
     
-    public void checkHitEnemy(Rectangle2D.Float AttackBox) {
-        enemyManager.checkEnemyHit(AttackBox);
-        objectManager.checkObjectHit(AttackBox);
+    // Method dari dev (dengan damage)
+    public void checkHitEnemy(Rectangle2D.Float AttackBox, int damage) {
+        enemyManager.checkEnemyHit(AttackBox, damage);
+    }
+    
+    // Untuk mendeteksi tebasan pedang ke barel/kotak (dari dev)
+    public void checkObjectHit(Rectangle2D.Float attackBox) {
+        objectManager.checkObjectHit(attackBox);
+    }
+
+    // Untuk mendeteksi sentuhan badan ke potion (dari dev)
+    public void checkPotionTouched(Rectangle2D.Float hitbox) {
+        objectManager.checkObjectTouched(hitbox);
     }
 
     public void setPaused(boolean paused) {
@@ -338,5 +354,9 @@ public class PlayStates extends States implements StateMethods {
 
     public ObjectManager getObjectManager() {
         return objectManager;
+    }
+    
+    public GameCore getGameCore() {
+        return gc;
     }
 }

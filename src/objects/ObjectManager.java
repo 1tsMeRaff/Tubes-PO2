@@ -31,25 +31,17 @@ public class ObjectManager {
     }
 
     public void applyEffectToPlayer(Potion p) {
-        // Terapkan efek sesuai dengan ID potion
+        // Efek Potion ditambahkan ke Player
         switch (p.getObjType()) {
             case RED_POTION_1:
-                // playStates.getPlayer().changeHealth(RED_VAL_1);
-                break;
             case RED_POTION_2:
-                // playStates.getPlayer().changeHealth(RED_VAL_2);
-                break;
             case RED_POTION_3:
-                // playStates.getPlayer().changeHealth(RED_VAL_3);
+                playStates.getPlayer().changeHealth(20); // Tambah 20 HP
                 break;
             case BLUE_POTION_1:
-                // playStates.getPlayer().changePower(BLUE_VAL_1); 
-                break;
             case BLUE_POTION_2:
-                // playStates.getPlayer().changePower(BLUE_VAL_2);
-                break;
             case BLUE_POTION_3:
-                // playStates.getPlayer().changePower(BLUE_VAL_3);
+                playStates.getPlayer().changeMana(20); // Tambah 20 MP
                 break;
         }
     }
@@ -81,36 +73,24 @@ public class ObjectManager {
     }
 
     private void loadImgs() {
-        // --- Memuat Potion ---
-        // Pastikan nama filenya sudah sesuai dengan yang baru!
         BufferedImage potionSprite = LoadSave.GetSpriteAtlas("potion_sprites.png"); 
         potionImgs = new BufferedImage[6][3]; 
-
-        // Kordinat Y dari datamu: Baris 0 = 8, Baris 1 = 34
         int[] yKordinat = {8, 34}; 
 
         for (int baris = 0; baris < 2; baris++) { 
             for (int tipe = 0; tipe < 3; tipe++) { 
                 for (int frame = 0; frame < 3; frame++) { 
-                    
                     int idObjek = (baris * 3) + tipe; 
                     int kolomGambar = (tipe * 3) + frame; 
-                    
-                    // Menghitung titik X (Mulai dari 7, jarak antar frame 35)
                     int potongX = 7 + (kolomGambar * 35);
-                    // Mengambil titik Y dari array (8 atau 34)
                     int potongY = yKordinat[baris];
-                 
-                    // Memotong dengan ukuran 16x16 sesuai datamu
                     potionImgs[idObjek][frame] = potionSprite.getSubimage(potongX, potongY, 16, 16);
                 }
             }
         }
 
-        // --- Memuat Kontainer (Barrel & Box) ---
         BufferedImage containerSprite = LoadSave.GetSpriteAtlas("objects_sprites.png"); 
         containerImgs = new BufferedImage[2][8];
-
         for (int j = 0; j < containerImgs.length; j++) {
             for (int i = 0; i < containerImgs[j].length; i++) {
                 containerImgs[j][i] = containerSprite.getSubimage(40 * i, 30 * j, 40, 30);
@@ -119,12 +99,8 @@ public class ObjectManager {
     }
 
     public void update() {
-        for (Potion p : potions) {
-            if (p.isActive()) p.update();
-        }
-        for (GameContainer gc : containers) {
-            if (gc.isActive()) gc.update();
-        }
+        for (Potion p : potions) { if (p.isActive()) p.update(); }
+        for (GameContainer gc : containers) { if (gc.isActive()) gc.update(); }
     }
 
     public void draw(Graphics g, int xLvlOffset) {
@@ -137,12 +113,10 @@ public class ObjectManager {
             if (gc.isActive()) {
                 int type = 0; 
                 if (gc.getObjType() == BOX) type = 1; 
-                
                 g.drawImage(containerImgs[type][gc.getAniIndex()], 
                     (int) (gc.getHitbox().x - gc.getxDrawOffset() - xLvlOffset), 
                     (int) (gc.getHitbox().y - gc.getyDrawOffset()), 
-                    CONTAINER_WIDTH, 
-                    CONTAINER_HEIGHT, null);
+                    CONTAINER_WIDTH, CONTAINER_HEIGHT, null);
             }
         }
     }
@@ -151,12 +125,10 @@ public class ObjectManager {
         for (Potion p : potions) {
             if (p.isActive()) {
                 int type = p.getObjType(); 
-
                 g.drawImage(potionImgs[type][p.getAniIndex()], 
                     (int) (p.getHitbox().x - p.getxDrawOffset() - xLvlOffset), 
                     (int) (p.getHitbox().y - p.getyDrawOffset()), 
-                    POTION_WIDTH, 
-                    POTION_HEIGHT, null);
+                    POTION_WIDTH, POTION_HEIGHT, null);
             }
         }
     }
@@ -167,15 +139,16 @@ public class ObjectManager {
     }
 
     public void addTestObjects() {
+        // Objek dari cabang dev-Rizal
         potions.add(new Potion(300, 200, 0));
         potions.add(new Potion(350, 200, 3));
-
+        // Objek tambahan dari cabang dev
+        potions.add(new Potion(650, 800, 0)); 
+        potions.add(new Potion(700, 800, 3)); 
+        // Container uji (BOX & BARREL) dari dev-Rizal
         containers.add(new GameContainer(450, 200, BOX));
-        containers.add(new GameContainer(600, 200, BARREL)); // BARREL SEKARANG BISA DIHANCURKAN
+        containers.add(new GameContainer(600, 200, BARREL));
     }
-    
-    
-    
     
     public BufferedImage getPotionImg(int type) {
         if (potionImgs != null && type >= 0 && type < potionImgs.length) {
@@ -184,7 +157,7 @@ public class ObjectManager {
         return null;
     }
     
- // Method untuk mengecek tabrakan pemain dengan objek yang solid
+    // Method untuk mengecek tabrakan pemain dengan objek yang solid
     public GameContainer getIntersectingContainer(Rectangle2D.Float nextHitbox) {
         for (GameContainer gc : containers) {
             // Objek dianggap solid hanya jika dia masih aktif dan BUKAN sedang hancur
