@@ -23,14 +23,21 @@ public class GameOverOverlay {
 
 		// Tulisan Game Over sederhana
 		g.setColor(Color.WHITE);
-		g.drawString("GAME OVER", GameCore.GAME_WIDTH / 2 - 35, 150);
-		g.drawString("Tekan ESC untuk kembali ke Menu Utama", GameCore.GAME_WIDTH / 2 - 110, 200);
+		g.drawString("GAME OVER", GameCore.GAME_WIDTH / 2 - 35, (int)(150 * GameCore.SCALE));
+		g.drawString("Tekan ESC untuk kembali ke Menu Utama", GameCore.GAME_WIDTH / 2 - 110, (int)(200 * GameCore.SCALE));
+		g.drawString("Tekan R untuk Main Lagi (Restart)", GameCore.GAME_WIDTH / 2 - 95, (int)(250 * GameCore.SCALE));
 	}
 
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 			playStates.resetAll(200, 200);
 			GameStates.state = GameStates.MENU;
+			
+			// [PEMICU BGM] Kembali ke lagu Menu
+			playStates.getGameCore().getAudioPlayer().playSong(audio.AudioPlayer.MENU_1);
+			
+		} else if (e.getKeyCode() == KeyEvent.VK_R) {
+			playStates.resetAll(200, 200); 
 		}
 	}
 }

@@ -15,8 +15,9 @@ public class GameCore implements Runnable {
 	
 	private PlayStates play;
 	private MainMenu menu;
+	private audio.AudioPlayer audioPlayer;
 	
-	public final static int TILE_DEFAULT_SIZE = 32;
+	public final static int TILE_DEFAULT_SIZE = 3;
 	public final static float SCALE = 1.25f;
 	public final static int TILES_IN_WIDTH = 26;
 	public final static int TILES_IN_HEIGHT = 14;
@@ -31,6 +32,7 @@ public class GameCore implements Runnable {
 		gameFrame = new GameFrame(gamePanel);
 		gamePanel.setRequestFocusEnabled(true);
 		gamePanel.requestFocus();
+		audioPlayer = new audio.AudioPlayer();
 		
 		startGameLoop();
 	}
@@ -131,5 +133,9 @@ public class GameCore implements Runnable {
 	
 	public PlayStates getPlay() {
 		return play;
+	}
+	
+	public audio.AudioPlayer getAudioPlayer() {
+	    return audioPlayer;
 	}
 }
