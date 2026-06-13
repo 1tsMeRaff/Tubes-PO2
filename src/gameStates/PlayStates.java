@@ -5,17 +5,18 @@ import entity.Player;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.util.Random;
-
 import main.GameCore;
+import objects.ObjectManager;
+import ui.GameOverOverlay;
+import ui.GameOverUI;
 import ui.LevelCompletedOverlay;
 import ui.PauseOverlay;
-import ui.GameOverOverlay; 
+import ui.InventoryOverlay;
 import utilitytools.LoadSave;
 import world.WorldManager;
-import objects.ObjectManager; 
 import static utilitytools.Konstanta.Environment.*;
 
 public class PlayStates extends States implements StateMethods {
@@ -24,13 +25,17 @@ public class PlayStates extends States implements StateMethods {
     private WorldManager worldManager;
     private EnemyManager enemyManager; 
     private ObjectManager objectManager; 
-    private PauseOverlay pauseOverlay; 
+    private PauseOverlay pauseOverlay;
+    private GameOverUI gameOverUI;               // dari dev-Rizal (tambahan UI)
     private LevelCompletedOverlay levelCompletedOverlay;
     private GameOverOverlay gameOverOverlay; 
 
     private boolean paused = false;
     private boolean lvlCompleted = false;
     private boolean gameOver = false; 
+    
+    private InventoryOverlay inventoryOverlay;   // dari dev-Rizal
+    private boolean inventoryOpen = false;       // dari dev-Rizal
     
     // Variabel Kamera
     public int xLvlOffset;
@@ -66,8 +71,10 @@ public class PlayStates extends States implements StateMethods {
         player.loadmapData(worldManager.getCurrentMap().getWorldData());
         
         pauseOverlay = new PauseOverlay(this); 
+        gameOverUI = new GameOverUI(this);                   // dari dev-Rizal
         levelCompletedOverlay = new LevelCompletedOverlay(this);
         gameOverOverlay = new GameOverOverlay(this); 
+        inventoryOverlay = new InventoryOverlay(this);       // dari dev-Rizal
     }
     
     private void calcLvlOffset() {
@@ -101,6 +108,8 @@ public class PlayStates extends States implements StateMethods {
             levelCompletedOverlay.update();
         } else if (gameOver) {
             // Saat game over, layar akan freeze
+        } else if (inventoryOpen) {
+            // Pause pergerakan dunia saat menu inventory dibuka (dari dev-Rizal)
         } else {
             worldManager.update();
             objectManager.update();
@@ -108,7 +117,7 @@ public class PlayStates extends States implements StateMethods {
             enemyManager.update(worldManager.getCurrentMap().getWorldData(), player); 
             checkCloseToBorder();
             
-            // Cek Transisi Level & Memicu Suara Menang
+            // Cek Transisi Level & Memicu Suara Menang (dari dev)
             int endOfMapX = (worldManager.getCurrentMap().getWorldData()[0].length * GameCore.TILES_SIZE) - 50;
             if (player.getHitbox().x >= endOfMapX) {
                 setLevelCompleted(true);
@@ -121,7 +130,7 @@ public class PlayStates extends States implements StateMethods {
     public void draw(Graphics g) {
         g.drawImage(backgroundImg, 0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
         
-        drawClouds(g);
+        drawClouds(g);      // awan tetap digambar (dari dev)
         
         worldManager.draw(g, xLvlOffset);
         objectManager.draw(g, xLvlOffset); 
@@ -134,6 +143,8 @@ public class PlayStates extends States implements StateMethods {
             levelCompletedOverlay.draw(g);
         } else if (gameOver) {
             gameOverOverlay.draw(g); 
+        } else if (inventoryOpen) {
+            inventoryOverlay.draw(g);        // dari dev-Rizal
         }
     }
 
@@ -158,25 +169,31 @@ public class PlayStates extends States implements StateMethods {
         player.loadmapData(newMapData); 
         calcLvlOffset();
         
-        // [PEMICU BGM] Ganti lagu ke Level 2 saat map baru dimuat
+        // [PEMICU BGM] Ganti lagu ke Level 2 saat map baru dimuat (dari dev)
         gc.getAudioPlayer().playSong(audio.AudioPlayer.LEVEL_2);
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        
+        // tidak digunakan
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
         if (gameOver) return; 
 
+        // Kalau inventory terbuka, klik hanya untuk UI, bukan untuk menyerang (dari dev-Rizal)
+        if (inventoryOpen) {
+            inventoryOverlay.mousePressed(e);
+            return; 
+        }
+
         if (paused) {
             pauseOverlay.mousePressed(e);
         } else if (lvlCompleted) {
             levelCompletedOverlay.mousePressed(e);
         } else if(e.getButton() == MouseEvent.BUTTON1) {
-            player.setCharging(true);
+            player.setCharging(true);       // charge attack (dari dev)
         }
     }
 
@@ -189,13 +206,19 @@ public class PlayStates extends States implements StateMethods {
         } else if (lvlCompleted) {
             levelCompletedOverlay.mouseReleased(e);
         } else if (e.getButton() == MouseEvent.BUTTON1) {
-            player.releaseAttack();
+            player.releaseAttack();         // lepas charge (dari dev)
         }
     }
 
     @Override
     public void mouseMoved(MouseEvent e) {
         if (gameOver) return;
+
+        // mouse buat inventory (dari dev-Rizal)
+        if (inventoryOpen) {
+            inventoryOverlay.mouseMoved(e);
+            return;
+        }
 
         if (paused) {
             pauseOverlay.mouseMoved(e);
@@ -225,6 +248,20 @@ public class PlayStates extends States implements StateMethods {
             return;
         }
         
+        // Tombol F untuk buka/tutup inventory (dari dev-Rizal)
+        if (e.getKeyCode() == KeyEvent.VK_F) {
+            inventoryOpen = !inventoryOpen;
+            if (inventoryOpen) {
+                inventoryOverlay.resetMenu();
+            }
+            return;
+        }
+
+        // Jangan proses input game jika inventory terbuka
+        if (inventoryOpen) {
+            return; 
+        }
+
         if (paused) return;
 
         switch(e.getKeyCode()) {
@@ -237,7 +274,7 @@ public class PlayStates extends States implements StateMethods {
             case KeyEvent.VK_SPACE:
                 player.setJump(true);
                 break;
-            case KeyEvent.VK_Q:
+            case KeyEvent.VK_Q:                  // dash (dari dev)
                 player.setDash(true);
                 break;
         }
@@ -245,7 +282,8 @@ public class PlayStates extends States implements StateMethods {
 
     @Override
     public void keyReleased(KeyEvent e) {
-        if (paused || lvlCompleted || gameOver) return;
+        // Tidak menerima input jika game di pause, level selesai, game over, atau inventory terbuka
+        if (paused || lvlCompleted || gameOver || inventoryOpen) return;
         
         switch(e.getKeyCode()) {
             case KeyEvent.VK_A:
@@ -270,9 +308,11 @@ public class PlayStates extends States implements StateMethods {
         paused = false;
         lvlCompleted = false;
         gameOver = false; 
+        inventoryOpen = false;        // dari dev-Rizal
         xLvlOffset = 0; 
     }
-  
+    
+    // [MODIFIKASI] Mematikan lagu dan memainkan efek suara saat mati (dari dev)
     public void setGameOver(boolean gameOver) {
         this.gameOver = gameOver;
         if (gameOver) {
@@ -281,16 +321,17 @@ public class PlayStates extends States implements StateMethods {
         }
     }
     
+    // Method dari dev (dengan damage)
     public void checkHitEnemy(Rectangle2D.Float AttackBox, int damage) {
         enemyManager.checkEnemyHit(AttackBox, damage);
     }
     
-    // Untuk mendeteksi tebasan pedang ke barel/kotak
+    // Untuk mendeteksi tebasan pedang ke barel/kotak (dari dev)
     public void checkObjectHit(Rectangle2D.Float attackBox) {
         objectManager.checkObjectHit(attackBox);
     }
 
-    // Untuk mendeteksi sentuhan badan ke potion
+    // Untuk mendeteksi sentuhan badan ke potion (dari dev)
     public void checkPotionTouched(Rectangle2D.Float hitbox) {
         objectManager.checkObjectTouched(hitbox);
     }
@@ -314,7 +355,7 @@ public class PlayStates extends States implements StateMethods {
     public ObjectManager getObjectManager() {
         return objectManager;
     }
-  
+    
     public GameCore getGameCore() {
         return gc;
     }
