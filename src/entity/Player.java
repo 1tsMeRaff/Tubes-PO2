@@ -29,7 +29,23 @@ public class Player extends Entity {
 	private float gravity = 0.04f * GameCore.SCALE;
 	private float jumpSpeed = -2.25f * GameCore.SCALE;
 	private float fallSpeedAfterCollision = 0.5f * GameCore.SCALE;
+	private boolean canDoubleJump = true;
 	private boolean inAir = true;
+	
+	// Dash
+	private boolean dashing = false;
+	private boolean canDash = true;
+	private int dashDuration = 100;
+	private int dashTick = 0;
+	private int dashCooldown = 100;
+	private int dashCooldownTick = 0;
+	private float dashSpeed = 1.5f * GameCore.SCALE;
+	
+	// Charge Attack
+	private boolean charging = false;
+	private int chargeTick = 0;
+	private final int CHARGE_DURATION_NEEDED = 100;
+	private boolean isExecutingChargeAttack = false;
 	
 	//status
 	private BufferedImage statusBarImg;
@@ -51,6 +67,7 @@ public class Player extends Entity {
 	// AttackBox
 	private Rectangle2D.Float AttackBox;
 	
+	// FlipImage
 	private int flipX = 0;
 	private int flipW = 1;
 	
@@ -77,9 +94,21 @@ public class Player extends Entity {
 			return;
 		}
 		
-		updateHealthBar();
-		updateAttackBox();
+		if (charging) {
+			chargeTick++;
+		}
+		
+		if (!canDash && !dashing) {
+			dashCooldownTick++;
+			if (dashCooldownTick >= dashCooldown) {
+				canDash = true;
+				dashCooldownTick = 0;
+			}
+		}
+		
 		updatePos();
+		updateAttackBox();
+		
 		if(attacking) {
 			checkAttack();
 		}
@@ -91,32 +120,47 @@ public class Player extends Entity {
 		if(attackCheck) {
 			return;
 		}
-		attackCheck = true;
-		playStates.checkHitEnemy(AttackBox);
+		
+		int hitFrame;
+		if (isExecutingChargeAttack) {
+		    hitFrame = 9;
+		} else {
+		    hitFrame = 3;
+		}
+		
+		if(aniIndex == hitFrame) {
+			attackCheck = true;
+			int damageToDeal;
+			if (isExecutingChargeAttack) {
+			    damageToDeal = 25;
+			} else {
+			    damageToDeal = 10;
+			}
+			playStates.checkHitEnemy(AttackBox, damageToDeal);
+		}
 	}
 	
 	private void updateAttackBox() {
-	    if (flipW == 1) {
-	        AttackBox.x = hitBox.x + hitBox.width + (int) (GameCore.SCALE * 5);
-	    } else if (flipW == -1) {
-	        AttackBox.x = hitBox.x - AttackBox.width - (int) (GameCore.SCALE * 5);
-	    }
-	    AttackBox.y = hitBox.y + (GameCore.SCALE * 2); 
-	}
+		AttackBox.y = hitBox.y + (GameCore.SCALE * 2);
+		int currentAttackWidth;
+		
+		if (isExecutingChargeAttack) {
+		    currentAttackWidth = (int)(30 * GameCore.SCALE);
+		} else {
+		    currentAttackWidth = (int)(20 * GameCore.SCALE);
+		}
+		
+		AttackBox.width = currentAttackWidth;
 
-//	private void updateAttackBox() {
-//		
-//		if (right) {
-//			AttackBox.x = hitBox.x + hitBox.width + (int) (GameCore.SCALE * 10);
-//		}else if (left) {
-//			AttackBox.x = hitBox.x - hitBox.width - (int) (GameCore.SCALE * 10);
-//		}
-//		AttackBox.y = hitBox.y + (GameCore.SCALE * 10);
-//	}
+		if (flipW == 1) {
+			AttackBox.x = hitBox.x + hitBox.width;
+		} else {
+			AttackBox.x = hitBox.x - AttackBox.width;
+		}
+	}
 
 	private void updateHealthBar() {
 		healthWidth = (int) ((currentHealth / (float) maxHealth) * healthBarWidth);
-		
 	}
 
 	public void render(Graphics g, int xLvlOffset) {
@@ -138,8 +182,9 @@ public class Player extends Entity {
 		g.setColor(Color.red);
 		g.fillRect(healthBarXStart + statusBarX + GameCore.TILES_SIZE, healthBarYStart + statusBarY
 					, healthWidth - GameCore.TILES_SIZE, healthBarHeight);
+		this.drawHitbox(g);
 	}
-
+	
 	private void updateAnimationTick() {
 		aniTick++;
 		if(aniTick >= aniSpeed) {
@@ -147,8 +192,9 @@ public class Player extends Entity {
 			aniIndex++;
 			if(aniIndex >= GetSpriteAmount(playerAction)) {
 				aniIndex = 0;
-				if(playerAction == ATTACK_1) {
+				if(playerAction == ATTACK_1 || playerAction == CHARGE_ATTACK) {
 					attacking = false;
+					isExecutingChargeAttack = false; // Reset eksekusi
 					attackCheck = false;
 				}
 			}
@@ -172,18 +218,68 @@ public class Player extends Entity {
 			}
 		}
 		
-		if(attacking) {
-			playerAction = ATTACK_1;
-			if(startAni != ATTACK_1) {
-				aniIndex= 1;
+		if(dashing) {
+			playerAction = DASH;
+		} else if(attacking) {
+			if (isExecutingChargeAttack) {
+			    playerAction = CHARGE_ATTACK;
+			} else {
+			    playerAction = ATTACK_1;
+			}
+			
+			if(startAni != playerAction) {
+				aniIndex = 0; 
 				aniTick = 0;
+				attackCheck = false;
 				return;
 			}
+		} else if(charging) {
+			playerAction = GUARD; 
 		}
-		
+
 		if(startAni != playerAction) {
 			resetAniTick();
 		}
+	}
+	
+	public void setDash(boolean dash) {
+		// Jangan dash saat cooldown, sedang menyerang
+		if (dash && canDash && !dashing && !attacking && !charging) {
+			this.dashing = true;
+			this.canDash = false;
+			this.dashTick = 0;
+		}
+	}
+	
+	public void setCharging(boolean charging) {
+		if (inAir) {
+			if (charging && !attacking && !dashing) {
+				this.isExecutingChargeAttack = false;
+				this.attacking = true;
+			}
+			return;
+		}
+
+		if (this.charging == charging) return; 
+		
+		this.charging = charging;
+		if (charging) {
+			chargeTick = 0;
+		}
+	}
+
+	public void releaseAttack() {
+		if (!charging) return;
+		this.charging = false;
+
+		if (chargeTick >= CHARGE_DURATION_NEEDED) {
+			isExecutingChargeAttack = true;
+		} else {
+			isExecutingChargeAttack = false;
+		}
+		
+		attacking = true;
+		chargeTick = 0;
 	}
 	
 	private void resetAniTick() {
@@ -193,31 +289,47 @@ public class Player extends Entity {
 
 	private void updatePos() {
 	    moving = false;
-	    if(jump) {
-	        jump();
-	    }
 	    
-	    if(!left && !right && !inAir) {
-	        return;	
-	    }
+	    if(jump && !charging) {
+			jump();
+		}
+	    
+	    // Logika Dash
+	    if (dashing) {
+			dashTick++;
+			if (dashTick >= dashDuration) {
+				dashing = false; // Hentikan dash jika durasi habis
+			} else {
+				// arah dash
+				float xSpeed = (flipW == 1) ? dashSpeed : -dashSpeed;
+				
+				// Cek collison
+				if (canMoveHere(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height, mapData)) {
+					hitBox.x += xSpeed;
+				} else {
+					hitBox.x = GetEntityPosNextToWall(hitBox, xSpeed);
+					dashing = false; // hentikan dash jika menabrak tembok
+				}
+				return;
+			}
+		}
 	    
 	    float xSpeed = 0;
-	    if (attacking) {
-	        return; 
-	    }
-
-	    if(left) {
-	        xSpeed -= playerSpeed;
-	        flipX = width;
-	        flipW = -1;
-	    }
-	    if(right) {
-	        xSpeed += playerSpeed;
-	        flipX = 0;
-	        flipW = 1;
+	    
+	    if(!attacking || inAir) {
+	    	if(left) {
+		        xSpeed -= playerSpeed;
+		        flipX = width;
+		        flipW = -1;
+		    }
+		    if(right) {
+		        xSpeed += playerSpeed;
+		        flipX = 0;
+		        flipW = 1;
+		    }
 	    }
 	    
-	    // 2. [PINDAHKAN KE SINI] Cek lantai dilakukan SAAT player memang sedang bergerak/berpindah
+	    
 	    if(!inAir) {
 	        if(!IsEntityOnFloor(hitBox, mapData)) {
 	            inAir = true;
@@ -239,23 +351,33 @@ public class Player extends Entity {
 	            updateXPos(xSpeed);
 	        }
 	    } else {
-	        updateXPos(xSpeed);
+	    	if(!attacking && !charging) {
+		       updateXPos(xSpeed);
+	    	}
 	    }
-	    
-	    moving = true;
+	    if (xSpeed != 0 && !attacking && !charging) {
+	        moving = true;
+	    }
 	}
 	
 	private void jump() {
 		if(inAir) {
+			if(canDoubleJump) {
+				airSpeed = jumpSpeed;
+	            canDoubleJump = false;
+	            jump = false;
+			}
 			return;
 		}
 		inAir = true;
 		airSpeed = jumpSpeed;
+		jump = false;
 	}
 
 	private void resetInAir() {
 		inAir = false;
 		airSpeed = 0;
+		canDoubleJump = true;
 	}
 
 	private void updateXPos(float xSpeed) {
@@ -300,22 +422,20 @@ public class Player extends Entity {
 		left = false; right = false; up = false; down = false;
 	}
 
-	// [PERBAIKAN] Tambahkan parameter koordinat baru untuk target map selanjutnya
 	public void resetAll(float newX, float newY) {
 	    resetDirBooleans();
 	    inAir = false;
+	    canDoubleJump = true;
 	    moving = false;
 	    attacking = false;
 	    playerAction = IDLE_ACTIVE;
 	    currentHealth = maxHealth;
 	    
-	    // Perbarui koordinat dasar Entity dan Hitbox ke posisi map baru
 	    this.x = newX;
 	    this.y = newY;
 	    hitBox.x = newX;
 	    hitBox.y = newY;
 	    
-	    // Pastikan mapData sudah di-load terlebih dahulu sebelum mengecek ini
 	    if (mapData != null && !IsEntityOnFloor(hitBox, mapData)) {
 	        inAir = true;
 	    }
@@ -357,12 +477,10 @@ public class Player extends Entity {
 		this.down = down;
 	}
 
-	// Method ini ada di branch `dev` tapi hilang di branch `dev-Arya`
 	public void setJump(boolean jump) {
 		this.jump = jump;
 	}
 	
-	// [PERBAIKAN] Menggunakan hitBox (huruf B besar) sesuai deklarasi di Entity
 	public java.awt.geom.Rectangle2D.Float getHitbox() {
 		return hitBox;
 	}

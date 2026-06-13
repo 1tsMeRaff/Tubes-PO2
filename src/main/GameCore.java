@@ -13,12 +13,11 @@ public class GameCore implements Runnable {
 	private final int FPS_SET = 120;
 	private final int UPS_SET = 200;
 	
-	// Perubahan: Menggunakan huruf kecil sesuai konvensi Java CamelCase
 	private PlayStates play;
 	private MainMenu menu;
 	
 	public final static int TILE_DEFAULT_SIZE = 32;
-	public final static float SCALE = 1.0f;
+	public final static float SCALE = 1.25f;
 	public final static int TILES_IN_WIDTH = 26;
 	public final static int TILES_IN_HEIGHT = 14;
 	public final static int TILES_SIZE = (int) (TILE_DEFAULT_SIZE * SCALE);
