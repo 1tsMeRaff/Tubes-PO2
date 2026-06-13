@@ -1,9 +1,10 @@
 package main;
 
-import java.awt.Graphics;
+import audio.AudioPlayer;
 import gameStates.GameStates;
 import gameStates.MainMenu;
 import gameStates.PlayStates;
+import java.awt.Graphics;
 
 public class GameCore implements Runnable {
 	
@@ -15,10 +16,10 @@ public class GameCore implements Runnable {
 	
 	private PlayStates play;
 	private MainMenu menu;
-	private audio.AudioPlayer audioPlayer;
+	private AudioPlayer audioPlayer;
 	
-	public final static int TILE_DEFAULT_SIZE = 3;
-	public final static float SCALE = 1.25f;
+	public final static int TILE_DEFAULT_SIZE = 32;
+	public final static float SCALE = 1.5f;
 	public final static int TILES_IN_WIDTH = 26;
 	public final static int TILES_IN_HEIGHT = 14;
 	public final static int TILES_SIZE = (int) (TILE_DEFAULT_SIZE * SCALE);

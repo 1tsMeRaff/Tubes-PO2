@@ -11,7 +11,6 @@ import java.util.Random;
 import main.GameCore;
 import objects.ObjectManager;
 import ui.GameOverOverlay;
-import ui.GameOverUI;
 import ui.LevelCompletedOverlay;
 import ui.PauseOverlay;
 import ui.InventoryOverlay;
@@ -26,7 +25,6 @@ public class PlayStates extends States implements StateMethods {
     private EnemyManager enemyManager; 
     private ObjectManager objectManager; 
     private PauseOverlay pauseOverlay;
-    private GameOverUI gameOverUI;               // dari dev-Rizal (tambahan UI)
     private LevelCompletedOverlay levelCompletedOverlay;
     private GameOverOverlay gameOverOverlay; 
 
@@ -34,8 +32,8 @@ public class PlayStates extends States implements StateMethods {
     private boolean lvlCompleted = false;
     private boolean gameOver = false; 
     
-    private InventoryOverlay inventoryOverlay;   // dari dev-Rizal
-    private boolean inventoryOpen = false;       // dari dev-Rizal
+    private InventoryOverlay inventoryOverlay;  
+    private boolean inventoryOpen = false;   
     
     // Variabel Kamera
     public int xLvlOffset;
@@ -70,11 +68,10 @@ public class PlayStates extends States implements StateMethods {
         player = new Player(200, 200, (int) (64 * GameCore.SCALE), (int) (40 * GameCore.SCALE), this);
         player.loadmapData(worldManager.getCurrentMap().getWorldData());
         
-        pauseOverlay = new PauseOverlay(this); 
-        gameOverUI = new GameOverUI(this);                   // dari dev-Rizal
+        pauseOverlay = new PauseOverlay(this);
         levelCompletedOverlay = new LevelCompletedOverlay(this);
         gameOverOverlay = new GameOverOverlay(this); 
-        inventoryOverlay = new InventoryOverlay(this);       // dari dev-Rizal
+        inventoryOverlay = new InventoryOverlay(this);
     }
     
     private void calcLvlOffset() {
@@ -109,7 +106,7 @@ public class PlayStates extends States implements StateMethods {
         } else if (gameOver) {
             // Saat game over, layar akan freeze
         } else if (inventoryOpen) {
-            // Pause pergerakan dunia saat menu inventory dibuka (dari dev-Rizal)
+            // Pause pergerakan dunia saat menu inventory dibuka
         } else {
             worldManager.update();
             objectManager.update();
