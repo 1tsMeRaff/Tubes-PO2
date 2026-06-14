@@ -16,7 +16,7 @@ public class MainMenu extends States implements StateMethods {
     private BufferedImage backgroundImage, backgroundimagemenu;
     private int menuX, menuY, menuWidth, menuHeight;
 
-    // Hitbox area tombol (tetap ada untuk deteksi klik, tapi tidak digambar)
+    // Hitbox area tombol (tetap ada untuk deteksi klik, tapi daatidak digambar)
     private Rectangle playBtn, optionsBtn;
     private boolean playHover, playPressed;
     private boolean optionsHover, optionsPressed;
