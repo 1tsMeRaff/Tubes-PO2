@@ -4,6 +4,7 @@ import audio.AudioPlayer;
 import gameStates.GameStates;
 import gameStates.MainMenu;
 import gameStates.PlayStates;
+import gameStates.GameOptions; // [TAMBAHAN] Import GameOptions
 import java.awt.Graphics;
 
 public class GameCore implements Runnable {
@@ -16,6 +17,7 @@ public class GameCore implements Runnable {
 	
 	private PlayStates play;
 	private MainMenu menu;
+	private GameOptions gameOptions; // [TAMBAHAN] Deklarasi GameOptions
 	private AudioPlayer audioPlayer;
 	
 	public final static int TILE_DEFAULT_SIZE = 32;
@@ -41,6 +43,7 @@ public class GameCore implements Runnable {
 	private void initClasses() {
 		menu = new MainMenu(this);
 		play = new PlayStates(this);
+		gameOptions = new GameOptions(this); // [TAMBAHAN] Inisialisasi GameOptions
 	}
 
 	private void startGameLoop() {
@@ -57,7 +60,7 @@ public class GameCore implements Runnable {
 				play.update();
 				break;
 			case OPTIONS:
-				// Dikosongkan sementara untuk fitur masa depan, tidak langsung exit
+				gameOptions.update(); // [TAMBAHAN] Memanggil update Options
 				break;
 			case QUIT:
 				System.exit(0);
@@ -74,6 +77,9 @@ public class GameCore implements Runnable {
 				break;
 			case PLAYING:
 				play.draw(g);
+				break;
+			case OPTIONS:
+				gameOptions.draw(g); // [TAMBAHAN] Memanggil render/draw Options
 				break;
 			default:
 				break;
@@ -135,8 +141,12 @@ public class GameCore implements Runnable {
 	public PlayStates getPlay() {
 		return play;
 	}
+
+	public GameOptions getGameOptions() {
+		return gameOptions;
+	}
 	
 	public audio.AudioPlayer getAudioPlayer() {
-	    return audioPlayer;
+		return audioPlayer;
 	}
 }
