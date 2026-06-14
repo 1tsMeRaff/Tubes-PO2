@@ -63,7 +63,9 @@ public class PlayStates extends States implements StateMethods {
         enemyManager = new EnemyManager(this); 
         
         objectManager = new ObjectManager(this);
-        objectManager.addTestObjects(); 
+        
+        // ---> TAMBAHAN: Memuat objek otomatis dari data CSV map <---
+        objectManager.loadObjectsFromMap(worldManager.getCurrentMap().getWorldData());
         
         player = new Player(200, 200, (int) (64 * GameCore.SCALE), (int) (40 * GameCore.SCALE), this);
         player.loadmapData(worldManager.getCurrentMap().getWorldData());
@@ -164,6 +166,10 @@ public class PlayStates extends States implements StateMethods {
 
         resetAll(newX, newY); 
         player.loadmapData(newMapData); 
+        
+        // ---> TAMBAHAN: Memuat ulang objek berdasarkan CSV dari map baru <---
+        objectManager.loadObjectsFromMap(newMapData);
+        
         calcLvlOffset();
         
         // [PEMICU BGM] Ganti lagu ke Level 2 saat map baru dimuat (dari dev)

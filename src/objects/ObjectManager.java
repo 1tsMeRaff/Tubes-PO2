@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import gameStates.PlayStates;
+import main.GameCore;
 import utilitytools.LoadSave;
 import static utilitytools.Konstanta.ObjectConstants.*;
 
@@ -129,6 +130,10 @@ public class ObjectManager {
                     (int) (p.getHitbox().x - p.getxDrawOffset() - xLvlOffset), 
                     (int) (p.getHitbox().y - p.getyDrawOffset()), 
                     POTION_WIDTH, POTION_HEIGHT, null);
+                
+                // Hilangkan tanda // pada dua baris di bawah ini jika ingin melihat hitbox merah (untuk debug)
+                // g.setColor(java.awt.Color.RED);
+                // g.drawRect((int) (p.getHitbox().x - xLvlOffset), (int) p.getHitbox().y, (int) p.getHitbox().width, (int) p.getHitbox().height);
             }
         }
     }
@@ -138,16 +143,40 @@ public class ObjectManager {
         for (GameContainer gc : containers) gc.reset();
     }
 
-    public void addTestObjects() {
-        // Objek dari cabang dev-Rizal
-        potions.add(new Potion(300, 200, 0));
-        potions.add(new Potion(350, 200, 3));
-        // Objek tambahan dari cabang dev
-        potions.add(new Potion(650, 800, 0)); 
-        potions.add(new Potion(700, 800, 3)); 
-        // Container uji (BOX & BARREL) dari dev-Rizal
-        containers.add(new GameContainer(450, 200, BOX));
-        containers.add(new GameContainer(600, 200, BARREL));
+    // Method pembaca CSV
+    public void loadObjectsFromMap(int[][] mapData) {
+        // 1. Bersihkan arena dari objek map sebelumnya
+        potions.clear();
+        containers.clear();
+        
+
+        for (int j = 0; j < mapData.length; j++) {
+            for (int i = 0; i < mapData[0].length; i++) {
+                
+                int id = mapData[j][i];
+                int xPos = i * GameCore.TILES_SIZE;
+                
+                //  RAMUAN 
+                if (id >= 300 && id <= 305) {
+                    int yPosPotion = (j * GameCore.TILES_SIZE) + (int)(0 * GameCore.SCALE);
+                    
+                    if (id == 300) { potions.add(new Potion(xPos, yPosPotion, RED_POTION_1)); mapData[j][i] = 0; }
+                    else if (id == 301) { potions.add(new Potion(xPos, yPosPotion, RED_POTION_2)); mapData[j][i] = 0; }
+                    else if (id == 302) { potions.add(new Potion(xPos, yPosPotion, RED_POTION_3)); mapData[j][i] = 0; }
+                    else if (id == 303) { potions.add(new Potion(xPos, yPosPotion, BLUE_POTION_1)); mapData[j][i] = 0; }
+                    else if (id == 304) { potions.add(new Potion(xPos, yPosPotion, BLUE_POTION_2)); mapData[j][i] = 0; }
+                    else if (id == 305) { potions.add(new Potion(xPos, yPosPotion, BLUE_POTION_3)); mapData[j][i] = 0; }
+                }
+                
+           
+                else if (id == 401 || id == 402) {
+                    int yPosContainer = (j * GameCore.TILES_SIZE) - (int)(0 * GameCore.SCALE); 
+                    
+                    if (id == 401) { containers.add(new GameContainer(xPos, yPosContainer, BOX)); mapData[j][i] = 0; }
+                    else if (id == 402) { containers.add(new GameContainer(xPos, yPosContainer, BARREL)); mapData[j][i] = 0; }
+                }
+            }
+        }
     }
     
     public BufferedImage getPotionImg(int type) {
