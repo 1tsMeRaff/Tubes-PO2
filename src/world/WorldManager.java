@@ -22,11 +22,9 @@ public class WorldManager {
 	}
 	
 	private void buildAllWorlds() {
-		// Tambahkan semua map yang sudah dibuat ke sini.
-		// Pastikan file CSV/PNG map-nya ada di folder resources.
 		worlds.add(new World(LoadSave.GetTilesData("/map_test.txt"))); 
-//		worlds.add(new World(LoadSave.GetTilesData("/untitled.csv"))); // Contoh Map 2
-		// worlds.add(new World(LoadSave.GetTilesData("/map_3.csv"))); // Tambahkan lagi nanti
+//		worlds.add(new World(LoadSave.GetTilesData("/untitled.csv")));
+		// worlds.add(new World(LoadSave.GetTilesData("/map_3.csv")));
 	}
 
 	private void importOutsideSprites() {
@@ -76,7 +74,7 @@ public class WorldManager {
 		if (worldIndex >= worlds.size()) {
 			worldIndex = 0; // Balik ke map 1 jika sudah tamat
 			System.out.println("Game Tamat! Kembali ke Map 1.");
-			gameStates.GameStates.state = gameStates.GameStates.MENU; // Opsional: Balik ke Main Menu
+			gameStates.GameStates.state = gameStates.GameStates.MENU;
 		}
 	}
 
