@@ -29,6 +29,7 @@ public class DemonBoss extends Boss {
 	}
 
 	public void update(int[][] tilesData, Player player) {
+		updateEffects(tilesData);
 		updateBehaviour(tilesData, player);
 		updateAnimationTick();
 		updateAttackBox();
@@ -41,6 +42,12 @@ public class DemonBoss extends Boss {
 		} else {
 			attackBox.x = hitBox.x + hitBox.width;
 		}
+	}
+	
+	@Override
+	public void hurt(int value, int kbDir, boolean applyKnockback) {
+	    super.hurt(value, kbDir, applyKnockback);
+	    checkPhaseTransition();
 	}
 
 	private void updateBehaviour(int[][] tilesData, Player player) {
@@ -69,7 +76,6 @@ public class DemonBoss extends Boss {
 			if (isPlayerCloseEnoughForAttack(player)) {
 				if (attackCooldown <= 0) {
 					newState(ATTACK);
-//					attackCooldown = 200;
 					attackCooldown = 90;
 				} else {
 					newState(IDLE);
@@ -120,6 +126,7 @@ public class DemonBoss extends Boss {
 
 	public void drawAttackBox(Graphics g, int xLvlOffset) {
 		g.setColor(Color.red);
-		g.drawRect((int) (attackBox.x - xLvlOffset), (int) attackBox.y, (int) attackBox.width, (int) attackBox.height);
+		g.drawRect((int) (attackBox.x - xLvlOffset), (int) attackBox.y, 
+				   (int) attackBox.width, (int) attackBox.height);
 	}
 }

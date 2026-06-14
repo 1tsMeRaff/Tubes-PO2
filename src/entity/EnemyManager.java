@@ -144,23 +144,27 @@ public class EnemyManager {
 	    g2.dispose();
 	}
 	
-	public void checkEnemyHit(Rectangle2D.Float attackBox, int damage) {
-		for (Slime s : Slimes) {
-			if(s.isActive()) {
-				if (attackBox.intersects(s.getHitBox())) {
-					s.hurt(damage); 
-					return;
-				}
-			}
-		}
-		for (DemonBoss demonBoss : demonBosses) {
-			if(demonBoss.isActive()) {
-				if (attackBox.intersects(demonBoss.getHitBox())) {
-					demonBoss.hurt(damage); 
-					return;
-				}
-			}
-		}
+	public void checkEnemyHit(Rectangle2D.Float attackBox, int damage, Player player) {
+	    for (Slime s : Slimes) {
+	        if(s.isActive()) {
+	            if (attackBox.intersects(s.getHitBox())) {
+	                int kbDir = (player.getHitbox().x < s.getHitBox().x) ? 1 : -1;
+	                s.hurt(damage, kbDir, true); 
+	                return;
+	            }
+	        }
+	    }
+	    
+	    for (DemonBoss demonBoss : demonBosses) {
+	        if(demonBoss.isActive()) {
+	            if (attackBox.intersects(demonBoss.getHitBox())) {
+	                int kbDir = (player.getHitbox().x < demonBoss.getHitBox().x) ? 1 : -1;
+	                boolean isCharge = player.isChargeAttack();
+	                demonBoss.hurt(damage, kbDir, isCharge); 
+	                return;
+	            }
+	        }
+	    }
 	}
 	
 	private void loadEnemyImages() {
