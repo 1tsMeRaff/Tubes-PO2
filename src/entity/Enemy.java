@@ -11,14 +11,11 @@ import java.awt.geom.Rectangle2D;
 public abstract class Enemy extends Entity {
 	protected int aniIndex, enemyState, enemyType;
 	protected int aniTick;
-//	protected int aniSpeed = 25;
 	protected int aniSpeed = 7;
 	protected boolean firstUpdate = true;
 	protected boolean inAir = false;
 	protected float fallSpeed;
-//	protected float gravity = 0.04f * GameCore.SCALE;
 	protected float gravity = 0.444f * GameCore.SCALE;
-//	protected float walkSpeed = 0.35f * GameCore.SCALE;
 	protected float walkSpeed = 1.16f * GameCore.SCALE;
 	protected int walkDir = LEFT;
 	protected int tileY;
