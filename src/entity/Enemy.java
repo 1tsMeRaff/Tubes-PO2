@@ -10,12 +10,16 @@ import java.awt.geom.Rectangle2D;
 
 public abstract class Enemy extends Entity {
 	protected int aniIndex, enemyState, enemyType;
-	protected int aniTick, aniSpeed = 25;
+	protected int aniTick;
+//	protected int aniSpeed = 25;
+	protected int aniSpeed = 7;
 	protected boolean firstUpdate = true;
 	protected boolean inAir = false;
 	protected float fallSpeed;
-	protected float gravity = 0.04f * GameCore.SCALE;
-	protected float walkSpeed = 0.35f * GameCore.SCALE;
+//	protected float gravity = 0.04f * GameCore.SCALE;
+	protected float gravity = 0.444f * GameCore.SCALE;
+//	protected float walkSpeed = 0.35f * GameCore.SCALE;
+	protected float walkSpeed = 1.16f * GameCore.SCALE;
 	protected int walkDir = LEFT;
 	protected int tileY;
 	protected float attackDistance = GameCore.TILES_SIZE;
@@ -98,10 +102,7 @@ public abstract class Enemy extends Entity {
 		return false;
 	}
 	
-//	private boolean IsSightClear(int[][] tilesData, Float hitBox, Float hitBox2, int tileY2) {
-//		// TODO Auto-generated method stub
-//		return false;
-//	}
+	
 
 	protected boolean isPlayerInRange(Player player) {
 		int absValue = (int) Math.abs(player.hitBox.x - hitBox.getX());

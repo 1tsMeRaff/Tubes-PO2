@@ -18,5 +18,4 @@ public class World {
 	public int[][] getWorldData(){
 		return tilesData;
 	}
-	
 }
