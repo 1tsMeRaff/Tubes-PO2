@@ -43,6 +43,11 @@ public class Player extends Entity {
     private int dashCooldownTick = 0;
     private float dashSpeed = 5.0f * GameCore.SCALE;
 
+    // Save point (untuk respawn jurang)
+    private float lastSafeX;
+    private float lastSafeY;
+    
+    // Charge Attack
     private boolean charging = false;
     private int chargeTick = 0;
     private final int CHARGE_DURATION_NEEDED = 30;
@@ -112,6 +117,11 @@ public class Player extends Entity {
             playStates.setGameOver(true);
             return;
         }
+      
+        // Cek apakah jatuh ke jurang
+        checkChasm();
+      
+        // Logika dash/charge + potion
         updateAttackBox();
         updatePos();
         checkPotionTouched();
@@ -130,6 +140,25 @@ public class Player extends Entity {
         }
         setAnimation();
         updateAnimationTick();
+    }
+
+ // Method utama untuk mendeteksi jatuh ke jurang
+    private void checkChasm() {
+        if (hitBox.y + hitBox.height >= main.GameCore.GAME_HEIGHT - 5) {
+            
+            //changeHealth(-20); 
+            
+            if (currentHealth > 0) {
+                hitBox.x = lastSafeX;
+                hitBox.y = lastSafeY - 15; 
+                
+    
+                inAir = true; 
+                airSpeed = 0;
+                moving = false;
+                jump = false;
+            }
+        }
     }
 
     private void updateManaBar() {
@@ -404,6 +433,14 @@ public class Player extends Entity {
             }
         }
         if (!inAir) {
+            
+            // ---> REKAM POSISI AMAN (DIPERBARUI) <---
+            // Hanya rekam posisi aman jika Feline BUKAN berada di ujung bawah layar
+            if (hitBox.y + hitBox.height < main.GameCore.GAME_HEIGHT - 32) {
+                lastSafeX = hitBox.x;
+                lastSafeY = hitBox.y;
+            }
+
             if (!IsEntityOnFloor(hitBox, mapData)) {
                 Rectangle2D.Float boxUnderneath = new Rectangle2D.Float(hitBox.x, hitBox.y + 1, hitBox.width, hitBox.height);
                 if (playStates.getObjectManager().getIntersectingContainer(boxUnderneath) == null) {
@@ -446,7 +483,6 @@ public class Player extends Entity {
             moving = true;
         }
     }
-
     private void jump() {
         if (inAir) {
             if (canDoubleJump) {
