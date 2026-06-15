@@ -244,6 +244,10 @@ public abstract class Enemy extends Entity {
 	public int getAniTick() {
 	    return aniTick;
 	}
+	
+	public int getCurrentHealth() {
+        return currentHealth;
+    }
 }
 
 
