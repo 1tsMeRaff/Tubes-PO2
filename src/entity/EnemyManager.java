@@ -4,7 +4,6 @@ import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-
 import gameStates.PlayStates;
 import main.GameCore;
 import utilitytools.LoadSave;
@@ -52,10 +51,11 @@ public class EnemyManager {
 	private void drawBossUI(Graphics g) {
 		for (DemonBoss db : demonBosses) {
 			if(db.isActive()) {
+				// 1. Tentukan ukuran dan posisi Health Bar (Statis di tengah bawah layar)
 				int maxWidth = (int) (400 * GameCore.SCALE); 
 				int height = (int) (20 * GameCore.SCALE);
 				int xPos = (GameCore.GAME_WIDTH / 2) - (maxWidth / 2);
-				int yPos = (int) (GameCore.GAME_HEIGHT - (40 * GameCore.SCALE));
+				int yPos = (int) (GameCore.GAME_HEIGHT - (40 * GameCore.SCALE)); // Posisi di bawah
 				
 				float distance = Math.abs(playStates.getPlayer().getHitbox().x - db.getHitBox().x);
 				float healthPercentage = (float) db.getCurrentHealth() / db.getMaxHealth();
@@ -67,12 +67,15 @@ public class EnemyManager {
 					g.setColor(new java.awt.Color(50, 50, 50, 200));
 					g.fillRect(xPos, yPos, maxWidth, height);
 
+					// 4. Gambar Darah Boss (Warna Merah)
 					g.setColor(new java.awt.Color(200, 50, 50));
 					g.fillRect(xPos, yPos, currentWidth, height);
 
+					// 5. Gambar Bingkai / Border (Warna Putih)
 					g.setColor(java.awt.Color.WHITE);
 					g.drawRect(xPos, yPos, maxWidth, height);
 
+					// 6. Gambar Teks Nama Boss
 					g.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, (int)(16 * GameCore.SCALE)));
 					g.drawString("DEMON BOSS", xPos, yPos - (int)(5 * GameCore.SCALE));
 					
@@ -85,12 +88,11 @@ public class EnemyManager {
 	private void drawSlimes(Graphics g, int xLvlOffset) {
 	    Graphics g2 = g.create();
 	    g2.translate(-xLvlOffset, 0);
-	    
 	    for (Slime s : Slimes) {
 	        if(s.isActive()) {
 	            int stateIndex = s.getEnemyState();
 	            if (stateIndex == MATI) {
-	                stateIndex = HURT; 
+	                stateIndex = HURT;
 	            }
 	            
 	            if (s.getEnemyState() == MATI) {
@@ -113,7 +115,6 @@ public class EnemyManager {
 	private void drawDemonBosses(Graphics g, int xLvlOffset) {
 	    Graphics g2 = g.create();
 	    g2.translate(-xLvlOffset, 0);
-	    
 	    for (DemonBoss demonBoss : demonBosses) {
 	        if(demonBoss.isActive()) {
 	            BufferedImage frame = demonBossImg[demonBoss.getEnemyState()][demonBoss.getAniIndex()];
@@ -125,7 +126,6 @@ public class EnemyManager {
 	                    demonBoss.drawX(),
 	                    demonBoss.drawY(),
 	                    DEMON_BOSS_WIDTH * demonBoss.flipW(), DEMON_BOSS_HEIGHT, null);
-
 	            demonBoss.drawHitbox(g2); 
 	            demonBoss.drawAttackBox(g, xLvlOffset);
 	        }
@@ -133,32 +133,23 @@ public class EnemyManager {
 	    g2.dispose();
 	}
 	
-	public void checkEnemyHit(Rectangle2D.Float attackBox, int damage, Player player) {
-	    for (Slime s : Slimes) {
-	        if(s.isActive()) {
-	            if (attackBox.intersects(s.getHitBox())) {
-	                int kbDir = (player.getHitbox().x < s.getHitBox().x) ? 1 : -1;
-	                s.hurt(damage, kbDir, true); 
-	                return;
-	            }
-	        }
-	    }
-	    
-	    for (DemonBoss demonBoss : demonBosses) {
-	        if(demonBoss.isActive()) {
-	            if (attackBox.intersects(demonBoss.getHitBox())) {
-	                int kbDir = (player.getHitbox().x < demonBoss.getHitBox().x) ? 1 : -1;
-	                boolean isCharge = player.isChargeAttack();
-	                demonBoss.hurt(damage, kbDir, isCharge); 
-	                if (demonBoss.isDead()) {
-	                    playStates.triggerHeavyHit(45, 120, 8);
-	                } else if (demonBoss.checkHpThresholdEffect()) {
-	                    playStates.triggerHeavyHit(20, 25, 12); 
-	                }
-	                return;
-	            }
-	        }
-	    }
+	public void checkEnemyHit(Rectangle2D.Float attackBox, int damage) {
+		for (Slime s : Slimes) {
+			if(s.isActive()) {
+				if (attackBox.intersects(s.getHitBox())) {
+					s.hurt(damage); 
+					return;
+				}
+			}
+		}
+		for (DemonBoss demonBoss : demonBosses) {
+			if(demonBoss.isActive()) {
+				if (attackBox.intersects(demonBoss.getHitBox())) {
+					demonBoss.hurt(damage); 
+					return;
+				}
+			}
+		}
 	}
 	
 	private void loadEnemyImages() {
@@ -194,6 +185,5 @@ public class EnemyManager {
 		for(DemonBoss demonBoss : demonBosses) {
 			demonBoss.resetEnemy();
 		}
-		
 	}
 }
