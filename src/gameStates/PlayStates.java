@@ -129,7 +129,7 @@ public class PlayStates extends States implements StateMethods {
     public void draw(Graphics g) {
         g.drawImage(backgroundImg, 0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
         
-        drawClouds(g);      // awan tetap digambar (dari dev)
+        //drawClouds(g);      // awan 
         
         worldManager.draw(g, xLvlOffset);
         objectManager.draw(g, xLvlOffset); 

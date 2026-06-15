@@ -15,6 +15,16 @@ public class Konstanta {
 	    public static final int BLUE_POTION_2 = 4;
 	    public static final int BLUE_POTION_3 = 5;
 
+	    
+	    //papan tulis
+	    public static final int SIGN = 5;
+
+	    public static final int SIGN_WIDTH_DEFAULT = 17; 
+	    public static final int SIGN_HEIGHT_DEFAULT = 17;
+	    public static final int SIGN_WIDTH = (int)(SIGN_WIDTH_DEFAULT * main.GameCore.SCALE);
+	    public static final int SIGN_HEIGHT = (int)(SIGN_HEIGHT_DEFAULT * main.GameCore.SCALE);
+	    
+	    
 	    // ID Kontainer
 	    public static final int BARREL = 6;
 	    public static final int BOX = 7;

@@ -3,7 +3,6 @@ package utilitytools;
 import java.awt.geom.Rectangle2D;
 import main.GameCore;
 
-
 public class HelpMethods {
 
     public static boolean isSolidTile(int tileID) {

@@ -1,5 +1,8 @@
 package objects;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -13,8 +16,11 @@ import static utilitytools.Konstanta.ObjectConstants.*;
 public class ObjectManager {
     private PlayStates playStates;
     private BufferedImage[][] potionImgs, containerImgs;
+    private BufferedImage signImg; // Gambar untuk papan tanda (MediavelFree.png)
+    
     private ArrayList<Potion> potions = new ArrayList<>();
     private ArrayList<GameContainer> containers = new ArrayList<>();
+    private ArrayList<Sign> signs = new ArrayList<>(); // Penyimpanan data papan tanda di map
 
     public ObjectManager(PlayStates playStates) {
         this.playStates = playStates;
@@ -97,16 +103,52 @@ public class ObjectManager {
                 containerImgs[j][i] = containerSprite.getSubimage(40 * i, 30 * j, 40, 30);
             }
         }
+        
+        // Memuat gambar Papan Tanda
+        signImg = LoadSave.GetSpriteAtlas("MediavelFree.png");
     }
 
     public void update() {
         for (Potion p : potions) { if (p.isActive()) p.update(); }
         for (GameContainer gc : containers) { if (gc.isActive()) gc.update(); }
+        // Sign tidak perlu di-update karena tidak memiliki animasi (statis)
     }
 
     public void draw(Graphics g, int xLvlOffset) {
+        drawSigns(g, xLvlOffset); // Gambar sign paling awal agar berada di belakang potion/objek lain
         drawPotions(g, xLvlOffset);
         drawContainers(g, xLvlOffset);
+    }
+    
+    // Fungsi untuk me-render papan tanda beserta teksnya
+    private void drawSigns(Graphics g, int xLvlOffset) {
+        for (Sign s : signs) {
+            int drawX = (int) (s.getHitbox().x - s.getxDrawOffset() - xLvlOffset);
+            int drawY = (int) (s.getHitbox().y - s.getyDrawOffset());
+
+            // 1. Gambar papan kayu utama
+            g.drawImage(signImg, drawX, drawY, SIGN_WIDTH, SIGN_HEIGHT, null);
+
+            // 2. Setup font untuk teks (Monospaced Bold)
+            g.setFont(new Font("Monospaced", Font.BOLD, (int)(10 * GameCore.SCALE))); 
+            FontMetrics fm = g.getFontMetrics();
+
+            // 3. Render Teks Atas (Warna Putih)
+            if (s.getTopText() != null && !s.getTopText().isEmpty()) {
+                g.setColor(Color.WHITE);
+                int tx = drawX + (SIGN_WIDTH / 2) - (fm.stringWidth(s.getTopText()) / 2);
+                int ty = drawY - (int)(8 * GameCore.SCALE); 
+                g.drawString(s.getTopText(), tx, ty);
+            }
+
+            // 4. Render Teks Tengah (Warna Hitam)
+            if (s.getMiddleText() != null && !s.getMiddleText().isEmpty()) {
+                g.setColor(Color.BLACK);
+                int mx = drawX + (SIGN_WIDTH / 2) - (fm.stringWidth(s.getMiddleText()) / 2);
+                int my = drawY + (SIGN_HEIGHT / 2) + (fm.getAscent() / 3); 
+                g.drawString(s.getMiddleText(), mx, my);
+            }
+        }
     }
 
     private void drawContainers(Graphics g, int xLvlOffset) {
@@ -131,8 +173,8 @@ public class ObjectManager {
                     (int) (p.getHitbox().y - p.getyDrawOffset()), 
                     POTION_WIDTH, POTION_HEIGHT, null);
                 
-                // Hilangkan tanda // pada dua baris di bawah ini jika ingin melihat hitbox merah (untuk debug)
-                // g.setColor(java.awt.Color.RED);
+                // Hilangkan tanda // pada dua baris di bawah ini jika ingin melihat hitbox (untuk debug)
+                // g.setColor(Color.RED);
                 // g.drawRect((int) (p.getHitbox().x - xLvlOffset), (int) p.getHitbox().y, (int) p.getHitbox().width, (int) p.getHitbox().height);
             }
         }
@@ -143,12 +185,12 @@ public class ObjectManager {
         for (GameContainer gc : containers) gc.reset();
     }
 
-    // Method pembaca CSV
+    // Method pembaca CSV Map yang sudah dimodifikasi
     public void loadObjectsFromMap(int[][] mapData) {
         // 1. Bersihkan arena dari objek map sebelumnya
         potions.clear();
         containers.clear();
-        
+        signs.clear(); // Bersihkan list papan tanda lama
 
         for (int j = 0; j < mapData.length; j++) {
             for (int i = 0; i < mapData[0].length; i++) {
@@ -156,7 +198,7 @@ public class ObjectManager {
                 int id = mapData[j][i];
                 int xPos = i * GameCore.TILES_SIZE;
                 
-                //  RAMUAN 
+                // --- RAMUAN ---
                 if (id >= 300 && id <= 305) {
                     int yPosPotion = (j * GameCore.TILES_SIZE) + (int)(0 * GameCore.SCALE);
                     
@@ -168,12 +210,28 @@ public class ObjectManager {
                     else if (id == 305) { potions.add(new Potion(xPos, yPosPotion, BLUE_POTION_3)); mapData[j][i] = 0; }
                 }
                 
-           
+                // --- CONTAINER ---
                 else if (id == 401 || id == 402) {
                     int yPosContainer = (j * GameCore.TILES_SIZE) - (int)(0 * GameCore.SCALE); 
                     
                     if (id == 401) { containers.add(new GameContainer(xPos, yPosContainer, BOX)); mapData[j][i] = 0; }
                     else if (id == 402) { containers.add(new GameContainer(xPos, yPosContainer, BARREL)); mapData[j][i] = 0; }
+                }
+                
+     
+                else if (id >= 500 && id <= 503) {
+                	int yPosSign = (j * GameCore.TILES_SIZE) + (int)(15 * GameCore.SCALE);
+                	
+                	int xPosSign = xPos + (int)(4 * GameCore.SCALE);
+                    
+                	if (id == 500) { 
+          
+                	    signs.add(new Sign(xPosSign, yPosSign, SIGN, "E", "gunakan")); 
+                    } 
+             
+
+                    // Ubah jadi 0 agar tubuh pemain tidak menabrak invisible wall dari papan
+                    mapData[j][i] = 0; 
                 }
             }
         }
