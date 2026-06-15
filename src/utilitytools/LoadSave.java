@@ -18,7 +18,8 @@ import static utilitytools.Konstanta.UI.PauseButtons.*;
 public class LoadSave {
 
 	public static final String PLAYER_SPRITE = "player_right.png";
-	public static final String WORLD_SPRITE = "main_tileset.png";
+	public static final String WORLD_SPRITE = "map_jungle_fix.png";
+//	public static final String MAP_TUTORIAL = "map_tutorial.png";
 	public static final String MAP_1_DATA = "map_1_data.png";
 	public static final String MENU_BUTTONS = "map_panel.png";
 	public static final String MENU_BACKGROUND = "bg_feline.png";
@@ -32,7 +33,8 @@ public class LoadSave {
 	public static final String DEMON_BOSS_SPRITE = "demon_boss_spritesheet.png";
 //	public static final String MENU_BACKGROUND = "MediavelFree.png";
 	public static final String MENU_BACKGROUND_IMG = "mainn_menu.jpeg";
-	public static final String PLAY_BACKGROUND_IMG = "Background_0.png";
+//	public static final String PLAY_BACKGROUND_IMG = "Background_0.png";
+	public static final String PLAY_BACKGROUND_IMG = "Background_jungle2.png";
 	public static final String CLOUDS_01 = "awan_01.png";
 	public static final String CLOUDS_02 = "awan_02.png";
 	
@@ -41,7 +43,7 @@ public class LoadSave {
 	public static final String MENU_PANEL = "menu_panel.png";
 	
 	// --- ASET BARU UNTUK PAUSE MENU ---
-    public static final String PAUSE_TITLE = "pause.png"; 
+    public static final String PAUSE_TITLE = "pause.png";
     public static final String PAUSE_MUSIC_TEXT = "music.png";
     public static final String PAUSE_SE_TEXT = "SE.png";
     public static final String PAUSE_VOL_TEXT = "volume.png";
@@ -114,7 +116,7 @@ public class LoadSave {
 		ArrayList<int[]> rowList = new ArrayList<>();
 		
 		try {
-			InputStream is = GameCore.class.getResourceAsStream(filePath); 
+			InputStream is = GameCore.class.getResourceAsStream(filePath);
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
 			String line;
 			
@@ -123,15 +125,15 @@ public class LoadSave {
 					continue;
 				}
 				
-				String[] numbers = line.split(","); 
-				int[] row = new int[numbers.length]; 
+				String[] numbers = line.split(",");
+				int[] row = new int[numbers.length];
 				
 				for (int col = 0; col < numbers.length; col++) {
 					int value = Integer.parseInt(numbers[col].trim());
 					
-					// 2. PERBAIKAN: Jika angkanya spawn musuh (200=Slime, 201=DemonBoss), jadikan -1 (udara) agar tidak digambar
-					if (value == 200 || value == 201) {
-						row[col] = -1; 
+					// PERBAIKAN: Jika angkanya spawn musuh (200/2000=Slime, 201/2001=DemonBoss), jadikan -1 (udara) agar tidak digambar
+					if (value == 200 || value == 201 || value == 2000 || value == 2001) {
+						row[col] = -1;
 					} else {
 						row[col] = value;
 					}
@@ -139,7 +141,6 @@ public class LoadSave {
 				rowList.add(row);
 			}
 			br.close();
-			
 		} catch (Exception e) {
 			System.out.println("Gagal memuat map!");
 			e.printStackTrace();
@@ -158,23 +159,25 @@ public class LoadSave {
 		int[][] tilesData = GetTilesData(filePath);
 		
 		try {
-			InputStream is = GameCore.class.getResourceAsStream(filePath); 
+			InputStream is = GameCore.class.getResourceAsStream(filePath);
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
 			
 			String line;
-			int row = 0; 
+			int row = 0;
 			
 			while ((line = br.readLine()) != null) {
 				if (line.trim().isEmpty()) {
 					continue;
 				}
 				
-				String[] numbers = line.split(","); 
+				String[] numbers = line.split(",");
 				
 				for (int col = 0; col < numbers.length; col++) {
 					int value = Integer.parseInt(numbers[col].trim());
-					if (value == 200) { 
-						int xPos = col * GameCore.TILES_SIZE; 
+					
+					// Mengakomodasi format ID branch dev (200) dan dev-Rafi (2000)
+					if (value == 200 || value == 2000) {
+						int xPos = col * GameCore.TILES_SIZE;
 						int yPos = row * GameCore.TILES_SIZE;
 						int groundRow = findGroundRow(row, col, tilesData);
 						if (groundRow != -1) {
@@ -201,7 +204,7 @@ public class LoadSave {
 		int[][] tilesData = GetTilesData(filePath);
 		
 		try {
-			InputStream is = GameCore.class.getResourceAsStream(filePath); 
+			InputStream is = GameCore.class.getResourceAsStream(filePath);
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
 			
 			String line;
@@ -212,13 +215,14 @@ public class LoadSave {
 					continue;
 				}
 				
-				String[] numbers = line.split(","); 
+				String[] numbers = line.split(",");
 				
 				for (int col = 0; col < numbers.length; col++) {
 					int value = Integer.parseInt(numbers[col].trim());
 					
-					if (value == 201) { 
-						int xPos = col * GameCore.TILES_SIZE; 
+					// Mengakomodasi format ID branch dev (201) dan dev-Rafi (2001)
+					if (value == 201 || value == 2001) {
+						int xPos = col * GameCore.TILES_SIZE;
 						int yPos = row * GameCore.TILES_SIZE;
 						int groundRow = findGroundRow(row, col, tilesData);
 						if (groundRow != -1) {

@@ -15,18 +15,42 @@ public class Konstanta {
 	    public static final int BLUE_POTION_2 = 4;
 	    public static final int BLUE_POTION_3 = 5;
 
+	    // Papan tulis
+	    public static final int SIGN = 5;
+
+	    public static final int SIGN_WIDTH_DEFAULT = 17;
+	    public static final int SIGN_HEIGHT_DEFAULT = 17;
+	    public static final int SIGN_WIDTH = (int)(SIGN_WIDTH_DEFAULT * main.GameCore.SCALE);
+	    public static final int SIGN_HEIGHT = (int)(SIGN_HEIGHT_DEFAULT * main.GameCore.SCALE);
+	    
+	    // Kandang macan
+	    public static final int KANDANG = 8;
+	    public static final int KANDANG_WIDTH_DEFAULT = 32; 
+	    public static final int KANDANG_HEIGHT_DEFAULT = 32;
+	    public static final int KANDANG_WIDTH = (int)(KANDANG_WIDTH_DEFAULT * main.GameCore.SCALE);
+	    public static final int KANDANG_HEIGHT = (int)(KANDANG_HEIGHT_DEFAULT * main.GameCore.SCALE);
+
 	    // ID Kontainer
 	    public static final int BARREL = 6;
 	    public static final int BOX = 7;
+	    
+	    // --- ID EQUIPMENT BARU ---
+	    public static final int HELMET = 10;
+	    public static final int ARMOR = 11;
+	    public static final int SHOES = 12;
+	    public static final int RING = 13;
+	    public static final int SACK = 14;     // Karung
+	    public static final int GLOVES = 15;   // Sarung Tangan
 
-	    // Nilai Potion (Contoh: makin besar tipenya, makin besar heal-nya)
+	    // Nilai Potion 
 	    public static final int RED_VAL_1 = 5,  RED_VAL_2 = 10, RED_VAL_3 = 15;
 	    public static final int BLUE_VAL_1 = 5, BLUE_VAL_2 = 10, BLUE_VAL_3 = 15;
 
 	    // Ukuran Default
 	    public static final int CONTAINER_WIDTH_DEFAULT = 40;
 	    public static final int CONTAINER_HEIGHT_DEFAULT = 30;
-	 // Ukuran Default Potion disesuaikan ke 16x16
+
+	    // Ukuran Default Potion disesuaikan ke 16x16
 	    public static final int POTION_WIDTH_DEFAULT = 16;
 	    public static final int POTION_HEIGHT_DEFAULT = 16;
 
@@ -40,10 +64,10 @@ public class Konstanta {
 	        switch (object_type) {
 	            case RED_POTION_1: case RED_POTION_2: case RED_POTION_3:
 	            case BLUE_POTION_1: case BLUE_POTION_2: case BLUE_POTION_3:
-	                return 3; // 3 frame animasi sesuai asetmu
+	                return 3;
 	            case BARREL:
 	            case BOX:
-	                return 8; // Tetap 8 frame untuk hancur
+	                return 8;
 	            default:
 	                return 1;
 	        }
@@ -61,9 +85,6 @@ public class Konstanta {
 	    public static final int CLOUDS_02_WIDTH = (int) (CLOUDS_01_WIDTH_DEFAULT * GameCore.SCALE);
 	    public static final int CLOUDS_02_HEIGHT = (int) (CLOUDS_01_HEIGHT_DEFAULT * GameCore.SCALE);
 	}
-	
-
-	
 
 	public static class EnemyConstants{
 		public static final int SLIME = 0;
@@ -75,16 +96,13 @@ public class Konstanta {
 		public static final int JUMP = 3;
 		public static final int HURT = 4;
 		public static final int MATI = 5;
-		
+
 		public static final int SLIME_WIDTH_DEFAULT = 80;
 		public static final int SLIME_HEIGHT_DEFAULT = 80;
-		
 		public static final int SLIME_WIDTH = (int) (SLIME_WIDTH_DEFAULT * GameCore.SCALE);
 		public static final int SLIME_HEIGHT = (int) (SLIME_HEIGHT_DEFAULT * GameCore.SCALE);
-		
 		public static final int SLIME_HITBOX_WIDTH = (int) (16 * GameCore.SCALE);
 		public static final int SLIME_HITBOX_HEIGHT = (int) (9 * GameCore.SCALE);
-		
 		public static final int SLIME_DRAWOFFSET_X = (int) (16 * GameCore.SCALE);
 		public static final int SLIME_DRAWOFFSET_Y = (int) (52 * GameCore.SCALE);
 
@@ -100,37 +118,25 @@ public class Konstanta {
 		
 		public static final int DEMON_BOSS_DRAWOFFSET_X = (int) (120 * GameCore.SCALE);
 		public static final int DEMON_BOSS_DRAWOFFSET_Y = (int) (85 * GameCore.SCALE);
-		
+
 		public static int GetSpriteAmount(int enemy_type, int enemy_state) {
-			
 			switch(enemy_type) {
 			case SLIME:
 				switch(enemy_state) {
-				case IDLE:
-					return 6;
-				case WALK:
-					return 6;
-				case ATTACK:
-					return 9;
-				case JUMP:
-					return 8;
-				case HURT:
-					return 3;
-				case MATI:
-					return 3;
+				case IDLE: return 6;
+				case WALK: return 6;
+				case ATTACK: return 9;
+				case JUMP: return 8;
+				case HURT: return 3;
+				case MATI: return 3;
 				}
 			case DEMON_BOSS:
 				switch(enemy_state) {
-				case IDLE:
-					return 6;
-				case WALK:
-					return 12;
-				case ATTACK:
-					return 15;
-				case HURT:
-					return 5;
-				case MATI:
-					return 22;
+				case IDLE: return 6;
+				case WALK: return 12;
+				case ATTACK: return 15;
+				case HURT: return 5;
+				case MATI: return 22;
 				}
 			}
 			return 0;
@@ -138,23 +144,17 @@ public class Konstanta {
 		
 		public static int getMaxHealth(int enemy_type) {
 			switch(enemy_type) {
-			case SLIME:
-				return 100;
-			case DEMON_BOSS:
-				return 80;
-			default:
-				return 1;
+			case SLIME: return 10;
+			case DEMON_BOSS: return 80;
+			default: return 1;
 			}
 		}
 		
 		public static int getEnemyAtt(int enemy_type) {
 			switch(enemy_type) {
-			case SLIME:
-				return 5;
-			case DEMON_BOSS:
-				return 25;
-			default:
-				return 0;
+			case SLIME: return 10;
+			case DEMON_BOSS: return 25;
+			default: return 0;
 			}
 		}
 	}
@@ -170,15 +170,12 @@ public class Konstanta {
 		public static class PauseButtons{
 			public static final int SOUND_SIZE_DEFAULT = 42;
 			public static final int SOUND_SIZE = (int) (SOUND_SIZE_DEFAULT * GameCore.SCALE);
-
 			public static final int URM_DEFAULT_SIZE = 56;
 			public static final int URM_SIZE = (int) (URM_DEFAULT_SIZE * GameCore.SCALE);
-
 			public static final int VOLUME_DEFAULT_WIDTH = 28;
 			public static final int VOLUME_DEFAULT_HEIGHT = 44;
 			public static final int VOLUME_WIDTH = (int) (VOLUME_DEFAULT_WIDTH * GameCore.SCALE);
 			public static final int VOLUME_HEIGHT = (int) (VOLUME_DEFAULT_HEIGHT * GameCore.SCALE);
-
 			public static final int SLIDER_DEFAULT_WIDTH = 215;
 			public static final int SLIDER_WIDTH = (int) (SLIDER_DEFAULT_WIDTH * GameCore.SCALE);
 		}
@@ -205,32 +202,19 @@ public class Konstanta {
 		public static final int ARISE = 24;
 		
 		public static int GetSpriteAmount(int player_action) {
-			
 			switch(player_action) {
-			case DOWN:
-				return 7;
-			case IDLE_CHILL:
-				return 8;
-			case ARISE:
-				return 7;
-			case IDLE_ACTIVE:
-				return 8;
-			case LARI:
-				return 8;
-			case LOMPAT:
-				return 11;
-			case JATUH:
-				return 6;
-			case ATTACK_1:
-				return 8;
-			case CHARGE_ATTACK:
-				return 15;
-			case GUARD:
-				return 6;
-			case DASH:
-				return 10;
-			default:
-				return 1;
+			case DOWN: return 7;
+			case IDLE_CHILL: return 8;
+			case ARISE: return 7;
+			case IDLE_ACTIVE: return 8;
+			case LARI: return 8;
+			case LOMPAT: return 11;
+			case JATUH: return 6;
+			case ATTACK_1: return 8;
+			case CHARGE_ATTACK: return 15;
+			case GUARD: return 6;
+			case DASH: return 10;
+			default: return 1;
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 package gameStates;
 
-import entity.EnemyManager; 
+import entity.EnemyManager;
 import entity.Player;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -23,7 +23,7 @@ public class PlayStates extends States implements StateMethods {
 
     private Player player;
     private WorldManager worldManager;
-    private EnemyManager enemyManager; 
+    private EnemyManager enemyManager;
     private ObjectManager objectManager; 
     private PauseOverlay pauseOverlay;
     private LevelCompletedOverlay levelCompletedOverlay;
@@ -34,8 +34,8 @@ public class PlayStates extends States implements StateMethods {
     private boolean gameOver = false; 
     
     private InventoryOverlay inventoryOverlay;  
-    private boolean inventoryOpen = false;   
-    
+    private boolean inventoryOpen = false;
+
     // Variabel Kamera
     public int xLvlOffset;
     private int leftBorder = (int) (0.2 * GameCore.GAME_WIDTH);
@@ -54,8 +54,7 @@ public class PlayStates extends States implements StateMethods {
     public PlayStates(GameCore gc) {
         super(gc);
         initClasses();
-        calcLvlOffset(); 
-        
+        calcLvlOffset();
         backgroundImg = LoadSave.GetSpriteAtlas(LoadSave.PLAY_BACKGROUND_IMG);
         clouds_01 = LoadSave.GetSpriteAtlas(LoadSave.CLOUDS_01);
         clouds_02 = LoadSave.GetSpriteAtlas(LoadSave.CLOUDS_01);
@@ -64,14 +63,12 @@ public class PlayStates extends States implements StateMethods {
             clouds_02Pos[i] = (int)(90 * GameCore.SCALE) +  rnd.nextInt((int)(100*GameCore.SCALE));
     }
     
-    
-    
     private void initClasses() {
         worldManager = new WorldManager(gc);
         enemyManager = new EnemyManager(this); 
         
         objectManager = new ObjectManager(this);
-        objectManager.addTestObjects(); 
+        objectManager.loadObjectsFromMap(worldManager.getCurrentMap().getWorldData());
         
         player = new Player(200, 200, (int) (64 * GameCore.SCALE), (int) (40 * GameCore.SCALE), this);
         player.loadmapData(worldManager.getCurrentMap().getWorldData());
@@ -107,11 +104,11 @@ public class PlayStates extends States implements StateMethods {
     
     private void drawClouds(Graphics g) {
         for (int i = 0; i < 3 ; i++) {
-            g.drawImage(clouds_01, i * CLOUDS_01_WIDTH - (int)(xLvlOffset * 0.3), (int) (204 * GameCore.SCALE), CLOUDS_01_WIDTH, CLOUDS_01_HEIGHT, null);
+//            g.drawImage(clouds_01, i * CLOUDS_01_WIDTH - (int)(xLvlOffset * 0.3), (int) (204 * GameCore.SCALE), CLOUDS_01_WIDTH, CLOUDS_01_HEIGHT, null);
         }
         
         for (int i = 0; i < clouds_02Pos.length; i++) {
-            g.drawImage(clouds_02, CLOUDS_02_WIDTH * 4 * i - (int)(xLvlOffset * 0.7), clouds_02Pos[i], CLOUDS_02_WIDTH, CLOUDS_02_HEIGHT, null);
+//            g.drawImage(clouds_02, CLOUDS_02_WIDTH * 4 * i - (int)(xLvlOffset * 0.7), clouds_02Pos[i], CLOUDS_02_WIDTH, CLOUDS_02_HEIGHT, null);
         }
     }
     
@@ -128,28 +125,25 @@ public class PlayStates extends States implements StateMethods {
         } else if (lvlCompleted) {
             levelCompletedOverlay.update();
         } else if (gameOver) {
-            // GameOver update
+        	
         } else if (inventoryOpen) {
-            // Inventory update
+        	
         } else {
-            // === LOGIKA HIT STOP ===
             if (hitStopDuration > 0) {
                 hitStopDuration--;
-                // Tetap kurangi durasi shake agar layar bisa bergetar SAAT waktu membeku
                 if (shakeDuration > 0) shakeDuration--;
-                return; // LEWATI semua update di bawah ini (Game membeku)
+                return;
             }
 
-            // Kurangi durasi shake saat berjalan normal
             if (shakeDuration > 0) shakeDuration--;
 
-            // ... [Update normal gamemu berjalan di sini] ...
             worldManager.update();
             objectManager.update();
             player.update();
             enemyManager.update(worldManager.getCurrentMap().getWorldData(), player);
             checkCloseToBorder();
-
+            
+            // Cek Transisi Level & Memicu Suara Menang
             int endOfMapX = (worldManager.getCurrentMap().getWorldData()[0].length * GameCore.TILES_SIZE) - 50;
             if (player.getHitbox().x >= endOfMapX) {
                 setLevelCompleted(true);
@@ -164,23 +158,25 @@ public class PlayStates extends States implements StateMethods {
         int shakeX = 0;
         int shakeY = 0;
 
-        // === LOGIKA SCREEN SHAKE ===
         if (shakeDuration > 0) {
             shakeX = rnd.nextInt(shakeIntensity * 2) - shakeIntensity;
             shakeY = rnd.nextInt(shakeIntensity * 2) - shakeIntensity;
         }
 
-        // Geser kanvas sebelum mulai menggambar
         g2.translate(shakeX, shakeY);
 
-        g.drawImage(backgroundImg, 0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
+//        g.drawImage(backgroundImg, -xLvlOffset, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
+        float geserX = 0.25f;
+        int bgX = (int)(-xLvlOffset * geserX) % GameCore.GAME_WIDTH;
+        g.drawImage(backgroundImg, bgX, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
+        g.drawImage(backgroundImg, bgX + GameCore.GAME_WIDTH, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
+        
         drawClouds(g);
         worldManager.draw(g, xLvlOffset);
         objectManager.draw(g, xLvlOffset);
         player.render(g, xLvlOffset);
         enemyManager.draw(g, xLvlOffset);
 
-        // Kembalikan kanvas ke posisi semula agar UI tidak ikut bergetar (opsional, tapi disarankan)
         g2.translate(-shakeX, -shakeY);
 
         if (paused) {
@@ -196,7 +192,7 @@ public class PlayStates extends States implements StateMethods {
 
 
     public void loadNextLevel() {
-        worldManager.loadNextWorld(); 
+        worldManager.loadNextWorld();
         int[][] newMapData = worldManager.getCurrentMap().getWorldData();
         
         float newX = 200;
@@ -204,9 +200,16 @@ public class PlayStates extends States implements StateMethods {
 
         resetAll(newX, newY); 
         player.loadmapData(newMapData); 
+        
+        objectManager.loadObjectsFromMap(newMapData);
         calcLvlOffset();
         
         gc.getAudioPlayer().playSong(audio.AudioPlayer.LEVEL_2);
+    }
+
+    // FUNGSI JEMBATAN UNTUK INVENTORY OVERLAY
+    public void equipPlayerItem(int itemIndex, String slotType) {
+        player.equipItem(itemIndex, slotType);
     }
 
     @Override
@@ -220,7 +223,7 @@ public class PlayStates extends States implements StateMethods {
 
         if (inventoryOpen) {
             inventoryOverlay.mousePressed(e);
-            return; 
+            return;
         }
 
         if (paused) {
@@ -235,7 +238,6 @@ public class PlayStates extends States implements StateMethods {
     @Override
     public void mouseReleased(MouseEvent e) {
         if (gameOver) return;
-
         if (paused) {
             pauseOverlay.mouseReleased(e);
         } else if (lvlCompleted) {
@@ -263,7 +265,6 @@ public class PlayStates extends States implements StateMethods {
 
     public void mouseDragged(MouseEvent e) {
         if (gameOver) return;
-
         if (paused) {
             pauseOverlay.mouseDragged(e);
         }
@@ -276,7 +277,6 @@ public class PlayStates extends States implements StateMethods {
             return;
         }
         if (lvlCompleted) return;
-
         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
             paused = !paused;
             return;
@@ -290,42 +290,25 @@ public class PlayStates extends States implements StateMethods {
             return;
         }
 
-        if (inventoryOpen) {
-            return; 
-        }
+        if (inventoryOpen) return; 
 
         if (paused) return;
-
+        
         switch(e.getKeyCode()) {
-            case KeyEvent.VK_A:
-                player.setLeft(true);
-                break;
-            case KeyEvent.VK_D:
-                player.setRight(true);
-                break;
-            case KeyEvent.VK_SPACE:
-                player.setJump(true);
-                break;
-            case KeyEvent.VK_Q:
-                player.setDash(true);
-                break;
+            case KeyEvent.VK_A: player.setLeft(true); break;
+            case KeyEvent.VK_D: player.setRight(true); break;
+            case KeyEvent.VK_SPACE: player.setJump(true); break;
+            case KeyEvent.VK_Q: player.setDash(true); break;
         }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
         if (paused || lvlCompleted || gameOver || inventoryOpen) return;
-        
         switch(e.getKeyCode()) {
-            case KeyEvent.VK_A:
-                player.setLeft(false);
-                break;
-            case KeyEvent.VK_D:
-                player.setRight(false);
-                break;
-            case KeyEvent.VK_SPACE:
-                player.setJump(false);
-                break;
+            case KeyEvent.VK_A: player.setLeft(false); break;
+            case KeyEvent.VK_D: player.setRight(false); break;
+            case KeyEvent.VK_SPACE: player.setJump(false); break;
         }
     }
     
@@ -347,7 +330,7 @@ public class PlayStates extends States implements StateMethods {
         this.gameOver = gameOver;
         if (gameOver) {
             gc.getAudioPlayer().stopSong(); 
-            gc.getAudioPlayer().playEffect(audio.AudioPlayer.GAMEOVER); 
+            gc.getAudioPlayer().playEffect(audio.AudioPlayer.GAMEOVER);
         }
     }
 
@@ -363,27 +346,10 @@ public class PlayStates extends States implements StateMethods {
         objectManager.checkObjectTouched(hitbox);
     }
 
-    public void setPaused(boolean paused) {
-        this.paused = paused;
-    }
-
-    public void setLevelCompleted(boolean levelCompleted) {
-        this.lvlCompleted = levelCompleted;
-    }
-
-    public boolean isPaused() {
-        return paused;
-    }
-    
-    public Player getPlayer() {
-        return player;
-    }
-
-    public ObjectManager getObjectManager() {
-        return objectManager;
-    }
-    
-    public GameCore getGameCore() {
-        return gc;
-    }
+    public void setPaused(boolean paused) { this.paused = paused; }
+    public void setLevelCompleted(boolean levelCompleted) { this.lvlCompleted = levelCompleted; }
+    public boolean isPaused() { return paused; }
+    public Player getPlayer() { return player; }
+    public ObjectManager getObjectManager() { return objectManager; }
+    public GameCore getGameCore() { return gc; }
 }

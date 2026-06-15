@@ -8,77 +8,101 @@ import main.GameCore;
 import utilitytools.LoadSave;
 
 public class WorldManager {
-	
-	private GameCore gc;
-	private BufferedImage[] mapSprite;
-	private ArrayList<World> worlds;
-	private int worldIndex = 0;
-	
-	public WorldManager(GameCore gc) {
-		this.gc = gc;
-		importOutsideSprites();
-		worlds = new ArrayList<>();
-		buildAllWorlds();
-	}
-	
-	private void buildAllWorlds() {
-		worlds.add(new World(LoadSave.GetTilesData("/map_test.txt"))); 
-//		worlds.add(new World(LoadSave.GetTilesData("/untitled.csv")));
-		// worlds.add(new World(LoadSave.GetTilesData("/map_3.csv")));
-	}
 
-	private void importOutsideSprites() {
-		BufferedImage image = LoadSave.GetSpriteAtlas(LoadSave.WORLD_SPRITE);
-		
-		int col = image.getWidth() / 32;
-		int row = image.getHeight() / 32;
-		
-		mapSprite = new BufferedImage[col * row]; 
-		
-		for(int j = 0; j < row; j++) {
-			for(int i = 0; i < col; i++) {
-				int index = (j * col) + i;
-				mapSprite[index] = image.getSubimage(i * 32, j * 32, 32, 32);
-			}
-		}
-	}
-	
-	public void draw(Graphics g, int xLvlOffset) {
-		
-		World currentMap = worlds.get(worldIndex);
-		int mapWidth = currentMap.getWorldData()[0].length;
-		
-		for(int j = 0; j < GameCore.TILES_IN_HEIGHT; j++) {
-			for(int i = 0; i < mapWidth; i++) {
-				
-				int index = currentMap.getSpriteIndex(i, j);
-				
-				if (index >= 0) { 
-					g.drawImage(mapSprite[index], 
-								(GameCore.TILES_SIZE * i) - xLvlOffset, 
-								GameCore.TILES_SIZE * j, 
-								GameCore.TILES_SIZE, 
-								GameCore.TILES_SIZE, 
-								null);
-				}
-			}
-		}
-	}
-	
-	public void update() {
-		// Logika update tambahan (animasi air/awan statis) bisa ditaruh di sini nanti
-	}
-	
-	public void loadNextWorld() {
-		worldIndex++;
-		if (worldIndex >= worlds.size()) {
-			worldIndex = 0; // Balik ke map 1 jika sudah tamat
-			System.out.println("Game Tamat! Kembali ke Map 1.");
-			gameStates.GameStates.state = gameStates.GameStates.MENU;
-		}
-	}
+    private GameCore gc;
+    private BufferedImage[] mapSprite;
+    private ArrayList<World> worlds;
+    private int worldIndex = 0;
 
-	public World getCurrentMap() {
-		return worlds.get(worldIndex);
-	}
+    public WorldManager(GameCore gc) {
+        this.gc = gc;
+        importOutsideSprites();
+        worlds = new ArrayList<>();
+        buildAllWorlds();
+    }
+
+    private void buildAllWorlds() {
+        worlds.add(new World(LoadSave.GetTilesData("/map_tutorial_fix.csv")));
+    }
+
+    private void importOutsideSprites() {
+        BufferedImage image = LoadSave.GetSpriteAtlas(LoadSave.WORLD_SPRITE);
+
+        int tileWidth = 16;
+        int tileHeight = 16;
+
+        // Dinamis: 432 / 16 = 27 kolom | 320 / 16 = 20 baris
+        int cols = image.getWidth() / tileWidth;
+        int rows = image.getHeight() / tileHeight;
+
+        // Total array sekarang akan berisi 540 elemen
+        mapSprite = new BufferedImage[cols * rows];
+
+        for (int j = 0; j < rows; j++) {
+            for (int i = 0; i < cols; i++) {
+                int index = i + (j * cols);
+                mapSprite[index] = image.getSubimage(i * tileWidth, j * tileHeight, tileWidth, tileHeight);
+            }
+        }
+    }
+
+    public void draw(Graphics g, int xLvlOffset) {
+        World currentMap = worlds.get(worldIndex);
+        int[][] worldData = currentMap.getWorldData();
+        int mapHeight = worldData.length;
+        int mapWidth = worldData[0].length;
+        int tileSize = GameCore.TILES_SIZE;
+
+        // === OPTIMASI FRUSTUM CULLING ===
+        int startX = Math.max(0, xLvlOffset / tileSize);
+        int endX = Math.min(mapWidth, startX + GameCore.TILES_IN_WIDTH + 2);
+
+        for (int j = 0; j < mapHeight; j++) {
+            for (int i = startX; i < endX; i++) {
+                int tiledValue = worldData[j][i];
+
+                // 1. Filter Udara: Lewati jika nilainya -1 (kosong)
+                if (tiledValue != -1) {
+                    
+                    // 2. Koreksi Pergeseran Tiled (1-based) ke Java (0-based)
+                    int spriteIndex = tiledValue;
+
+                    // 3. Validasi Keamanan menggunakan fungsi Helper
+                    if (isValidTile(spriteIndex)) {
+                        int xPos = (int) (i * tileSize - xLvlOffset);
+                        int yPos = j * tileSize;
+                        
+                        g.drawImage(mapSprite[spriteIndex], xPos, yPos, tileSize, tileSize, null);
+                    }
+                }
+            }
+        }
+    }
+
+    // Fungsi Helper untuk memvalidasi indeks ubin sebelum dirender
+    private boolean isValidTile(int index) {
+        // Mencegah error OutOfBounds jika Tiled mengirim angka di luar total atlas (540 ubin)
+        // Ini otomatis memblokir ID Entitas bernilai besar (seperti 2000+) agar tidak digambar sebagai tanah
+        if (index < 0 || index >= mapSprite.length) {
+            return false;
+        }
+        
+        return true;
+    }
+
+    public void update() {
+    }
+
+    public void loadNextWorld() {
+        worldIndex++;
+        if (worldIndex >= worlds.size()) {
+            worldIndex = 0;
+            System.out.println("Game Tamat! Kembali ke Map 1.");
+            gameStates.GameStates.state = gameStates.GameStates.MENU;
+        }
+    }
+
+    public World getCurrentMap() {
+        return worlds.get(worldIndex);
+    }
 }
