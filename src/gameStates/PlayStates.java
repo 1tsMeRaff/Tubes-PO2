@@ -144,7 +144,7 @@ public class PlayStates extends States implements StateMethods {
             objectManager.update();
             player.update();
             enemyManager.update(worldManager.getCurrentMap().getWorldData(), player);
-            checkBossTrigger(100, 300, 10);
+//            checkBossTrigger(100, 50);
             checkCloseToBorder();
             
             // Cek Transisi Level & Memicu Suara Menang
@@ -198,19 +198,17 @@ public class PlayStates extends States implements StateMethods {
         }
     }
     
-    private void checkBossTrigger(int triggerX, int triggerY, int radius) {
-        if (isBossEncountered) return;
-
-        float playerCenterX = player.getHitbox().x + (player.getHitbox().width / 2);
-        float playerCenterY = player.getHitbox().y + (player.getHitbox().height / 2);
-
-        double distance = Math.sqrt(Math.pow(playerCenterX - triggerX, 2) + Math.pow(playerCenterY - triggerY, 2));
-
-        if (distance < radius) {
-            isBossEncountered = true;
-            System.out.println("Boss Triggered!");
-        }
-    }
+//    private void checkBossTrigger(int targetX, int tolerance) {
+//        if (isBossEncountered) return;
+//
+//        // Pemain hanya perlu melewati garis X tertentu
+//        float playerCenterX = player.getHitbox().x + (player.getHitbox().width / 2);
+//        
+//        // Jika posisi X pemain sudah melewati targetX - tolerance
+//        if (playerCenterX > targetX - tolerance) {
+//            isBossEncountered = true;
+//        }
+//    }
 
 
     public void loadNextLevel() {
@@ -363,7 +361,7 @@ public class PlayStates extends States implements StateMethods {
     }
 
     public void checkHitEnemy(Rectangle2D.Float AttackBox, int damage) {
-        enemyManager.checkEnemyHit(AttackBox, damage);
+        enemyManager.checkEnemyHit(AttackBox, damage, player);
     }
     
     public void checkObjectHit(Rectangle2D.Float attackBox) {
@@ -372,6 +370,10 @@ public class PlayStates extends States implements StateMethods {
 
     public void checkPotionTouched(Rectangle2D.Float hitbox) {
         objectManager.checkObjectTouched(hitbox);
+    }
+    
+    public boolean isBossEncountered() {
+        return isBossEncountered;
     }
 
     public void setPaused(boolean paused) { this.paused = paused; }

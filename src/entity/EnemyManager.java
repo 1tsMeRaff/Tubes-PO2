@@ -100,8 +100,8 @@ public class EnemyManager {
 	                    (int) (s.getHitBox().x - SLIME_DRAWOFFSET_X + s.flipX()),
 	                    (int) (s.getHitBox().y - SLIME_DRAWOFFSET_Y),
 	                    SLIME_WIDTH * s.flipW(), SLIME_HEIGHT, null);
-	             s.drawHitbox(g2); 
-	             s.drawAttackBox(g2, xLvlOffset);
+//	             s.drawHitbox(g2); 
+//	             s.drawAttackBox(g2, xLvlOffset);
 	        }
 	    } 
 	    g2.dispose();
@@ -120,32 +120,64 @@ public class EnemyManager {
 	            g2.drawImage(frame,
 	                    demonBoss.drawX(),
 	                    demonBoss.drawY(),
-	                    DEMON_BOSS_WIDTH * demonBoss.flipW(), DEMON_BOSS_HEIGHT, null);
-	            demonBoss.drawHitbox(g2); 
-	            demonBoss.drawAttackBox(g, xLvlOffset);
+	                    DEMON_BOSS_WIDTH * demonBoss.flipW(), 
+	                    DEMON_BOSS_HEIGHT, null);
+//	            demonBoss.drawHitbox(g2); 
+//	            demonBoss.drawAttackBox(g, xLvlOffset);
 	        }
 	    } 
 	    g2.dispose();
 	}
 	
-	public void checkEnemyHit(Rectangle2D.Float attackBox, int damage) {
-		for (Slime s : Slimes) {
-			if(s.isActive()) {
-				if (attackBox.intersects(s.getHitBox())) {
-					s.hurt(damage); 
-					return;
-				}
-			}
-		}
-		for (DemonBoss demonBoss : demonBosses) {
-			if(demonBoss.isActive()) {
-				if (attackBox.intersects(demonBoss.getHitBox())) {
-					demonBoss.hurt(damage); 
-					return;
-				}
-			}
-		}
+	public void checkEnemyHit(Rectangle2D.Float attackBox, int damage, Player player) {
+	    // 1. Cek Slime (Sederhana)
+	    for (Slime s : Slimes) {
+	        if (s.isActive() && attackBox.intersects(s.getHitBox())) {
+	            s.hurt(damage); // Slime cukup damage saja
+	            return;
+	        }
+	    }
+	    
+	    // 2. Cek DemonBoss (Kompleks + HeavyHit)
+	    for (DemonBoss demonBoss : demonBosses) {
+	        if (demonBoss.isActive() && attackBox.intersects(demonBoss.getHitBox())) {
+	            
+	            // Logika Knockback & Charge
+	            int kbDir = (player != null && player.getHitbox().x < demonBoss.getHitBox().x) ? 1 : -1;
+	            boolean isCharge = (player != null) && player.isChargeAttack();
+	            
+	            demonBoss.hurt(damage, kbDir, isCharge);
+	            
+	            // Logika HeavyHit (Screen Shake)
+	            if (demonBoss.isDead()) {
+	                playStates.triggerHeavyHit(45, 120, 8); // Guncangan besar saat mati
+	            } else if (demonBoss.checkHpThresholdEffect()) {
+	                playStates.triggerHeavyHit(20, 25, 12); // Guncangan saat HP rendah
+	            }
+	            
+	            return;
+	        }
+	    }
 	}
+	
+//	public void checkEnemyHit(Rectangle2D.Float attackBox, int damage) {
+//		for (Slime s : Slimes) {
+//			if(s.isActive()) {
+//				if (attackBox.intersects(s.getHitBox())) {
+//					s.hurt(damage); 
+//					return;
+//				}
+//			}
+//		}
+//		for (DemonBoss demonBoss : demonBosses) {
+//			if(demonBoss.isActive()) {
+//				if (attackBox.intersects(demonBoss.getHitBox())) {
+//					demonBoss.hurt(damage); 
+//					return;
+//				}
+//			}
+//		}
+//	}
 	
 	private void loadEnemyImages() {
 		slimeImg = new BufferedImage[5][9];
