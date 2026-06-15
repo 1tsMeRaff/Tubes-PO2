@@ -88,13 +88,6 @@ public class Slime extends Enemy {
 		g.setColor(Color.red);
 		g.drawRect((int) (AttackBox.x-xLvlOffset), (int) AttackBox.y, (int) AttackBox.width, (int) AttackBox.height);
 	}
-//	public int flipX() {
-//		if (walkDir == LEFT) {
-//			return width;
-//		}else {
-//			return 0;
-//		}
-//	}
 	
 	public int flipW() {
 		if (walkDir == LEFT) {

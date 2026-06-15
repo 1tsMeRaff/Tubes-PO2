@@ -22,7 +22,7 @@ public class WorldManager {
     }
 
     private void buildAllWorlds() {
-        worlds.add(new World(LoadSave.GetTilesData("/map_tutorial_fix.csv")));
+        worlds.add(new World(LoadSave.GetTilesData("/map_tutorial_fix.txt")));
     }
 
     private void importOutsideSprites() {

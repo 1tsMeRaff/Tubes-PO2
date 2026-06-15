@@ -24,8 +24,8 @@ public class EnemyManager {
 	}
 
 	private void addEnemies() {
-		Slimes = LoadSave.GetSlimes("/map_test.txt");
-		demonBosses = LoadSave.GetDemonBosses("/map_test.txt");
+		Slimes = LoadSave.GetSlimes("/map_tutorial_fix.txt");
+		demonBosses = LoadSave.GetDemonBosses("/map_tutorial_fix.txt");
 	}
 
 	public void update(int[][] tilesData, Player player) {
@@ -44,18 +44,16 @@ public class EnemyManager {
 	public void draw(Graphics g, int xLvlOffset) {
 		drawSlimes(g, xLvlOffset);
 		drawDemonBosses(g, xLvlOffset);
-		
 		drawBossUI(g);
 	}
 	
-	private void drawBossUI(Graphics g) {
+	public void drawBossUI(Graphics g) {
 		for (DemonBoss db : demonBosses) {
 			if(db.isActive()) {
-				// 1. Tentukan ukuran dan posisi Health Bar (Statis di tengah bawah layar)
 				int maxWidth = (int) (400 * GameCore.SCALE); 
 				int height = (int) (20 * GameCore.SCALE);
 				int xPos = (GameCore.GAME_WIDTH / 2) - (maxWidth / 2);
-				int yPos = (int) (GameCore.GAME_HEIGHT - (40 * GameCore.SCALE)); // Posisi di bawah
+				int yPos = (int) (GameCore.GAME_HEIGHT - (40 * GameCore.SCALE));
 				
 				float distance = Math.abs(playStates.getPlayer().getHitbox().x - db.getHitBox().x);
 				float healthPercentage = (float) db.getCurrentHealth() / db.getMaxHealth();
@@ -67,15 +65,12 @@ public class EnemyManager {
 					g.setColor(new java.awt.Color(50, 50, 50, 200));
 					g.fillRect(xPos, yPos, maxWidth, height);
 
-					// 4. Gambar Darah Boss (Warna Merah)
 					g.setColor(new java.awt.Color(200, 50, 50));
 					g.fillRect(xPos, yPos, currentWidth, height);
 
-					// 5. Gambar Bingkai / Border (Warna Putih)
 					g.setColor(java.awt.Color.WHITE);
 					g.drawRect(xPos, yPos, maxWidth, height);
 
-					// 6. Gambar Teks Nama Boss
 					g.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, (int)(16 * GameCore.SCALE)));
 					g.drawString("DEMON BOSS", xPos, yPos - (int)(5 * GameCore.SCALE));
 					

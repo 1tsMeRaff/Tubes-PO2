@@ -1,5 +1,6 @@
 package gameStates;
 
+import entity.DemonBoss;
 import entity.EnemyManager;
 import entity.Player;
 import java.awt.Graphics;
@@ -46,6 +47,8 @@ public class PlayStates extends States implements StateMethods {
     private int hitStopDuration = 0;
     private int shakeDuration = 0;
     private int shakeIntensity = 0;
+    
+    private boolean isBossEncountered = false;
 
     private BufferedImage backgroundImg, clouds_01, clouds_02; 
     private int[] clouds_02Pos;
@@ -141,6 +144,7 @@ public class PlayStates extends States implements StateMethods {
             objectManager.update();
             player.update();
             enemyManager.update(worldManager.getCurrentMap().getWorldData(), player);
+            checkBossTrigger(100, 300, 10);
             checkCloseToBorder();
             
             // Cek Transisi Level & Memicu Suara Menang
@@ -175,6 +179,10 @@ public class PlayStates extends States implements StateMethods {
         worldManager.draw(g, xLvlOffset);
         objectManager.draw(g, xLvlOffset);
         player.render(g, xLvlOffset);
+        
+        if (isBossEncountered) {
+            enemyManager.drawBossUI(g); // HP Boss tetap tenang di atas layar
+        }
         enemyManager.draw(g, xLvlOffset);
 
         g2.translate(-shakeX, -shakeY);
@@ -187,6 +195,20 @@ public class PlayStates extends States implements StateMethods {
             gameOverOverlay.draw(g);
         } else if (inventoryOpen) {
             inventoryOverlay.draw(g);
+        }
+    }
+    
+    private void checkBossTrigger(int triggerX, int triggerY, int radius) {
+        if (isBossEncountered) return;
+
+        float playerCenterX = player.getHitbox().x + (player.getHitbox().width / 2);
+        float playerCenterY = player.getHitbox().y + (player.getHitbox().height / 2);
+
+        double distance = Math.sqrt(Math.pow(playerCenterX - triggerX, 2) + Math.pow(playerCenterY - triggerY, 2));
+
+        if (distance < radius) {
+            isBossEncountered = true;
+            System.out.println("Boss Triggered!");
         }
     }
 
@@ -277,8 +299,14 @@ public class PlayStates extends States implements StateMethods {
             return;
         }
         if (lvlCompleted) return;
+        
         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
             paused = !paused;
+            return;
+        }
+        
+        if (e.getKeyCode() == KeyEvent.VK_F11) {
+            gc.getGameFrame().toggleFullScreen();
             return;
         }
         
