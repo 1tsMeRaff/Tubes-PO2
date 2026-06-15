@@ -39,7 +39,6 @@ public class LoadSave {
 	public static final String CLOUDS_02 = "awan_02.png";
 	
 	public static final String STATUS_BAR = "statusbar.png";
-    // 👇 TAMBAHAN BARU UNTUK PANEL KAYU 👇
 	public static final String MENU_PANEL = "menu_panel.png";
 	
 	// --- ASET BARU UNTUK PAUSE MENU ---

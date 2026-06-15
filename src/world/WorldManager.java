@@ -31,11 +31,9 @@ public class WorldManager {
         int tileWidth = 16;
         int tileHeight = 16;
 
-        // Dinamis: 432 / 16 = 27 kolom | 320 / 16 = 20 baris
         int cols = image.getWidth() / tileWidth;
         int rows = image.getHeight() / tileHeight;
 
-        // Total array sekarang akan berisi 540 elemen
         mapSprite = new BufferedImage[cols * rows];
 
         for (int j = 0; j < rows; j++) {
@@ -53,7 +51,6 @@ public class WorldManager {
         int mapWidth = worldData[0].length;
         int tileSize = GameCore.TILES_SIZE;
 
-        // === OPTIMASI FRUSTUM CULLING ===
         int startX = Math.max(0, xLvlOffset / tileSize);
         int endX = Math.min(mapWidth, startX + GameCore.TILES_IN_WIDTH + 2);
 
@@ -61,13 +58,10 @@ public class WorldManager {
             for (int i = startX; i < endX; i++) {
                 int tiledValue = worldData[j][i];
 
-                // 1. Filter Udara: Lewati jika nilainya -1 (kosong)
                 if (tiledValue != -1) {
                     
-                    // 2. Koreksi Pergeseran Tiled (1-based) ke Java (0-based)
                     int spriteIndex = tiledValue;
 
-                    // 3. Validasi Keamanan menggunakan fungsi Helper
                     if (isValidTile(spriteIndex)) {
                         int xPos = (int) (i * tileSize - xLvlOffset);
                         int yPos = j * tileSize;
@@ -79,14 +73,10 @@ public class WorldManager {
         }
     }
 
-    // Fungsi Helper untuk memvalidasi indeks ubin sebelum dirender
     private boolean isValidTile(int index) {
-        // Mencegah error OutOfBounds jika Tiled mengirim angka di luar total atlas (540 ubin)
-        // Ini otomatis memblokir ID Entitas bernilai besar (seperti 2000+) agar tidak digambar sebagai tanah
         if (index < 0 || index >= mapSprite.length) {
             return false;
         }
-        
         return true;
     }
 
