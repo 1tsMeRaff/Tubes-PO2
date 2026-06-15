@@ -144,35 +144,17 @@ public class Konstanta {
 		
 		public static int getMaxHealth(int enemy_type) {
 			switch(enemy_type) {
-<<<<<<< HEAD
-			case SLIME:
-				return 100;
-			case DEMON_BOSS:
-				return 80;
-			default:
-				return 1;
-=======
 			case SLIME: return 10;
 			case DEMON_BOSS: return 80;
 			default: return 1;
->>>>>>> origin/dev-Rizal
 			}
 		}
 		
 		public static int getEnemyAtt(int enemy_type) {
 			switch(enemy_type) {
-<<<<<<< HEAD
-			case SLIME:
-				return 5;
-			case DEMON_BOSS:
-				return 25;
-			default:
-				return 0;
-=======
 			case SLIME: return 10;
 			case DEMON_BOSS: return 25;
 			default: return 0;
->>>>>>> origin/dev-Rizal
 			}
 		}
 	}
