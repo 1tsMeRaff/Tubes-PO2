@@ -144,4 +144,10 @@ public class MainMenu extends States implements StateMethods {
 
     @Override
     public void keyReleased(KeyEvent e) {}
+
+	@Override
+	public void triggerHeavyHit(int freezeFrames, int shakeFrames, int intensity) {
+		// TODO Auto-generated method stub
+		
+	}
 }

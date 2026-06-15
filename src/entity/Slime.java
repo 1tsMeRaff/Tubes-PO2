@@ -28,6 +28,7 @@ public class Slime extends Enemy {
 	}
 
 	public void update(int[][] tilesData, Player player) {
+		updateEffects(tilesData);
 		updateBehaviour(tilesData, player);
 		updateAnimationTick();
 		updateAttackBox();

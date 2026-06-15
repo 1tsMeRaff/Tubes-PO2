@@ -43,7 +43,7 @@ public class Player extends Entity {
     private int dashCooldownTick = 0;
     private float dashSpeed = 5.0f * GameCore.SCALE;
 
-    // Save point (untuk respawn jurang)
+    // Save point
     private float lastSafeX;
     private float lastSafeY;
     
@@ -52,6 +52,17 @@ public class Player extends Entity {
     private int chargeTick = 0;
     private final int CHARGE_DURATION_NEEDED = 30;
     private boolean isExecutingChargeAttack = false;
+    
+    // Variabel I-Frames & Knockback
+    private boolean isInvincible = false;
+    private int invincibilityTick = 0;
+    private final int INVINCIBILITY_DURATION = 45;
+    private float knockbackSpeed = 0;
+    private int knockbackDir = 1;
+    private float knockbackFriction = 0.15f * GameCore.SCALE;
+    
+    // Down
+    private boolean isKnockedDown = false;
 
     private BufferedImage statusBarImg;
     private int statusBarWidth = (int) (164 * GameCore.SCALE);
@@ -62,11 +73,14 @@ public class Player extends Entity {
     private int healthBarHeight = (int) (2 * GameCore.SCALE);
     private int healthBarXStart = (int) (63 * GameCore.SCALE);
     private int healthBarYStart = (int) (18 * GameCore.SCALE);
+    private int healthWidth = healthBarWidth;
+    
     private int maxHealth = 100;
     private int currentHealth = maxHealth;
-    private int healthWidth = healthBarWidth;
+    
     private int maxMana = 100;
     private int currentMana = maxMana;
+    
     private int manaBarWidth = (int) (150 * GameCore.SCALE);
     private int manaBarHeight = (int) (6 * GameCore.SCALE);
     private int manaBarXStart = (int) (63 * GameCore.SCALE);
@@ -111,6 +125,21 @@ public class Player extends Entity {
     }
 
     public void update() {
+    	if (isInvincible) {
+    	    invincibilityTick++;
+    	    if (invincibilityTick >= INVINCIBILITY_DURATION && !isKnockedDown) {
+    	        isInvincible = false;
+    	        invincibilityTick = 0;
+    	    }
+    	}
+    	
+        if (knockbackSpeed > 0) {
+            knockbackSpeed -= knockbackFriction;
+            if (knockbackSpeed < 0) {
+            	knockbackSpeed = 0;
+            }
+        }
+        
         updateHealthBar();
         updateManaBar();
         if (currentHealth <= 0) {
@@ -142,7 +171,6 @@ public class Player extends Entity {
         updateAnimationTick();
     }
 
- // Method utama untuk mendeteksi jatuh ke jurang
     private void checkChasm() {
         if (hitBox.y + hitBox.height >= main.GameCore.GAME_HEIGHT - 5) {
             
@@ -211,7 +239,7 @@ public class Player extends Entity {
     private void checkPotionTouched() {
         playStates.checkPotionTouched(hitBox);
     }
-
+    
     private void checkAttack() {
         if (attackCheck) {
             return;
@@ -222,19 +250,48 @@ public class Player extends Entity {
         } else {
             hitFrame = 3;
         }
+        
         if (aniIndex == hitFrame) {
             attackCheck = true;
             int damageToDeal;
+            
             if (isExecutingChargeAttack) {
                 damageToDeal = 25;
+//                playStates.triggerHeavyHit(12, 20, 8); 
             } else {
                 damageToDeal = 10;
+//                playStates.triggerHeavyHit(3, 5, 3);
             }
+            
             playStates.checkHitEnemy(AttackBox, damageToDeal);
             playStates.checkObjectHit(AttackBox);
             playStates.getGameCore().getAudioPlayer().playAttackSound();
         }
     }
+
+//    private void checkAttack() {
+//        if (attackCheck) {
+//            return;
+//        }
+//        int hitFrame;
+//        if (isExecutingChargeAttack) {
+//            hitFrame = 9;
+//        } else {
+//            hitFrame = 3;
+//        }
+//        if (aniIndex == hitFrame) {
+//            attackCheck = true;
+//            int damageToDeal;
+//            if (isExecutingChargeAttack) {
+//                damageToDeal = 25;
+//            } else {
+//                damageToDeal = 10;
+//            }
+//            playStates.checkHitEnemy(AttackBox, damageToDeal);
+//            playStates.checkObjectHit(AttackBox);
+//            playStates.getGameCore().getAudioPlayer().playAttackSound();
+//        }
+//    }
 
     private void updateAttackBox() {
         AttackBox.y = hitBox.y + (GameCore.SCALE * 2 * playerScale);
@@ -257,14 +314,17 @@ public class Player extends Entity {
     private void updateHealthBar() {
     	healthWidth = (int) ((currentHealth / (float) maxHealth) * healthBarWidth);
     }
-
+    
     public void render(Graphics g, int xLvlOffset) {
-        g.drawImage(animasi[playerAction][aniIndex],
-                (int) (hitBox.x - xDrawOffSet) - xLvlOffset + flipX,
-                (int) (hitBox.y - yDrawOffSet),
-                width * flipW, height, null);
-        drawAttackBox(g, xLvlOffset);
-        drawHitbox(g);
+        if (isInvincible && invincibilityTick % 10 < 5) {
+        } else {
+            g.drawImage(animasi[playerAction][aniIndex],
+                    (int) (hitBox.x - xDrawOffSet) - xLvlOffset + flipX,
+                    (int) (hitBox.y - yDrawOffSet),
+                    width * flipW, height, null);
+        }
+//        drawAttackBox(g, xLvlOffset);
+//        drawHitbox(g);
         drawUI(g);
     }
 
@@ -276,44 +336,40 @@ public class Player extends Entity {
     private void drawUI(Graphics g) {
         g.drawImage(statusBarImg, statusBarX, statusBarY, statusBarWidth, statusBarHeight, null);
 
-        // 2. Tentukan offset relatif (jarak dari pojok kiri atas statusBarImg)
-        // Sesuaikan angka ini (63 dan 18) sampai pas di lubang gambar bar Anda
         int healthBarX = statusBarX + healthBarXStart;
         int healthBarY = statusBarY + healthBarYStart;
         
         int manaBarX = statusBarX + manaBarXStart;
         int manaBarY = statusBarY + manaBarYStart;
 
-        // 3. Gambar Health Bar
         g.setColor(Color.red);
         g.fillRect(healthBarX, healthBarY, healthWidth, healthBarHeight);
 
-        // 4. Gambar Mana Bar
         g.setColor(Color.blue);
         g.fillRect(manaBarX, manaBarY, manaWidth, manaBarHeight);
     }
-
-//    private void drawUI(Graphics g) {
-//        g.drawImage(statusBarImg, statusBarX, statusBarY, statusBarWidth, statusBarHeight, null);
-//        g.setColor(Color.red);
-//        g.fillRect(healthBarXStart + statusBarX + GameCore.TILES_SIZE, healthBarYStart + statusBarY,
-//                healthWidth - GameCore.TILES_SIZE, healthBarHeight);
-//        g.setColor(Color.blue);
-//        g.fillRect(healthBarXStart + statusBarX + GameCore.TILES_SIZE, manaBarYStart + statusBarY,
-//                manaWidth - GameCore.TILES_SIZE, manaBarHeight);
-//    }
 
     private void updateAnimationTick() {
         aniTick++;
         if (aniTick >= aniSpeed) {
             aniTick = 0;
             aniIndex++;
+            
             if (aniIndex >= GetSpriteAmount(playerAction)) {
                 aniIndex = 0;
+                
                 if (playerAction == ATTACK_1 || playerAction == CHARGE_ATTACK) {
                     attacking = false;
                     isExecutingChargeAttack = false;
                     attackCheck = false;
+                }else if (playerAction == DOWN) {
+                    if (!inAir) {
+                        playerAction = ARISE;
+                    } else {
+                        aniIndex = GetSpriteAmount(DOWN) - 1;
+                    }
+                } else if (playerAction == ARISE) {
+                    isKnockedDown = false;
                 }
             }
         }
@@ -321,11 +377,17 @@ public class Player extends Entity {
 
     private void setAnimation() {
         int startAni = playerAction;
+        
+        if (isKnockedDown) {
+            return;
+        }
+        
         if (moving) {
             playerAction = LARI;
         } else {
             playerAction = IDLE_ACTIVE;
         }
+        
         if (inAir) {
             if (airSpeed < 0) {
                 playerAction = LOMPAT;
@@ -333,13 +395,14 @@ public class Player extends Entity {
                 playerAction = JATUH;
             }
         }
+        
         if (dashing) {
         	if(!inAir) {
         		playerAction = DASH;
         	}else {
         		playerAction = JATUH;
         	}
-        } else if (attacking) {
+        }else if (attacking) {
             if (isExecutingChargeAttack) {
                 playerAction = CHARGE_ATTACK;
             } else {
@@ -401,57 +464,66 @@ public class Player extends Entity {
 
     private void updatePos() {
         moving = false;
-        if (jump && !charging) {
+        if (jump && !charging && !isKnockedDown) {
             jump();
         }
+
+        float xSpeed = 0;
+
         if (dashing) {
             dashTick++;
             if (dashTick >= dashDuration) {
                 dashing = false;
-            } else {
-                float xSpeed = (flipW == 1) ? dashSpeed : -dashSpeed;
-                if (canMoveHere(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height, mapData)) {
-                    hitBox.x += xSpeed;
-                } else {
-                    hitBox.x = GetEntityPosNextToWall(hitBox, xSpeed);
-                    dashing = false;
-                }
-                return;
             }
         }
-        float xSpeed = 0;
-        if (!attacking || inAir) {
-            if (left) {
-                xSpeed -= playerSpeed;
-                flipX = width;
-                flipW = -1;
-            }
-            if (right) {
-                xSpeed += playerSpeed;
-                flipX = 0;
-                flipW = 1;
-            }
-        }
-        if (!inAir) {
+
+        if (knockbackSpeed > 0) {
+            xSpeed = knockbackSpeed * knockbackDir;
             
-            // ---> REKAM POSISI AMAN (DIPERBARUI) <---
-            // Hanya rekam posisi aman jika Feline BUKAN berada di ujung bawah layar
+            knockbackSpeed -= 0.15f * GameCore.SCALE;
+            if (knockbackSpeed < 0) {
+                knockbackSpeed = 0;
+            }
+        } else if (dashing) {
+            if (flipW == 1) {
+                xSpeed = dashSpeed;
+            } else {
+                xSpeed = -dashSpeed;
+            }
+        } else if (!isKnockedDown) {
+            if (!attacking || inAir) {
+                if (left) {
+                    xSpeed -= playerSpeed;
+                    flipX = width;
+                    flipW = -1;
+                }
+                if (right) {
+                    xSpeed += playerSpeed;
+                    flipX = 0;
+                    flipW = 1;
+                }
+            }
+        }
+
+        if (!inAir) {
             if (hitBox.y + hitBox.height < main.GameCore.GAME_HEIGHT - 32) {
                 lastSafeX = hitBox.x;
                 lastSafeY = hitBox.y;
             }
 
-            if (!IsEntityOnFloor(hitBox, mapData)) {
+            if (!utilitytools.HelpMethods.IsEntityOnFloor(hitBox, mapData)) {
                 Rectangle2D.Float boxUnderneath = new Rectangle2D.Float(hitBox.x, hitBox.y + 1, hitBox.width, hitBox.height);
                 if (playStates.getObjectManager().getIntersectingContainer(boxUnderneath) == null) {
                     inAir = true;
                 }
             }
         }
+        
         if (inAir) {
             Rectangle2D.Float nextYHitbox = new Rectangle2D.Float(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height);
-            GameContainer gcY = playStates.getObjectManager().getIntersectingContainer(nextYHitbox);
-            if (canMoveHere(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height, mapData) && gcY == null) {
+            objects.GameContainer gcY = playStates.getObjectManager().getIntersectingContainer(nextYHitbox);
+            
+            if (utilitytools.HelpMethods.canMoveHere(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height, mapData) && gcY == null) {
                 hitBox.y += airSpeed;
                 airSpeed += gravity;
                 updateXPos(xSpeed);
@@ -460,14 +532,22 @@ public class Player extends Entity {
                     if (airSpeed > 0) {
                         hitBox.y = gcY.getHitbox().y - hitBox.height - 1f;
                         resetInAir();
+                        if (isKnockedDown) {
+                            playerAction = utilitytools.Konstanta.KonstantaPlayerRight.DOWN;
+                            aniIndex = 0;
+                        }
                     } else {
                         hitBox.y = gcY.getHitbox().y + gcY.getHitbox().height + 1f;
                         airSpeed = fallSpeedAfterCollision;
                     }
                 } else {
-                    hitBox.y = GetEntityPosUnderRoofOrAboveFloor(hitBox, airSpeed);
+                    hitBox.y = utilitytools.HelpMethods.GetEntityPosUnderRoofOrAboveFloor(hitBox, airSpeed);
                     if (airSpeed > 0) {
                         resetInAir();
+                        if (isKnockedDown) {
+                            playerAction = utilitytools.Konstanta.KonstantaPlayerRight.DOWN;
+                            aniIndex = 0;
+                        }
                     } else {
                         airSpeed = fallSpeedAfterCollision;
                     }
@@ -475,14 +555,16 @@ public class Player extends Entity {
                 updateXPos(xSpeed);
             }
         } else {
-            if (!attacking && !charging) {
+            if (knockbackSpeed > 0 || dashing || (!attacking && !charging && !isKnockedDown)) {
                 updateXPos(xSpeed);
             }
         }
-        if (xSpeed != 0 && !attacking && !charging) {
+        
+        if (xSpeed != 0 && !attacking && !charging && !isKnockedDown && !dashing && knockbackSpeed <= 0) {
             moving = true;
         }
     }
+    
     private void jump() {
         if (inAir) {
             if (canDoubleJump) {
@@ -522,8 +604,13 @@ public class Player extends Entity {
             }
         }
     }
-
+    
     public void changeHealth(int value) {
+        if (value < 0) {
+            if (isInvincible) return;
+            isInvincible = true;
+        }
+        
         currentHealth += value;
         if (currentHealth <= 0) {
             currentHealth = 0;
@@ -531,10 +618,14 @@ public class Player extends Entity {
             currentHealth = maxHealth;
         }
     }
+    
+    public boolean isChargeAttack() {
+        return isExecutingChargeAttack;
+    }
 
     private void loadAnimations() {
         BufferedImage image = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_SPRITE);
-        animasi = new BufferedImage[22][16];
+        animasi = new BufferedImage[24][16];
         for (int j = 0; j < animasi.length; j++) {
             for (int i = 0; i < animasi[j].length; i++) {
                 animasi[j][i] = image.getSubimage(i * 80, j * 64, 80, 64);
@@ -563,6 +654,7 @@ public class Player extends Entity {
         canDoubleJump = true;
         moving = false;
         attacking = false;
+        isKnockedDown = false;
         playerAction = IDLE_ACTIVE;
         currentHealth = maxHealth;
         this.x = newX;
@@ -577,7 +669,39 @@ public class Player extends Entity {
     public void setAttack(boolean attacking) {
         this.attacking = attacking;
     }
+    
+    
 
+    public void applyKnockback(int dir, boolean fromBoss) {
+        knockbackDir = dir;
+        
+        attacking = false;
+        charging = false;
+        isExecutingChargeAttack = false;
+
+        if (fromBoss) {
+            isKnockedDown = true;
+            playerAction = DOWN;
+            aniIndex = 0;
+            aniTick = 0;
+            
+            knockbackSpeed = 5.0f * GameCore.SCALE;
+            airSpeed = -3.5f * GameCore.SCALE;
+            inAir = true;
+        } else {
+            knockbackSpeed = 3.5f * GameCore.SCALE;
+            if (!inAir) {
+                inAir = true;
+                airSpeed = -2.0f * GameCore.SCALE;
+            }
+        }
+    }
+    
+    public PlayStates getPlayStates() {
+        return playStates;
+    }
+   
+    public int getFlipW() { return flipW; }
     public boolean isLeft() { return left; }
     public void setLeft(boolean left) { this.left = left; }
     public boolean isUp() { return up; }

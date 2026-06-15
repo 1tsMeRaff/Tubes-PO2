@@ -51,38 +51,28 @@ public class EnemyManager {
 	
 	private void drawBossUI(Graphics g) {
 		for (DemonBoss db : demonBosses) {
-			// Hanya gambar jika bos masih hidup/aktif
 			if(db.isActive()) {
-				// 1. Tentukan ukuran dan posisi Health Bar (Statis di tengah bawah layar)
 				int maxWidth = (int) (400 * GameCore.SCALE); 
 				int height = (int) (20 * GameCore.SCALE);
 				int xPos = (GameCore.GAME_WIDTH / 2) - (maxWidth / 2);
-				int yPos = (int) (GameCore.GAME_HEIGHT - (40 * GameCore.SCALE)); // Posisi di bawah
+				int yPos = (int) (GameCore.GAME_HEIGHT - (40 * GameCore.SCALE));
 				
 				float distance = Math.abs(playStates.getPlayer().getHitbox().x - db.getHitBox().x);
-
-				// 2. Kalkulasi persentase darah saat ini
 				float healthPercentage = (float) db.getCurrentHealth() / db.getMaxHealth();
 				int currentWidth = (int) (maxWidth * healthPercentage);
 
-				// Pastikan lebar tidak negatif jika darah < 0
 				if (currentWidth < 0) currentWidth = 0;
 
 				if (distance < GameCore.GAME_WIDTH) {
-					
-					// 3. Gambar Background Bar (Warna Hitam/Abu-abu gelap)
 					g.setColor(new java.awt.Color(50, 50, 50, 200));
 					g.fillRect(xPos, yPos, maxWidth, height);
 
-					// 4. Gambar Darah Boss (Warna Merah)
 					g.setColor(new java.awt.Color(200, 50, 50));
 					g.fillRect(xPos, yPos, currentWidth, height);
 
-					// 5. Gambar Bingkai / Border (Warna Putih)
 					g.setColor(java.awt.Color.WHITE);
 					g.drawRect(xPos, yPos, maxWidth, height);
 
-					// 6. Gambar Teks Nama Boss
 					g.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, (int)(16 * GameCore.SCALE)));
 					g.drawString("DEMON BOSS", xPos, yPos - (int)(5 * GameCore.SCALE));
 					
@@ -113,7 +103,6 @@ public class EnemyManager {
 	                    (int) (s.getHitBox().x - SLIME_DRAWOFFSET_X + s.flipX()),
 	                    (int) (s.getHitBox().y - SLIME_DRAWOFFSET_Y),
 	                    SLIME_WIDTH * s.flipW(), SLIME_HEIGHT, null);
-
 	             s.drawHitbox(g2); 
 	             s.drawAttackBox(g2, xLvlOffset);
 	        }
@@ -144,23 +133,32 @@ public class EnemyManager {
 	    g2.dispose();
 	}
 	
-	public void checkEnemyHit(Rectangle2D.Float attackBox, int damage) {
-		for (Slime s : Slimes) {
-			if(s.isActive()) {
-				if (attackBox.intersects(s.getHitBox())) {
-					s.hurt(damage); 
-					return;
-				}
-			}
-		}
-		for (DemonBoss demonBoss : demonBosses) {
-			if(demonBoss.isActive()) {
-				if (attackBox.intersects(demonBoss.getHitBox())) {
-					demonBoss.hurt(damage); 
-					return;
-				}
-			}
-		}
+	public void checkEnemyHit(Rectangle2D.Float attackBox, int damage, Player player) {
+	    for (Slime s : Slimes) {
+	        if(s.isActive()) {
+	            if (attackBox.intersects(s.getHitBox())) {
+	                int kbDir = (player.getHitbox().x < s.getHitBox().x) ? 1 : -1;
+	                s.hurt(damage, kbDir, true); 
+	                return;
+	            }
+	        }
+	    }
+	    
+	    for (DemonBoss demonBoss : demonBosses) {
+	        if(demonBoss.isActive()) {
+	            if (attackBox.intersects(demonBoss.getHitBox())) {
+	                int kbDir = (player.getHitbox().x < demonBoss.getHitBox().x) ? 1 : -1;
+	                boolean isCharge = player.isChargeAttack();
+	                demonBoss.hurt(damage, kbDir, isCharge); 
+	                if (demonBoss.isDead()) {
+	                    playStates.triggerHeavyHit(45, 120, 8);
+	                } else if (demonBoss.checkHpThresholdEffect()) {
+	                    playStates.triggerHeavyHit(20, 25, 12); 
+	                }
+	                return;
+	            }
+	        }
+	    }
 	}
 	
 	private void loadEnemyImages() {

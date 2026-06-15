@@ -139,7 +139,7 @@ public class Konstanta {
 		public static int getMaxHealth(int enemy_type) {
 			switch(enemy_type) {
 			case SLIME:
-				return 10;
+				return 100;
 			case DEMON_BOSS:
 				return 80;
 			default:
@@ -150,7 +150,7 @@ public class Konstanta {
 		public static int getEnemyAtt(int enemy_type) {
 			switch(enemy_type) {
 			case SLIME:
-				return 10;
+				return 5;
 			case DEMON_BOSS:
 				return 25;
 			default:
@@ -190,6 +190,7 @@ public class Konstanta {
 		public static final int RIGHT = 2;
 		public static final int DOWN = 3;
 	}
+	
 	public static class KonstantaPlayerRight{
 		public static final int IDLE_ACTIVE = 0;
 		public static final int IDLE_CHILL = 1;
