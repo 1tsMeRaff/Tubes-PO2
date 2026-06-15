@@ -10,6 +10,7 @@ import gameStates.PlayStates;
 import main.GameCore;
 import utilitytools.LoadSave;
 import objects.GameContainer;
+import objects.Cage; // <-- Tambahan import untuk Cage
 
 import static utilitytools.Konstanta.KonstantaPlayerRight.*;
 import static utilitytools.HelpMethods.*;
@@ -117,10 +118,10 @@ public class Player extends Entity {
             playStates.setGameOver(true);
             return;
         }
-      
+        
         // Cek apakah jatuh ke jurang
         checkChasm();
-      
+        
         // Logika dash/charge + potion
         updateAttackBox();
         updatePos();
@@ -162,7 +163,7 @@ public class Player extends Entity {
     }
 
     private void updateManaBar() {
-    	manaWidth = (int) ((currentMana / (float) maxMana) * manaBarWidth);
+        manaWidth = (int) ((currentMana / (float) maxMana) * manaBarWidth);
     }
 
     public void addItemToInventory(int objType) {
@@ -255,7 +256,7 @@ public class Player extends Entity {
     }
 
     private void updateHealthBar() {
-    	healthWidth = (int) ((currentHealth / (float) maxHealth) * healthBarWidth);
+        healthWidth = (int) ((currentHealth / (float) maxHealth) * healthBarWidth);
     }
 
     public void render(Graphics g, int xLvlOffset) {
@@ -293,16 +294,6 @@ public class Player extends Entity {
         g.fillRect(manaBarX, manaBarY, manaWidth, manaBarHeight);
     }
 
-//    private void drawUI(Graphics g) {
-//        g.drawImage(statusBarImg, statusBarX, statusBarY, statusBarWidth, statusBarHeight, null);
-//        g.setColor(Color.red);
-//        g.fillRect(healthBarXStart + statusBarX + GameCore.TILES_SIZE, healthBarYStart + statusBarY,
-//                healthWidth - GameCore.TILES_SIZE, healthBarHeight);
-//        g.setColor(Color.blue);
-//        g.fillRect(healthBarXStart + statusBarX + GameCore.TILES_SIZE, manaBarYStart + statusBarY,
-//                manaWidth - GameCore.TILES_SIZE, manaBarHeight);
-//    }
-
     private void updateAnimationTick() {
         aniTick++;
         if (aniTick >= aniSpeed) {
@@ -334,11 +325,11 @@ public class Player extends Entity {
             }
         }
         if (dashing) {
-        	if(!inAir) {
-        		playerAction = DASH;
-        	}else {
-        		playerAction = JATUH;
-        	}
+            if(!inAir) {
+                playerAction = DASH;
+            }else {
+                playerAction = JATUH;
+            }
         } else if (attacking) {
             if (isExecutingChargeAttack) {
                 playerAction = CHARGE_ATTACK;
@@ -435,27 +426,35 @@ public class Player extends Entity {
         if (!inAir) {
             
             // ---> REKAM POSISI AMAN (DIPERBARUI) <---
-            // Hanya rekam posisi aman jika Feline BUKAN berada di ujung bawah layar
             if (hitBox.y + hitBox.height < main.GameCore.GAME_HEIGHT - 32) {
                 lastSafeX = hitBox.x;
                 lastSafeY = hitBox.y;
             }
 
             if (!IsEntityOnFloor(hitBox, mapData)) {
+                // 1. Membuat box tiruan 1 pixel di bawah Player
                 Rectangle2D.Float boxUnderneath = new Rectangle2D.Float(hitBox.x, hitBox.y + 1, hitBox.width, hitBox.height);
-                if (playStates.getObjectManager().getIntersectingContainer(boxUnderneath) == null) {
-                    inAir = true;
+                
+                // 2. Gunakan playStates, bukan playing!
+                if (playStates.getObjectManager().getIntersectingContainer(boxUnderneath) == null && 
+                    playStates.getObjectManager().getIntersectingCage(boxUnderneath) == null) {
+                    
+                    inAir = true; 
                 }
             }
         }
         if (inAir) {
             Rectangle2D.Float nextYHitbox = new Rectangle2D.Float(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height);
             GameContainer gcY = playStates.getObjectManager().getIntersectingContainer(nextYHitbox);
-            if (canMoveHere(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height, mapData) && gcY == null) {
+            Cage cageY = playStates.getObjectManager().getIntersectingCage(nextYHitbox); // Cek kandang sumbu Y
+
+            // Cek jika tidak ada tabrakan dengan map, container, DAN kandang
+            if (canMoveHere(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height, mapData) && gcY == null && cageY == null) {
                 hitBox.y += airSpeed;
                 airSpeed += gravity;
                 updateXPos(xSpeed);
             } else {
+                // Logika jika menabrak sesuatu di sumbu Y (atas/bawah)
                 if (gcY != null) {
                     if (airSpeed > 0) {
                         hitBox.y = gcY.getHitbox().y - hitBox.height - 1f;
@@ -464,7 +463,15 @@ public class Player extends Entity {
                         hitBox.y = gcY.getHitbox().y + gcY.getHitbox().height + 1f;
                         airSpeed = fallSpeedAfterCollision;
                     }
-                } else {
+                } else if (cageY != null) { // Logika jika menabrak Kandang
+                    if (airSpeed > 0) {
+                        hitBox.y = cageY.getHitbox().y - hitBox.height - 1f;
+                        resetInAir();
+                    } else {
+                        hitBox.y = cageY.getHitbox().y + cageY.getHitbox().height + 1f;
+                        airSpeed = fallSpeedAfterCollision;
+                    }
+                } else { // Nabrak lantai / atap map biasa
                     hitBox.y = GetEntityPosUnderRoofOrAboveFloor(hitBox, airSpeed);
                     if (airSpeed > 0) {
                         resetInAir();
@@ -483,6 +490,7 @@ public class Player extends Entity {
             moving = true;
         }
     }
+    
     private void jump() {
         if (inAir) {
             if (canDoubleJump) {
@@ -508,16 +516,26 @@ public class Player extends Entity {
     private void updateXPos(float xSpeed) {
         Rectangle2D.Float nextXHitbox = new Rectangle2D.Float(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height);
         GameContainer gcX = playStates.getObjectManager().getIntersectingContainer(nextXHitbox);
-        if (canMoveHere(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height, mapData) && gcX == null) {
+        Cage cageX = playStates.getObjectManager().getIntersectingCage(nextXHitbox); // Cek kandang sumbu X
+
+        // Cek jika tidak ada tabrakan dengan map, container, DAN kandang
+        if (canMoveHere(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height, mapData) && gcX == null && cageX == null) {
             hitBox.x += xSpeed;
         } else {
+            // Logika jika menabrak dinding / objek di kiri/kanan
             if (gcX != null) {
                 if (xSpeed > 0) {
                     hitBox.x = gcX.getHitbox().x - hitBox.width - 1f;
                 } else if (xSpeed < 0) {
                     hitBox.x = gcX.getHitbox().x + gcX.getHitbox().width + 1f;
                 }
-            } else {
+            } else if (cageX != null) { // Logika nabrak Kandang
+                if (xSpeed > 0) {
+                    hitBox.x = cageX.getHitbox().x - hitBox.width - 1f;
+                } else if (xSpeed < 0) {
+                    hitBox.x = cageX.getHitbox().x + cageX.getHitbox().width + 1f;
+                }
+            } else { // Nabrak dinding map biasa
                 hitBox.x = GetEntityPosNextToWall(hitBox, xSpeed);
             }
         }

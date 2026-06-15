@@ -25,6 +25,14 @@ public class Konstanta {
 	    public static final int SIGN_HEIGHT = (int)(SIGN_HEIGHT_DEFAULT * main.GameCore.SCALE);
 	    
 	    
+	    //kandang macan
+	    public static final int KANDANG = 8;
+
+	    public static final int KANDANG_WIDTH_DEFAULT = 32; 
+	    public static final int KANDANG_HEIGHT_DEFAULT = 32;
+	    public static final int KANDANG_WIDTH = (int)(KANDANG_WIDTH_DEFAULT * main.GameCore.SCALE);
+	    public static final int KANDANG_HEIGHT = (int)(KANDANG_HEIGHT_DEFAULT * main.GameCore.SCALE);
+	    
 	    // ID Kontainer
 	    public static final int BARREL = 6;
 	    public static final int BOX = 7;

@@ -64,7 +64,7 @@ public class PlayStates extends States implements StateMethods {
         
         objectManager = new ObjectManager(this);
         
-        // ---> TAMBAHAN: Memuat objek otomatis dari data CSV map <---
+        // TAMBAHAN: Memuat objek dari data CSV 
         objectManager.loadObjectsFromMap(worldManager.getCurrentMap().getWorldData());
         
         player = new Player(200, 200, (int) (64 * GameCore.SCALE), (int) (40 * GameCore.SCALE), this);
@@ -129,7 +129,7 @@ public class PlayStates extends States implements StateMethods {
     public void draw(Graphics g) {
         g.drawImage(backgroundImg, 0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
         
-        //drawClouds(g);      // awan 
+        //drawClouds(g);      // awan  
         
         worldManager.draw(g, xLvlOffset);
         objectManager.draw(g, xLvlOffset); 
@@ -167,7 +167,7 @@ public class PlayStates extends States implements StateMethods {
         resetAll(newX, newY); 
         player.loadmapData(newMapData); 
         
-        // ---> TAMBAHAN: Memuat ulang objek berdasarkan CSV dari map baru <---
+        //  Memuat ulang objek berdasarkan CSV dari map baru <---
         objectManager.loadObjectsFromMap(newMapData);
         
         calcLvlOffset();
