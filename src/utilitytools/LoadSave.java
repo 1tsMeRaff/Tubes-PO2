@@ -39,6 +39,21 @@ public class LoadSave {
 	public static final String STATUS_BAR = "statusbar.png";
     // 👇 TAMBAHAN BARU UNTUK PANEL KAYU 👇
 	public static final String MENU_PANEL = "menu_panel.png";
+	
+	// --- ASET BARU UNTUK PAUSE MENU ---
+    public static final String PAUSE_TITLE = "pause.png"; 
+    public static final String PAUSE_MUSIC_TEXT = "music.png";
+    public static final String PAUSE_SE_TEXT = "SE.png";
+    public static final String PAUSE_VOL_TEXT = "volume.png";
+    
+    // Tombol-tombol
+    public static final String PAUSE_PAW_BTN = "paw_button.png";
+    public static final String PAUSE_RESUME_BTN = "resume_button.png";
+    public static final String PAUSE_RESTART_BTN = "restart_button.png";
+    public static final String PAUSE_MENU_BTN = "menu_button.png";
+    
+    // (Opsional) Jika kamu mau pakai rantainya sebagai hiasan di belakang bel
+    public static final String PAUSE_CHAIN = "rantai.png";
 
 	public static BufferedImage GetSpriteAtlas(String fileName) {
 		
