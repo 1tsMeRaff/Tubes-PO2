@@ -13,134 +13,169 @@ import utilitytools.LoadSave;
 
 public class MainMenu extends States implements StateMethods {
 
-    private BufferedImage backgroundImage, backgroundimagemenu;
-    private int menuX, menuY, menuWidth, menuHeight;
+    // Aset Gambar Terpisah
+    private BufferedImage backgroundImage; 
+    private BufferedImage panelImage; 
+    
+    private int panelX, panelY, panelWidth, panelHeight;
 
-    // Hitbox area tombol (tetap ada untuk deteksi klik, tapi tidak digambar)
-    private Rectangle playBtn, optionsBtn;
-    private boolean playHover, playPressed;
+    // Hitbox untuk 4 Tombol
+    private Rectangle startBtn, continueBtn, optionsBtn, exitBtn;
+    
+    // Status Interaksi (Hover & Pressed)
+    private boolean startHover, startPressed;
+    private boolean continueHover, continuePressed;
     private boolean optionsHover, optionsPressed;
+    private boolean exitHover, exitPressed;
 
     public MainMenu(GameCore gc) {
         super(gc);
-        loadBackground();
-        initButtonsVertically();
-        backgroundimagemenu = LoadSave.GetSpriteAtlas(LoadSave.MENU_BACKGROUND_IMG);
+        loadAsetUI(); 
+        initLayoutMenu(); 
     }
 
-    private void loadBackground() {
-        backgroundImage = LoadSave.GetSpriteAtlas(LoadSave.MENU_BACKGROUND);
-        menuWidth = (int) (backgroundImage.getWidth() * GameCore.SCALE);
-        menuHeight = (int) (backgroundImage.getHeight() * GameCore.SCALE);
-        menuX = GameCore.GAME_WIDTH / 2 - menuWidth / 2;
-        menuY = (int) (120 * GameCore.SCALE);
+    private void loadAsetUI() {
+        backgroundImage = LoadSave.GetSpriteAtlas(LoadSave.MENU_BACKGROUND); 
+        // Menggunakan panel kayu yang baru
+        panelImage = LoadSave.GetSpriteAtlas(LoadSave.MENU_PANEL); 
     }
 
-    private void initButtonsVertically() {
-        double frameLeftPercent = 0.30;   // dari kiri background
-        double frameWidthPercent = 0.40;  // lebar frame
-        double frameTopPercent = 0.20;    // dari atas background
-        double frameHeightPercent = 0.60; // tinggi frame
+    private void initLayoutMenu() {
+        // Ukuran panel kayumu yang baru
+        panelWidth = (int) (500 * GameCore.SCALE); 
+        panelHeight = (int) (300 * GameCore.SCALE); 
+        panelX = GameCore.GAME_WIDTH / 2 - panelWidth / 2;
+        panelY = (int) (160 * GameCore.SCALE); 
 
-        int frameX = menuX + (int) (menuWidth * frameLeftPercent);
-        int frameY = menuY + (int) (menuHeight * frameTopPercent);
-        int frameWidth = (int) (menuWidth * frameWidthPercent);
-        int frameHeight = (int) (menuHeight * frameHeightPercent);
+        // --- PERBAIKAN KOTAK HITIH (HITBOX) ---
+        
+        // 1. LEBAR & TINGGI KOTAK
+        // Dikecilkan jadi 0.30 (30%) agar seukuran teks, tidak tumpah keluar kayu
+        int btnWidth = (int)(panelWidth * 0.30); 
+        int btnHeight = (int) (30 * GameCore.SCALE); // Tinggi kotak
+        int btnX = GameCore.GAME_WIDTH / 2 - btnWidth / 2;
 
-        int btnWidth = (int) (frameWidth * 0.6);
-        int btnHeight = (int) (40 * GameCore.SCALE);
+        // 2. POSISI AWAL & JARAK (SPACING)
+        // Ubah angka 100 agar kotak pertama pas di teks "START"
+        int startY = panelY + (int)(105 * GameCore.SCALE); 
+        
+        // Ubah angka 40 agar jarak jatuhnya pas ke teks "CONTINUE", "OPTIONS", dst
+        int spacing = (int)(31 * GameCore.SCALE); 
 
-        // Posisi X tombol (tengah frame)
-        int btnX = frameX + (frameWidth - btnWidth) / 2;
-
-        // Y: Start di 1/3 tinggi frame, Options di 2/3 tinggi frame
-        int startY = frameY + (frameHeight / 3) - (btnHeight / 2);
-        int optionsY = frameY + (2 * frameHeight / 3) - (btnHeight / 2);
-
-        playBtn = new Rectangle(btnX, startY, btnWidth, btnHeight);
-        optionsBtn = new Rectangle(btnX, optionsY, btnWidth, btnHeight);
+        startBtn = new Rectangle(btnX, startY, btnWidth, btnHeight);
+        continueBtn = new Rectangle(btnX, startY + spacing, btnWidth, btnHeight);
+        optionsBtn = new Rectangle(btnX, startY + (spacing * 2), btnWidth, btnHeight);
+        exitBtn = new Rectangle(btnX, startY + (spacing * 3), btnWidth, btnHeight);
     }
 
     @Override
     public void update() {
-
+        // Logika animasi panel (jika ada) bisa ditaruh di sini nanti
     }
 
     @Override
     public void draw(Graphics g) {
-        g.drawImage(backgroundimagemenu, 0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null, null);
-        // Gambar background
-        g.drawImage(backgroundImage, menuX, menuY, menuWidth, menuHeight, null);
-
-        // Gambar tombol dengan teks tanpa kotak (transparan)
-        drawTransparentButton(g, playBtn, "START", playHover, playPressed);
-        drawTransparentButton(g, optionsBtn, "OPTIONS", optionsHover, optionsPressed);
-    }
-
-    private void drawTransparentButton(Graphics g, Rectangle bounds, String text, boolean isHover, boolean isPressed) {
-        // Warna teks berdasarkan status
-        if (isPressed) {
-            g.setColor(new Color(150, 50, 50));  // merah gelap saat ditekan
-        } else if (isHover) {
-            g.setColor(new Color(255, 215, 0));  // emas saat di-hover
+        // 1. Gambar Latar Belakang (Paling Bawah)
+        if (backgroundImage != null) {
+            g.drawImage(backgroundImage, 0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
         } else {
-            g.setColor(Color.LIGHT_GRAY);        // normal
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT);
         }
 
-        // Font
-        g.setFont(new Font("Arial", Font.BOLD, (int)(24 * GameCore.SCALE)));
+        // 2. Gambar Panel Kayu (Di Atas Latar)
+        if (panelImage != null) {
+            g.drawImage(panelImage, panelX, panelY, panelWidth, panelHeight, null);
+        } else {
+            g.setColor(new Color(60, 40, 20)); // Warna darurat jika gambar belum dimuat
+            g.fillRect(panelX, panelY, panelWidth, panelHeight);
+        }
+        
+        // 3. PANGGIL METHOD HIGHLIGHT HITBOX DI SINI
+        drawButtonHighlight(g, startBtn, startHover, startPressed);
+        drawButtonHighlight(g, continueBtn, continueHover, continuePressed);
+        drawButtonHighlight(g, optionsBtn, optionsHover, optionsPressed);
+        drawButtonHighlight(g, exitBtn, exitHover, exitPressed);
+    }
+        
+    private void drawButtonHighlight(Graphics g, Rectangle bounds, boolean isHover, boolean isPressed) {
+        // g.setColor(Color.RED);
+        // g.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
 
-        // Gambar teks di tengah rectangle
+        // Efek visual kotak terang/gelap dengan SUDUT MEMBULAT
+        if (isPressed) {
+            g.setColor(new Color(0, 0, 0, 100)); // Hitam transparan saat diklik
+            // Menggunakan fillRoundRect dengan lengkungan 15 pixel
+            g.fillRoundRect(bounds.x, bounds.y, bounds.width, bounds.height, 15, 15);
+        } else if (isHover) {
+            g.setColor(new Color(255, 255, 255, 50)); // Putih transparan saat di-hover
+            g.fillRoundRect(bounds.x, bounds.y, bounds.width, bounds.height, 15, 15);
+        }
+    }
+
+    // Method untuk menggambar teks tombol dibiarkan saja tapi tidak dipanggil agar tidak error
+    private void drawMenuText(Graphics g, Rectangle bounds, String text, boolean isHover, boolean isPressed) {
+        g.setFont(new Font("Arial", Font.BOLD, (int)(24 * GameCore.SCALE)));
         int stringWidth = g.getFontMetrics().stringWidth(text);
         int stringHeight = g.getFontMetrics().getHeight();
-        g.drawString(text,
-                     bounds.x + (bounds.width - stringWidth) / 2,
-                     bounds.y + (bounds.height + stringHeight) / 2 - 5);
+        int drawX = bounds.x + (bounds.width - stringWidth) / 2;
+        int drawY = bounds.y + (bounds.height + stringHeight) / 2 - 5;
+
+        if (isPressed) {
+            g.setColor(new Color(150, 50, 50)); 
+            g.drawString(text, drawX, drawY + 2); 
+        } else if (isHover) {
+            g.setColor(new Color(255, 215, 0)); 
+            g.drawString(text, drawX, drawY);
+            g.setColor(new Color(255, 255, 200, 100));
+            g.drawRect(bounds.x, bounds.y, bounds.width, bounds.height); 
+        } else {
+            g.setColor(new Color(200, 200, 200)); 
+            g.drawString(text, drawX, drawY);
+        }
     }
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        playHover = playBtn.contains(e.getX(), e.getY());
+        startHover = startBtn.contains(e.getX(), e.getY());
+        continueHover = continueBtn.contains(e.getX(), e.getY());
         optionsHover = optionsBtn.contains(e.getX(), e.getY());
+        exitHover = exitBtn.contains(e.getX(), e.getY());
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-        if (playHover) playPressed = true;
+        if (startHover) startPressed = true;
+        if (continueHover) continuePressed = true;
         if (optionsHover) optionsPressed = true;
+        if (exitHover) exitPressed = true;
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (playHover && playPressed) {
+        if (startHover && startPressed) {
             GameStates.state = GameStates.PLAYING;
-            // [PEMICU BGM] Ganti lagu ke Level 1 saat Start Game diklik
             gc.getAudioPlayer().playSong(audio.AudioPlayer.LEVEL_1);
-            
+        } else if (continueHover && continuePressed) {
+            System.out.println("Continue Game...");
         } else if (optionsHover && optionsPressed) {
             GameStates.state = GameStates.OPTIONS;
+        } else if (exitHover && exitPressed) {
+            System.exit(0); 
         }
         resetButtons();
     }
 
     private void resetButtons() {
-        playHover = false;
-        playPressed = false;
-        optionsHover = false;
-        optionsPressed = false;
+        startHover = continueHover = optionsHover = exitHover = false;
+        startPressed = continuePressed = optionsPressed = exitPressed = false;
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {}
 
     @Override
-    public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            GameStates.state = GameStates.PLAYING;
-            // [PEMICU BGM] Ganti lagu ke Level 1 saat Start Game (Pakai tombol Enter)
-            gc.getAudioPlayer().playSong(audio.AudioPlayer.LEVEL_1);
-        }
-    }
+    public void keyPressed(KeyEvent e) {}
 
     @Override
     public void keyReleased(KeyEvent e) {}
