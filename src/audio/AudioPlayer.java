@@ -156,8 +156,16 @@ public class AudioPlayer {
 	private void updateSongVolume() {
 		if (songs != null && currentSongId >= 0 && currentSongId < songs.length && songs[currentSongId] != null) {
 			FloatControl gainControl = (FloatControl) songs[currentSongId].getControl(FloatControl.Type.MASTER_GAIN);
-			float range = gainControl.getMaximum() - gainControl.getMinimum();
-			float gain = (range * volume) + gainControl.getMinimum();
+			
+			// Mencegah error jika volume berada di angka 0 mutlak
+			float safeVolume = Math.max(0.0001f, volume); 
+			
+			// Rumus konversi logaritmik dari linear (0.0 - 1.0) ke Desibel (dB)
+			float gain = 20f * (float) Math.log10(safeVolume);
+			
+			// Pastikan nilai dB tidak melampaui batas maksimum atau minimum bawaan Java
+			gain = Math.max(gainControl.getMinimum(), Math.min(gainControl.getMaximum(), gain));
+			
 			gainControl.setValue(gain);
 		}
 	}
@@ -167,8 +175,12 @@ public class AudioPlayer {
 			for (Clip c : effects) {
 				if (c != null) {
 					FloatControl gainControl = (FloatControl) c.getControl(FloatControl.Type.MASTER_GAIN);
-					float range = gainControl.getMaximum() - gainControl.getMinimum();
-					float gain = (range * volume) + gainControl.getMinimum();
+					
+					// Gunakan rumus logaritmik yang sama
+					float safeVolume = Math.max(0.0001f, volume);
+					float gain = 20f * (float) Math.log10(safeVolume);
+					gain = Math.max(gainControl.getMinimum(), Math.min(gainControl.getMaximum(), gain));
+					
 					gainControl.setValue(gain);
 				}
 			}
