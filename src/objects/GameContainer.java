@@ -2,6 +2,7 @@ package objects;
 
 import main.GameCore;
 import utilitytools.Konstanta.ObjectConstants;
+import objects.GameObject;
 
 public class GameContainer extends GameObject {
 

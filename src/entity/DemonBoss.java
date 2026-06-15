@@ -12,6 +12,7 @@ public class DemonBoss extends Boss {
 
 	private Rectangle2D.Float attackBox;
 	private int attackCooldown = 0;
+	private boolean Active = false;
 	
 	private boolean hp70Triggered = false;
     private boolean hp40Triggered = false;
@@ -85,7 +86,7 @@ public class DemonBoss extends Boss {
 
 		switch(enemyState) {
 		case IDLE:
-			if (isPlayerCloseEnoughForAttack(player) && attackCooldown > 0) {
+			if (isPlayerCloseEnoughForAttack(player) && attackCooldown > 0 && !Active) {
 				turnToPlayer(player);
 			} else {
 				newState(WALK);

@@ -1,5 +1,6 @@
 package gameStates;
 
+import entity.DemonBoss;
 import entity.EnemyManager;
 import entity.Player;
 import java.awt.Graphics;
@@ -46,6 +47,8 @@ public class PlayStates extends States implements StateMethods {
     private int hitStopDuration = 0;
     private int shakeDuration = 0;
     private int shakeIntensity = 0;
+    
+    private boolean isBossEncountered = false;
 
     private BufferedImage backgroundImg, clouds_01, clouds_02; 
     private int[] clouds_02Pos;
@@ -141,6 +144,7 @@ public class PlayStates extends States implements StateMethods {
             objectManager.update();
             player.update();
             enemyManager.update(worldManager.getCurrentMap().getWorldData(), player);
+//            checkBossTrigger(100, 50);
             checkCloseToBorder();
             
             // Cek Transisi Level & Memicu Suara Menang
@@ -175,6 +179,10 @@ public class PlayStates extends States implements StateMethods {
         worldManager.draw(g, xLvlOffset);
         objectManager.draw(g, xLvlOffset);
         player.render(g, xLvlOffset);
+        
+        if (isBossEncountered) {
+            enemyManager.drawBossUI(g); // HP Boss tetap tenang di atas layar
+        }
         enemyManager.draw(g, xLvlOffset);
 
         g2.translate(-shakeX, -shakeY);
@@ -189,6 +197,18 @@ public class PlayStates extends States implements StateMethods {
             inventoryOverlay.draw(g);
         }
     }
+    
+//    private void checkBossTrigger(int targetX, int tolerance) {
+//        if (isBossEncountered) return;
+//
+//        // Pemain hanya perlu melewati garis X tertentu
+//        float playerCenterX = player.getHitbox().x + (player.getHitbox().width / 2);
+//        
+//        // Jika posisi X pemain sudah melewati targetX - tolerance
+//        if (playerCenterX > targetX - tolerance) {
+//            isBossEncountered = true;
+//        }
+//    }
 
 
     public void loadNextLevel() {
@@ -277,8 +297,14 @@ public class PlayStates extends States implements StateMethods {
             return;
         }
         if (lvlCompleted) return;
+        
         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
             paused = !paused;
+            return;
+        }
+        
+        if (e.getKeyCode() == KeyEvent.VK_F11) {
+            gc.getGameFrame().toggleFullScreen();
             return;
         }
         
@@ -344,6 +370,10 @@ public class PlayStates extends States implements StateMethods {
 
     public void checkPotionTouched(Rectangle2D.Float hitbox) {
         objectManager.checkObjectTouched(hitbox);
+    }
+    
+    public boolean isBossEncountered() {
+        return isBossEncountered;
     }
 
     public void setPaused(boolean paused) { this.paused = paused; }

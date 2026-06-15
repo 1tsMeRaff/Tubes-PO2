@@ -39,7 +39,6 @@ public class LoadSave {
 	public static final String CLOUDS_02 = "awan_02.png";
 	
 	public static final String STATUS_BAR = "statusbar.png";
-    // 👇 TAMBAHAN BARU UNTUK PANEL KAYU 👇
 	public static final String MENU_PANEL = "menu_panel.png";
 	// --- ASET UNTUK INVENTORY ---
 	public static final String INVENTORY_BG = "inventory_skill_karakter_panel.png";
@@ -131,9 +130,7 @@ public class LoadSave {
 				
 				for (int col = 0; col < numbers.length; col++) {
 					int value = Integer.parseInt(numbers[col].trim());
-					
-					// PERBAIKAN: Jika angkanya spawn musuh (200/2000=Slime, 201/2001=DemonBoss), jadikan -1 (udara) agar tidak digambar
-					if (value == 200 || value == 201 || value == 2000 || value == 2001) {
+					if (value == 800 || value == 801) {
 						row[col] = -1;
 					} else {
 						row[col] = value;
@@ -177,7 +174,7 @@ public class LoadSave {
 					int value = Integer.parseInt(numbers[col].trim());
 					
 					// Mengakomodasi format ID branch dev (200) dan dev-Rafi (2000)
-					if (value == 200 || value == 2000) {
+					if (value == 800) {
 						int xPos = col * GameCore.TILES_SIZE;
 						int yPos = row * GameCore.TILES_SIZE;
 						int groundRow = findGroundRow(row, col, tilesData);
@@ -221,8 +218,7 @@ public class LoadSave {
 				for (int col = 0; col < numbers.length; col++) {
 					int value = Integer.parseInt(numbers[col].trim());
 					
-					// Mengakomodasi format ID branch dev (201) dan dev-Rafi (2001)
-					if (value == 201 || value == 2001) {
+					if (value == 801) {
 						int xPos = col * GameCore.TILES_SIZE;
 						int yPos = row * GameCore.TILES_SIZE;
 						int groundRow = findGroundRow(row, col, tilesData);

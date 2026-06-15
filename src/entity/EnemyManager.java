@@ -24,8 +24,9 @@ public class EnemyManager {
     }
 
     private void addEnemies() {
-        Slimes = LoadSave.GetSlimes("/map_test.txt");
-        demonBosses = LoadSave.GetDemonBosses("/map_test.txt");
+        // Menggunakan map_tutorial_fix.txt dari branch dev-Rafi
+        Slimes = LoadSave.GetSlimes("/map_tutorial_fix.txt");
+        demonBosses = LoadSave.GetDemonBosses("/map_tutorial_fix.txt");
     }
 
     public void update(int[][] tilesData, Player player) {
@@ -53,7 +54,7 @@ public class EnemyManager {
                 int maxWidth = (int) (400 * GameCore.SCALE); 
                 int height = (int) (20 * GameCore.SCALE);
                 int xPos = (GameCore.GAME_WIDTH / 2) - (maxWidth / 2);
-                int yPos = (int) (GameCore.GAME_HEIGHT - (40 * GameCore.SCALE)); 
+                int yPos = (int) (GameCore.GAME_HEIGHT - (40 * GameCore.SCALE));
                 
                 float distance = Math.abs(playStates.getPlayer().getHitbox().x - db.getHitBox().x);
                 float healthPercentage = (float) db.getCurrentHealth() / db.getMaxHealth();
@@ -100,8 +101,10 @@ public class EnemyManager {
                         (int) (s.getHitBox().x - SLIME_DRAWOFFSET_X + s.flipX()),
                         (int) (s.getHitBox().y - SLIME_DRAWOFFSET_Y),
                         SLIME_WIDTH * s.flipW(), SLIME_HEIGHT, null);
-                 s.drawHitbox(g2); 
-                 s.drawAttackBox(g2, xLvlOffset);
+                
+                // Debugging Hitbox - Un-comment untuk melihat garis batas serangan/tubuh
+                // s.drawHitbox(g2); 
+                // s.drawAttackBox(g2, xLvlOffset);
             }
         } 
         g2.dispose();
@@ -120,39 +123,55 @@ public class EnemyManager {
                 g2.drawImage(frame,
                         demonBoss.drawX(),
                         demonBoss.drawY(),
-                        DEMON_BOSS_WIDTH * demonBoss.flipW(), DEMON_BOSS_HEIGHT, null);
-                demonBoss.drawHitbox(g2); 
-                demonBoss.drawAttackBox(g, xLvlOffset);
+                        DEMON_BOSS_WIDTH * demonBoss.flipW(), 
+                        DEMON_BOSS_HEIGHT, null);
+                
+                // Debugging Hitbox - Un-comment untuk melihat garis batas serangan/tubuh
+                // demonBoss.drawHitbox(g2); 
+                // demonBoss.drawAttackBox(g2, xLvlOffset);
             }
         } 
         g2.dispose();
     }
     
-    public void checkEnemyHit(Rectangle2D.Float attackBox, int damage) {
+    // Logika tergabung: Hit, Knockback, Screen Shake (dari dev-Rafi) + EXP System (dari dev)
+    public void checkEnemyHit(Rectangle2D.Float attackBox, int damage, Player player) {
+        // 1. Cek Slime
         for (Slime s : Slimes) {
-            if(s.isActive()) {
-                if (attackBox.intersects(s.getHitBox())) {
-                    s.hurt(damage); 
-                    
-                    // --- TAMBAHAN LOGIKA EXP KETIKA SLIME MATI ---
-                    if (s.getCurrentHealth() <= 0) {
-                        playStates.getPlayer().gainExp(20);
-                    }
-                    return;
+            if (s.isActive() && attackBox.intersects(s.getHitBox())) {
+                s.hurt(damage); 
+                
+                // Logika EXP ketika Slime mati
+                if (s.getCurrentHealth() <= 0) {
+                    playStates.getPlayer().gainExp(20);
                 }
+                return;
             }
         }
+        
+        // 2. Cek DemonBoss
         for (DemonBoss demonBoss : demonBosses) {
-            if(demonBoss.isActive()) {
-                if (attackBox.intersects(demonBoss.getHitBox())) {
-                    demonBoss.hurt(damage); 
-                    
-                    // --- TAMBAHAN LOGIKA EXP KETIKA BOSS MATI ---
-                    if (demonBoss.getCurrentHealth() <= 0) {
-                        playStates.getPlayer().gainExp(100);
-                    }
-                    return;
+            if (demonBoss.isActive() && attackBox.intersects(demonBoss.getHitBox())) {
+                
+                // Logika Knockback & Charge
+                int kbDir = (player != null && player.getHitbox().x < demonBoss.getHitBox().x) ? 1 : -1;
+                boolean isCharge = (player != null) && player.isChargeAttack();
+                
+                demonBoss.hurt(damage, kbDir, isCharge);
+                
+                // Logika EXP ketika Boss mati
+                if (demonBoss.getCurrentHealth() <= 0 || demonBoss.isDead()) {
+                    playStates.getPlayer().gainExp(100);
                 }
+                
+                // Logika HeavyHit (Screen Shake)
+                if (demonBoss.isDead() || demonBoss.getCurrentHealth() <= 0) {
+                    playStates.triggerHeavyHit(45, 120, 8); // Guncangan besar saat mati
+                } else if (demonBoss.checkHpThresholdEffect()) {
+                    playStates.triggerHeavyHit(20, 25, 12); // Guncangan saat HP rendah
+                }
+                
+                return;
             }
         }
     }

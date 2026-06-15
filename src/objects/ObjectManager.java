@@ -269,39 +269,41 @@ public class ObjectManager {
     public void loadObjectsFromMap(int[][] mapData) {
         potions.clear();
         containers.clear();
-        signs.clear(); 
+        signs.clear();
         cages.clear();
+        
         for (int j = 0; j < mapData.length; j++) {
             for (int i = 0; i < mapData[0].length; i++) {
-                
+
                 int id = mapData[j][i];
                 int xPos = i * GameCore.TILES_SIZE;
-                
-                if (id >= 300 && id <= 305) {
+
+                if (id >= 500 && id <= 505) {
                     int yPosPotion = (j * GameCore.TILES_SIZE);
-                    potions.add(new Potion(xPos, yPosPotion, id - 300)); 
-                    mapData[j][i] = 0; 
+                    potions.add(new Potion(xPos, yPosPotion, id - 500));
+                    mapData[j][i] = 11;
                 }
-                else if (id == 401 || id == 402) {
+                
+                else if (id == 601 || id == 602) {
                     int yPosContainer = (j * GameCore.TILES_SIZE);
-                    containers.add(new GameContainer(xPos, yPosContainer, (id == 401) ? BOX : BARREL)); 
-                    mapData[j][i] = 0;
+                    containers.add(new GameContainer(xPos, yPosContainer, (id == 601) ? BOX : BARREL));
+                    mapData[j][i] = 11;
                 }
-                else if (id >= 500 && id <= 503) {
+                else if (id >= 700 && id <= 703) {
                     int yPosSign = (j * GameCore.TILES_SIZE) + (int)(15 * GameCore.SCALE);
                     int xPosSign = xPos + (int)(4 * GameCore.SCALE);
-                    
-                    if (id == 500) signs.add(new Sign(xPosSign, yPosSign, SIGN, "E", "gunakan"));
-                    else if (id == 501) signs.add(new Sign(xPosSign, yPosSign, SIGN, "SHOP", "WEAPONS"));
-                    else if (id == 502) signs.add(new Sign(xPosSign, yPosSign, SIGN, "DANGER", "BOSS AREA"));
-                    else if (id == 503) signs.add(new Sign(xPosSign, yPosSign, SIGN, "SAVE", "POINT")); 
 
-                    mapData[j][i] = 0;
+                    if (id == 700) signs.add(new Sign(xPosSign, yPosSign, SIGN, "E", "gunakan"));
+                    else if (id == 701) signs.add(new Sign(xPosSign, yPosSign, SIGN, "SHOP", "WEAPONS"));
+                    else if (id == 702) signs.add(new Sign(xPosSign, yPosSign, SIGN, "DANGER", "BOSS AREA"));
+                    else if (id == 703) signs.add(new Sign(xPosSign, yPosSign, SIGN, "SAVE", "POINT"));
+
+                    mapData[j][i] = 11;
                 }
                 else if (id == 403) {
                     int yPosKandang = (j * GameCore.TILES_SIZE);
                     cages.add(new Cage(xPos, yPosKandang, KANDANG));
-                    mapData[j][i] = 0;
+                    mapData[j][i] = 11;
                 }
             }
         }

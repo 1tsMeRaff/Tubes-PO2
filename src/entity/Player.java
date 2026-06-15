@@ -52,7 +52,7 @@ public class Player extends Entity {
     private int dashCooldownTick = 0;
     private float dashSpeed = 5.0f * GameCore.SCALE;
 
-    // Save Point
+    // Save Point (Jatuh ke jurang)
     private float lastSafeX;
     private float lastSafeY;
     
@@ -73,7 +73,7 @@ public class Player extends Entity {
     private float knockbackFriction = 0.15f * GameCore.SCALE;
     private boolean isKnockedDown = false;
 
-    // UI Status Bar
+    // UI Status Bar (Health & Mana)
     private BufferedImage statusBarImg;
     private int statusBarWidth = (int) (164 * GameCore.SCALE);
     private int statusBarHeight = (int) (36 * GameCore.SCALE);
@@ -100,8 +100,8 @@ public class Player extends Entity {
     public ArrayList<Integer> inventory = new ArrayList<>();
     public final int maxInventorySize = 20;
 
-    // Sistem Defense
-    private int baseDefense = 50;
+    // Sistem Defense & Equipment (Dari dev-Rizal)
+    private int baseDefense = 5;
     private int totalDefense = baseDefense;
     private int equippedHelmet = -1; 
     private int equippedArmor = -1;  
@@ -152,7 +152,7 @@ public class Player extends Entity {
             playStates.setGameOver(true);
             return;
         }
-       
+
         checkChasm();
         updateAttackBox();
         updatePos();
@@ -196,6 +196,7 @@ public class Player extends Entity {
         manaWidth = (int) ((currentMana / (float) maxMana) * manaBarWidth);
     }
 
+    // --- SISTEM DEFENSE & INVENTORY ---
     public void calculateDefense() {
         totalDefense = baseDefense;
         totalDefense += getEquipmentDefenseValue(equippedHelmet);
@@ -228,11 +229,12 @@ public class Player extends Entity {
         }
     }
 
+    // Memisahkan logika potion (useItem) dan equipment (equipItem) yang sebelumnya menyatu
     public void useItem(int itemIndex) {
         if (itemIndex < inventory.size()) {
             int potionType = inventory.get(itemIndex);
             int value = 0;
-            boolean isRed = potionType <= 2;
+            boolean isRed = potionType <= 2; // Asumsi ID <= 2 adalah potion merah
             
             switch (potionType) {
                 case utilitytools.Konstanta.ObjectConstants.RED_POTION_1: value = utilitytools.Konstanta.ObjectConstants.RED_VAL_1; break;
@@ -245,10 +247,14 @@ public class Player extends Entity {
             
             if (isRed) {
                 changeHealth(value);
+                System.out.println("Berhasil minum Ramuan Merah! Darah sekarang: " + currentHealth);
             } else {
                 changeMana(value);
+                System.out.println("Berhasil minum Ramuan Biru! Mana sekarang: " + currentMana);
             }
             inventory.remove(itemIndex);
+        } else {
+            System.out.println("Slot ini kosong!");
         }
     }
 
@@ -267,7 +273,7 @@ public class Player extends Entity {
             }
             
             inventory.remove(itemIndex);
-            if (oldItem != -1) inventory.add(oldItem);
+            if (oldItem != -1) inventory.add(oldItem); // Mengembalikan item lama ke tas
             calculateDefense();
         }
     }
@@ -276,11 +282,11 @@ public class Player extends Entity {
         if (value < 0) {
             if (isInvincible) return;
             int incomingDamage = Math.abs(value);
-            int finalDamage = Math.max(1, incomingDamage - totalDefense); 
+            int finalDamage = Math.max(1, incomingDamage - totalDefense); // Defense diaplikasikan di sini
             currentHealth -= finalDamage;
             isInvincible = true;
         } else {
-            currentHealth += value; 
+            currentHealth += value; // Perbaikan: tidak ada lagi duplikasi penambahan health
         }
         
         if (currentHealth <= 0) {
@@ -300,8 +306,11 @@ public class Player extends Entity {
         playStates.checkPotionTouched(hitBox);
     }
     
+    // --- SISTEM COMBAT ---
     private void checkAttack() {
-        if (attackCheck) return;
+        if (attackCheck) {
+            return;
+        }
         
         int hitFrame = isExecutingChargeAttack ? 9 : 3;
         
@@ -336,14 +345,18 @@ public class Player extends Entity {
         }
     }
 
+    // --- SISTEM RENDER & ANIMASI ---
     public void render(Graphics g, int xLvlOffset) {
+        // Efek kedip saat I-frame
         if (isInvincible && invincibilityTick % 10 < 5) {
+            // Jangan gambar apa-apa (blink effect)
         } else {
             g.drawImage(animasi[playerAction][aniIndex],
                     (int) (hitBox.x - xDrawOffSet) - xLvlOffset + flipX,
                     (int) (hitBox.y - yDrawOffSet),
                     width * flipW, height, null);
         }
+        // Hapus atau comment method draw hitbox ini jika sudah rilis
         drawAttackBox(g, xLvlOffset);
         drawHitbox(g);
         drawUI(g);
@@ -386,7 +399,7 @@ public class Player extends Entity {
                     if (!inAir) {
                         playerAction = ARISE;
                     } else {
-                        aniIndex = GetSpriteAmount(DOWN) - 1; 
+                        aniIndex = GetSpriteAmount(DOWN) - 1; // Freeze on last frame if still in air
                     }
                 } else if (playerAction == ARISE) {
                     isKnockedDown = false;
@@ -398,23 +411,36 @@ public class Player extends Entity {
     private void setAnimation() {
         int startAni = playerAction;
         
-        if (isKnockedDown) return;
+        if (isKnockedDown) {
+            return;
+        }
         
-        if (moving) playerAction = LARI;
-        else playerAction = IDLE_ACTIVE;
+        if (moving) {
+            playerAction = LARI;
+        } else {
+            playerAction = IDLE_ACTIVE;
+        }
         
         if (inAir) {
-            if (airSpeed < 0) playerAction = LOMPAT;
-            else playerAction = JATUH;
+            if (airSpeed < 0) {
+                playerAction = LOMPAT;
+            } else {
+                playerAction = JATUH;
+            }
         }
         
         if (dashing) {
-            if(!inAir) playerAction = DASH;
-            else playerAction = JATUH;
+            if(!inAir) {
+                playerAction = DASH;
+            } else {
+                playerAction = JATUH;
+            }
         } else if (attacking) {
-            if (isExecutingChargeAttack) playerAction = CHARGE_ATTACK;
-            else playerAction = ATTACK_1;
-            
+            if (isExecutingChargeAttack) {
+                playerAction = CHARGE_ATTACK;
+            } else {
+                playerAction = ATTACK_1;
+            }
             if (startAni != playerAction) {
                 aniIndex = 0;
                 aniTick = 0;
@@ -425,7 +451,9 @@ public class Player extends Entity {
             playerAction = GUARD;
         }
         
-        if (startAni != playerAction) resetAniTick();
+        if (startAni != playerAction) {
+            resetAniTick();
+        }
     }
 
     private void resetAniTick() {
@@ -433,6 +461,7 @@ public class Player extends Entity {
         aniIndex = 0;
     }
 
+    // --- KONTROL & FISIKA GERAKAN ---
     public void setDash(boolean dash) {
         if (dash && canDash && !dashing && !attacking && !charging) {
             this.dashing = true;
@@ -451,7 +480,9 @@ public class Player extends Entity {
         }
         if (this.charging == charging) return;
         this.charging = charging;
-        if (charging) chargeTick = 0;
+        if (charging) {
+            chargeTick = 0;
+        }
     }
 
     public void releaseAttack() {
@@ -468,13 +499,17 @@ public class Player extends Entity {
 
     private void updatePos() {
         moving = false;
-        if (jump && !charging && !isKnockedDown) jump();
+        if (jump && !charging && !isKnockedDown) {
+            jump();
+        }
 
         float xSpeed = 0;
 
         if (dashing) {
             dashTick++;
-            if (dashTick >= dashDuration) dashing = false;
+            if (dashTick >= dashDuration) {
+                dashing = false;
+            }
         }
 
         if (knockbackSpeed > 0) {
@@ -515,7 +550,9 @@ public class Player extends Entity {
         
         if (inAir) {
             float maxFallSpeed = GameCore.TILES_SIZE - 1.0f; 
-            if (airSpeed > maxFallSpeed) airSpeed = maxFallSpeed;
+            if (airSpeed > maxFallSpeed) {
+                airSpeed = maxFallSpeed;
+            }
             
             Rectangle2D.Float nextYHitbox = new Rectangle2D.Float(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height);
             GameContainer gcY = playStates.getObjectManager().getIntersectingContainer(nextYHitbox);
@@ -557,7 +594,9 @@ public class Player extends Entity {
             }
         }
         
-        if (xSpeed != 0 && !attacking && !charging && !isKnockedDown && !dashing && knockbackSpeed <= 0) moving = true;
+        if (xSpeed != 0 && !attacking && !charging && !isKnockedDown && !dashing && knockbackSpeed <= 0) {
+            moving = true;
+        }
     }
     
     private void jump() {
@@ -589,8 +628,11 @@ public class Player extends Entity {
             hitBox.x += xSpeed;
         } else {
             if (gcX != null) {
-                if (xSpeed > 0) hitBox.x = gcX.getHitbox().x - hitBox.width - 1f;
-                else if (xSpeed < 0) hitBox.x = gcX.getHitbox().x + gcX.getHitbox().width + 1f;
+                if (xSpeed > 0) {
+                    hitBox.x = gcX.getHitbox().x - hitBox.width - 1f;
+                } else if (xSpeed < 0) {
+                    hitBox.x = gcX.getHitbox().x + gcX.getHitbox().width + 1f;
+                }
             } else {
                 hitBox.x = GetEntityPosNextToWall(hitBox, xSpeed);
             }
@@ -608,6 +650,7 @@ public class Player extends Entity {
             playerAction = DOWN;
             aniIndex = 0;
             aniTick = 0;
+            
             knockbackSpeed = 5.0f * GameCore.SCALE;
             airSpeed = -3.5f * GameCore.SCALE;
             inAir = true;
@@ -620,6 +663,7 @@ public class Player extends Entity {
         }
     }
 
+    // --- INISIALISASI & RESET ---
     private void loadAnimations() {
         BufferedImage image = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_SPRITE);
         animasi = new BufferedImage[25][16];
@@ -633,22 +677,39 @@ public class Player extends Entity {
 
     public void loadmapData(int[][] mapData) {
         this.mapData = mapData;
-        if (!IsEntityOnFloor(hitBox, mapData)) inAir = true;
+        if (!IsEntityOnFloor(hitBox, mapData)) {
+            inAir = true;
+        }
     }
 
     public void resetDirBooleans() {
-        left = false; right = false; up = false; down = false;
+        left = false;
+        right = false;
+        up = false;
+        down = false;
     }
 
     public void resetAll(float newX, float newY) {
         resetDirBooleans();
-        inAir = false; canDoubleJump = true; moving = false;
-        attacking = false; isKnockedDown = false; playerAction = IDLE_ACTIVE;
+        inAir = false;
+        canDoubleJump = true;
+        moving = false;
+        attacking = false;
+        isKnockedDown = false;
+        playerAction = IDLE_ACTIVE;
         currentHealth = maxHealth;
-        this.x = newX; this.y = newY; hitBox.x = newX; hitBox.y = newY;
-        if (mapData != null && !IsEntityOnFloor(hitBox, mapData)) inAir = true;
-        if (currentHealth <= 0) currentHealth = 0;
-        else if (currentHealth >= maxHealth) currentHealth = maxHealth;
+        this.x = newX;
+        this.y = newY;
+        hitBox.x = newX;
+        hitBox.y = newY;
+        if (mapData != null && !IsEntityOnFloor(hitBox, mapData)) {
+            inAir = true;
+        }
+        if (currentHealth <= 0) {
+            currentHealth = 0;
+        } else if (currentHealth >= maxHealth) {
+            currentHealth = maxHealth;
+        }
     }
 
     // --- LOGIKA EXP & LEVEL UP ---
@@ -677,7 +738,7 @@ public class Player extends Entity {
         System.out.println("Level Up! Sekarang Level " + level);
     }
 
-    // GETTER & SETTER
+    // --- GETTER & SETTER ---
     public boolean isChargeAttack() { return isExecutingChargeAttack; }
     public void setAttack(boolean attacking) { this.attacking = attacking; }
     public PlayStates getPlayStates() { return playStates; }
@@ -693,6 +754,7 @@ public class Player extends Entity {
     public void setJump(boolean jump) { this.jump = jump; }
     public java.awt.geom.Rectangle2D.Float getHitbox() { return hitBox; }
 
+    // Equipment Getter untuk UI Inventory
     public int getEquippedHelmet() { return equippedHelmet; }
     public int getEquippedArmor() { return equippedArmor; }
     public int getEquippedGloves() { return equippedGloves; }
