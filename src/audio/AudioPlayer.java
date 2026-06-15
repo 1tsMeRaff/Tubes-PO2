@@ -2,6 +2,7 @@ package audio;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Random;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -10,16 +11,13 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
-import java.util.Random;
 
 public class AudioPlayer {
 
-	// BGM Index
 	public static int MENU_1 = 0;
 	public static int LEVEL_1 = 1;
 	public static int LEVEL_2 = 2;
 
-	// SFX Index
 	public static int DIE = 0;
 	public static int JUMP = 1;
 	public static int GAMEOVER = 2;
@@ -30,19 +28,18 @@ public class AudioPlayer {
 
 	private Clip[] songs, effects;
 	private int currentSongId;
-	private float volume = 0.8f; // Volume standar (50%)
+	private float volume = 0.8f;
 	private boolean songMute, effectMute;
 	private Random rand = new Random();
 
 	public AudioPlayer() {
 		loadSongs();
 		loadEffects();
-		playSong(MENU_1); // Putar lagu menu saat game pertama dibuka
+		playSong(MENU_1);
 	}
 
 	private void loadSongs() {
-		// Nama file BGM harus persis dengan yang ada di src/resources/audio/
-		String[] names = { "menu", "level1", "level2" };
+		String[] names = { "Theme", "Theme", "Theme" };
 		songs = new Clip[names.length];
 		for (int i = 0; i < songs.length; i++) {
 			songs[i] = getClip(names[i]);
@@ -50,34 +47,34 @@ public class AudioPlayer {
 	}
 
 	private void loadEffects() {
-		// Nama file SFX harus persis dengan yang ada di src/resources/audio/
 		String[] names = { "die", "jump", "gameover", "lvlcompleted", "attack1", "attack2", "attack3" };
 		effects = new Clip[names.length];
 		for (int i = 0; i < effects.length; i++) {
 			effects[i] = getClip(names[i]);
 		}
-		
 		updateEffectsVolume();
 	}
 
 	private Clip getClip(String name) {
-//		URL url = getClass().getResource("/audio/" + name + ".wav");
-		URL url = getClass().getResource("/resources/audio/" + name + ".wav");
-		
-		// [SISTEM ANTI-CRASH] Jika file belum ada, jangan lakukan apa-apa
-		if (url == null) {
-			System.out.println("Audio belum siap: " + name + ".wav (Menunggu aset dari ketua)");
-			return null; 
+		String[] paths = {
+			"/" + name + ".wav",
+			"/audio/" + name + ".wav",
+			"/resources/audio/" + name + ".wav"
+		};
+
+		for (String path : paths) {
+			URL url = getClass().getResource(path);
+			if (url != null) {
+				try (AudioInputStream audio = AudioSystem.getAudioInputStream(url)) {
+					Clip c = AudioSystem.getClip();
+					c.open(audio);
+					return c;
+				} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 
-		try {
-			AudioInputStream audio = AudioSystem.getAudioInputStream(url);
-			Clip c = AudioSystem.getClip();
-			c.open(audio);
-			return c;
-		} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
-			e.printStackTrace();
-		}
 		return null;
 	}
 
@@ -88,10 +85,8 @@ public class AudioPlayer {
 	}
 
 	public void stopSong() {
-		if (songs[currentSongId] != null) {
-			if (songs[currentSongId].isActive()) {
-				songs[currentSongId].stop();
-			}
+		if (songs != null && songs[currentSongId] != null && songs[currentSongId].isActive()) {
+			songs[currentSongId].stop();
 		}
 	}
 
@@ -109,13 +104,12 @@ public class AudioPlayer {
 	}
 
 	public void playAttackSound() {
-		int start = 4;
-		start += rand.nextInt(3); // Pilih acak antara attack 1, 2, atau 3
+		int start = ATTACK_ONE + rand.nextInt(3);
 		playEffect(start);
 	}
 
 	public void playEffect(int effect) {
-		if (effects[effect] != null) {
+		if (effects != null && effect >= 0 && effect < effects.length && effects[effect] != null) {
 			effects[effect].setMicrosecondPosition(0);
 			effects[effect].start();
 		}
@@ -123,55 +117,72 @@ public class AudioPlayer {
 
 	public void playSong(int song) {
 		stopSong();
-
 		currentSongId = song;
 		updateSongVolume();
-		
-		if (songs[currentSongId] != null) {
+
+		if (songs != null && currentSongId >= 0 && currentSongId < songs.length && songs[currentSongId] != null) {
 			songs[currentSongId].setMicrosecondPosition(0);
-			songs[currentSongId].loop(Clip.LOOP_CONTINUOUSLY); // BGM diulang terus menerus
+			songs[currentSongId].loop(Clip.LOOP_CONTINUOUSLY);
 		}
 	}
 
 	public void toggleSongMute() {
 		this.songMute = !songMute;
-		for (Clip c : songs) {
-			if (c != null) {
-				BooleanControl booleanControl = (BooleanControl) c.getControl(BooleanControl.Type.MUTE);
-				booleanControl.setValue(songMute);
+		if (songs != null) {
+			for (Clip c : songs) {
+				if (c != null) {
+					BooleanControl control = (BooleanControl) c.getControl(BooleanControl.Type.MUTE);
+					control.setValue(songMute);
+				}
 			}
 		}
 	}
 
 	public void toggleEffectMute() {
 		this.effectMute = !effectMute;
-		for (Clip c : effects) {
-			if (c != null) {
-				BooleanControl booleanControl = (BooleanControl) c.getControl(BooleanControl.Type.MUTE);
-				booleanControl.setValue(effectMute);
+		if (effects != null) {
+			for (Clip c : effects) {
+				if (c != null) {
+					BooleanControl control = (BooleanControl) c.getControl(BooleanControl.Type.MUTE);
+					control.setValue(effectMute);
+				}
 			}
 		}
 		if (!effectMute) {
-			playEffect(JUMP); // Suara feedback saat SFX dinyalakan
+			playEffect(JUMP);
 		}
 	}
 
 	private void updateSongVolume() {
-		if (songs[currentSongId] != null) {
+		if (songs != null && currentSongId >= 0 && currentSongId < songs.length && songs[currentSongId] != null) {
 			FloatControl gainControl = (FloatControl) songs[currentSongId].getControl(FloatControl.Type.MASTER_GAIN);
-			float range = gainControl.getMaximum() - gainControl.getMinimum();
-			float gain = (range * volume) + gainControl.getMinimum();
+			
+			// Mencegah error jika volume berada di angka 0 mutlak
+			float safeVolume = Math.max(0.0001f, volume); 
+			
+			// Rumus konversi logaritmik dari linear (0.0 - 1.0) ke Desibel (dB)
+			float gain = 20f * (float) Math.log10(safeVolume);
+			
+			// Pastikan nilai dB tidak melampaui batas maksimum atau minimum bawaan Java
+			gain = Math.max(gainControl.getMinimum(), Math.min(gainControl.getMaximum(), gain));
+			
 			gainControl.setValue(gain);
 		}
 	}
 
 	private void updateEffectsVolume() {
-		for (Clip c : effects) {
-			if (c != null) {
-				FloatControl gainControl = (FloatControl) c.getControl(FloatControl.Type.MASTER_GAIN);
-				float range = gainControl.getMaximum() - gainControl.getMinimum();
-				float gain = (range * volume) + gainControl.getMinimum();
-				gainControl.setValue(gain);
+		if (effects != null) {
+			for (Clip c : effects) {
+				if (c != null) {
+					FloatControl gainControl = (FloatControl) c.getControl(FloatControl.Type.MASTER_GAIN);
+					
+					// Gunakan rumus logaritmik yang sama
+					float safeVolume = Math.max(0.0001f, volume);
+					float gain = 20f * (float) Math.log10(safeVolume);
+					gain = Math.max(gainControl.getMinimum(), Math.min(gainControl.getMaximum(), gain));
+					
+					gainControl.setValue(gain);
+				}
 			}
 		}
 	}

@@ -51,10 +51,11 @@ public class EnemyManager {
 	private void drawBossUI(Graphics g) {
 		for (DemonBoss db : demonBosses) {
 			if(db.isActive()) {
-				int maxWidth = (int) (400 * GameCore.SCALE);
+				// 1. Tentukan ukuran dan posisi Health Bar (Statis di tengah bawah layar)
+				int maxWidth = (int) (400 * GameCore.SCALE); 
 				int height = (int) (20 * GameCore.SCALE);
 				int xPos = (GameCore.GAME_WIDTH / 2) - (maxWidth / 2);
-				int yPos = (int) (GameCore.GAME_HEIGHT - (40 * GameCore.SCALE)); 
+				int yPos = (int) (GameCore.GAME_HEIGHT - (40 * GameCore.SCALE)); // Posisi di bawah
 				
 				float distance = Math.abs(playStates.getPlayer().getHitbox().x - db.getHitBox().x);
 				float healthPercentage = (float) db.getCurrentHealth() / db.getMaxHealth();
@@ -65,10 +66,16 @@ public class EnemyManager {
 				if (distance < GameCore.GAME_WIDTH) {
 					g.setColor(new java.awt.Color(50, 50, 50, 200));
 					g.fillRect(xPos, yPos, maxWidth, height);
+
+					// 4. Gambar Darah Boss (Warna Merah)
 					g.setColor(new java.awt.Color(200, 50, 50));
 					g.fillRect(xPos, yPos, currentWidth, height);
+
+					// 5. Gambar Bingkai / Border (Warna Putih)
 					g.setColor(java.awt.Color.WHITE);
 					g.drawRect(xPos, yPos, maxWidth, height);
+
+					// 6. Gambar Teks Nama Boss
 					g.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, (int)(16 * GameCore.SCALE)));
 					g.drawString("DEMON BOSS", xPos, yPos - (int)(5 * GameCore.SCALE));
 					
@@ -98,7 +105,6 @@ public class EnemyManager {
 	                    (int) (s.getHitBox().x - SLIME_DRAWOFFSET_X + s.flipX()),
 	                    (int) (s.getHitBox().y - SLIME_DRAWOFFSET_Y),
 	                    SLIME_WIDTH * s.flipW(), SLIME_HEIGHT, null);
-
 	             s.drawHitbox(g2); 
 	             s.drawAttackBox(g2, xLvlOffset);
 	        }
@@ -136,25 +142,10 @@ public class EnemyManager {
 				}
 			}
 		}
-
 		for (DemonBoss demonBoss : demonBosses) {
 			if(demonBoss.isActive()) {
 				if (attackBox.intersects(demonBoss.getHitBox())) {
-					// 1. Simpan status hidup sebelum Boss menerima hit
-					boolean wasAlive = demonBoss.getCurrentHealth() > 0;
-					
-					// 2. Boss Menerima Damage
 					demonBoss.hurt(damage); 
-					
-					// 3. Cek apakah Boss baru saja mati karena hit ini
-					if (wasAlive && demonBoss.getCurrentHealth() <= 0) {
-						// Ambil titik koordinat tengah tubuh boss saat mati
-						int dropX = (int) (demonBoss.getHitBox().x + demonBoss.getHitBox().width / 2);
-						int dropY = (int) (demonBoss.getHitBox().y + demonBoss.getHitBox().height / 2);
-						
-						// Panggil fungsi spawn drop item
-						playStates.getObjectManager().spawnEquipment(dropX, dropY);
-					}
 					return;
 				}
 			}

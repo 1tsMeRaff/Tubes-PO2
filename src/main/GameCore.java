@@ -4,6 +4,7 @@ import audio.AudioPlayer;
 import gameStates.GameStates;
 import gameStates.MainMenu;
 import gameStates.PlayStates;
+import gameStates.GameOptions; // [TAMBAHAN] Import GameOptions
 import java.awt.Graphics;
 
 public class GameCore implements Runnable {
@@ -16,6 +17,7 @@ public class GameCore implements Runnable {
 	
 	private PlayStates play;
 	private MainMenu menu;
+	private GameOptions gameOptions; // [TAMBAHAN] Deklarasi GameOptions
 	private AudioPlayer audioPlayer;
 	
 	public final static int TILE_DEFAULT_SIZE = 32;
@@ -41,6 +43,7 @@ public class GameCore implements Runnable {
 	private void initClasses() {
 		menu = new MainMenu(this);
 		play = new PlayStates(this);
+		gameOptions = new GameOptions(this); // [TAMBAHAN] Inisialisasi GameOptions
 	}
 
 	private void startGameLoop() {
@@ -57,7 +60,7 @@ public class GameCore implements Runnable {
 				play.update();
 				break;
 			case OPTIONS:
-				// Dikosongkan sementara untuk fitur masa depan, tidak langsung exit
+				gameOptions.update(); // [TAMBAHAN] Memanggil update Options
 				break;
 			case QUIT:
 				System.exit(0);
@@ -75,58 +78,13 @@ public class GameCore implements Runnable {
 			case PLAYING:
 				play.draw(g);
 				break;
+			case OPTIONS:
+				gameOptions.draw(g); // [TAMBAHAN] Memanggil render/draw Options
+				break;
 			default:
 				break;
 		}
 	}
-	
-//	@Override
-//	public void run() {
-//		double timePerFrame = 1000000000.0 / FPS_SET;
-//		double timePerUpdate = 1000000000.0 / UPS_SET;
-//		
-//		long previousTime = System.nanoTime();
-//		
-//		int fps = 0;
-//		int ups = 0;
-//		long lastCheck = System.currentTimeMillis();
-//		
-//		double deltaU = 0;
-//		double deltaF = 0;
-//		
-//		while(true) {
-//			long currentTime = System.nanoTime();
-//	        
-//	        deltaU += (currentTime - previousTime) / timePerUpdate;
-//	        deltaF += (currentTime - previousTime) / timePerFrame;
-//	        previousTime = currentTime;
-//	        
-//	        if (deltaU >= 1) {
-//	            update();
-//	            ups++;
-//	            deltaU--;
-//	        }
-//	        
-//	        if (deltaF >= 1) {
-//	            gamePanel.repaint();
-//	            fps++;
-//	            deltaF--;
-//	        }
-//	        
-//	        try {
-//	            Thread.sleep(1); 
-//	        } catch (InterruptedException e) {
-//	            e.printStackTrace();
-//	        }
-//			
-//			if(System.currentTimeMillis() - lastCheck >= 1000) {
-//				lastCheck = System.currentTimeMillis();
-//				System.out.println("FPS : " + fps + " | UPS : " + ups);
-//				fps = 0;
-//				ups = 0;
-//			}
-//		}
-//	}
 	
 	@Override
 	public void run() {
@@ -139,7 +97,7 @@ public class GameCore implements Runnable {
 	    double deltaU = 0;
 	    double deltaF = 0;
 
-	    // Variabel untuk monitoring performa di konsol
+	    // Debug
 	    long lastCheck = System.currentTimeMillis();
 	    int updates = 0;
 	    int frames = 0;
@@ -147,28 +105,22 @@ public class GameCore implements Runnable {
 	    while (gameThread != null) {
 	        long currentTime = System.nanoTime();
 	        
-	        // Menghitung rasio waktu yang telah berlalu
 	        deltaU += (currentTime - previousTime) / TIME_PER_UPDATE;
 	        deltaF += (currentTime - previousTime) / TIME_PER_FRAME;
 	        previousTime = currentTime;
 
-	        // --- AKSI 1: PEMBARUAN LOGIKA GAME (FIXED TIMESTEP) ---
-	        // Jika deltaU >= 1, berarti sudah waktunya logika game diperbarui
 	        while (deltaU >= 1) {
-	            update(); // Panggil metode update() Anda (posisi, fisika, ai)
+	            update();
 	            updates++;
-	            deltaU--; // Kurangi 1 tick
+	            deltaU--;
 	        }
 
-	        // --- AKSI 2: RENDERING / DRAWING (FPS) ---
-	        // Jika deltaF >= 1, render frame baru ke layar
 	        if (deltaF >= 1) {
-	            gamePanel.repaint(); // Panggil repaint untuk memicu paintComponent()
+	            gamePanel.repaint();
 	            frames++;
 	            deltaF--;
 	        }
 
-	        // --- MONITORING FPS & UPS (Opsional, muncul setiap 1 detik) ---
 	        if (System.currentTimeMillis() - lastCheck >= 1000) {
 	            lastCheck = System.currentTimeMillis();
 	            System.out.println("FPS: " + frames + " | UPS: " + updates);
@@ -191,8 +143,12 @@ public class GameCore implements Runnable {
 	public PlayStates getPlay() {
 		return play;
 	}
+
+	public GameOptions getGameOptions() {
+		return gameOptions;
+	}
 	
 	public audio.AudioPlayer getAudioPlayer() {
-	    return audioPlayer;
+		return audioPlayer;
 	}
 }

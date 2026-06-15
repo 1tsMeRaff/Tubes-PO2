@@ -187,6 +187,7 @@ public class Konstanta {
 		public static final int RIGHT = 2;
 		public static final int DOWN = 3;
 	}
+	
 	public static class KonstantaPlayerRight{
 		public static final int IDLE_ACTIVE = 0;
 		public static final int IDLE_CHILL = 1;

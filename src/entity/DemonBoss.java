@@ -12,6 +12,10 @@ public class DemonBoss extends Boss {
 
 	private Rectangle2D.Float attackBox;
 	private int attackCooldown = 0;
+	
+	private boolean hp70Triggered = false;
+    private boolean hp40Triggered = false;
+    private boolean hp10Triggered = false;
 
     public DemonBoss(float x, float y) {
         super(x, y, DEMON_BOSS_WIDTH, DEMON_BOSS_HEIGHT, DEMON_BOSS); 
@@ -23,12 +27,31 @@ public class DemonBoss extends Boss {
 //      aniSpeed = 12;
         aniSpeed = 4;
     }
+    
+    public boolean checkHpThresholdEffect() {
+        float hpPercentage = ((float) currentHealth / maxHealth) * 100f;
+
+        if (hpPercentage <= 70 && !hp70Triggered) {
+            hp70Triggered = true;
+            return true;
+        }
+        if (hpPercentage <= 40 && !hp40Triggered) {
+            hp40Triggered = true;
+            return true;
+        }
+        if (hpPercentage <= 10 && !hp10Triggered) {
+            hp10Triggered = true;
+            return true;
+        }
+        return false;
+    }
 
 	private void initAttackBox() {
 		attackBox = new Rectangle2D.Float(x, y, (int) (70 * GameCore.SCALE), (int) (55 * GameCore.SCALE));
 	}
 
 	public void update(int[][] tilesData, Player player) {
+		updateEffects(tilesData);
 		updateBehaviour(tilesData, player);
 		updateAnimationTick();
 		updateAttackBox();
@@ -41,6 +64,12 @@ public class DemonBoss extends Boss {
 		} else {
 			attackBox.x = hitBox.x + hitBox.width;
 		}
+	}
+	
+	@Override
+	public void hurt(int value, int kbDir, boolean applyKnockback) {
+	    super.hurt(value, kbDir, applyKnockback);
+	    checkPhaseTransition();
 	}
 
 	private void updateBehaviour(int[][] tilesData, Player player) {
@@ -69,7 +98,6 @@ public class DemonBoss extends Boss {
 			if (isPlayerCloseEnoughForAttack(player)) {
 				if (attackCooldown <= 0) {
 					newState(ATTACK);
-//					attackCooldown = 200;
 					attackCooldown = 90;
 				} else {
 					newState(IDLE);
@@ -120,6 +148,13 @@ public class DemonBoss extends Boss {
 
 	public void drawAttackBox(Graphics g, int xLvlOffset) {
 		g.setColor(Color.red);
-		g.drawRect((int) (attackBox.x - xLvlOffset), (int) attackBox.y, (int) attackBox.width, (int) attackBox.height);
+		g.drawRect((int) (attackBox.x - xLvlOffset), (int) attackBox.y, 
+				   (int) attackBox.width, (int) attackBox.height);
 	}
+	
+	public void resetBoss() {
+        hp70Triggered = false;
+        hp40Triggered = false;
+        hp10Triggered = false;
+    }
 }

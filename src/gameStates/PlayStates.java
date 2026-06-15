@@ -3,6 +3,7 @@ package gameStates;
 import entity.EnemyManager;
 import entity.Player;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
@@ -40,6 +41,11 @@ public class PlayStates extends States implements StateMethods {
     private int leftBorder = (int) (0.2 * GameCore.GAME_WIDTH);
     private int rightBorder = (int) (0.8 * GameCore.GAME_WIDTH);
     private int maxLvlOffsetX;
+    
+    // Efek hit boss
+    private int hitStopDuration = 0;
+    private int shakeDuration = 0;
+    private int shakeIntensity = 0;
 
     private BufferedImage backgroundImg, clouds_01, clouds_02; 
     private int[] clouds_02Pos;
@@ -95,6 +101,22 @@ public class PlayStates extends States implements StateMethods {
             xLvlOffset = 0;
         }
     }
+    
+    private void drawClouds(Graphics g) {
+        for (int i = 0; i < 3 ; i++) {
+//            g.drawImage(clouds_01, i * CLOUDS_01_WIDTH - (int)(xLvlOffset * 0.3), (int) (204 * GameCore.SCALE), CLOUDS_01_WIDTH, CLOUDS_01_HEIGHT, null);
+        }
+        
+        for (int i = 0; i < clouds_02Pos.length; i++) {
+//            g.drawImage(clouds_02, CLOUDS_02_WIDTH * 4 * i - (int)(xLvlOffset * 0.7), clouds_02Pos[i], CLOUDS_02_WIDTH, CLOUDS_02_HEIGHT, null);
+        }
+    }
+    
+    public void triggerHeavyHit(int freezeFrames, int shakeFrames, int intensity) {
+        this.hitStopDuration = freezeFrames;
+        this.shakeDuration = shakeFrames;
+        this.shakeIntensity = intensity;
+    }
 
     @Override
     public void update() {
@@ -103,14 +125,22 @@ public class PlayStates extends States implements StateMethods {
         } else if (lvlCompleted) {
             levelCompletedOverlay.update();
         } else if (gameOver) {
-            // Saat game over, layar akan freeze
+        	
         } else if (inventoryOpen) {
-            // Pause pergerakan dunia saat menu inventory dibuka
+        	
         } else {
+            if (hitStopDuration > 0) {
+                hitStopDuration--;
+                if (shakeDuration > 0) shakeDuration--;
+                return;
+            }
+
+            if (shakeDuration > 0) shakeDuration--;
+
             worldManager.update();
             objectManager.update();
             player.update();
-            enemyManager.update(worldManager.getCurrentMap().getWorldData(), player); 
+            enemyManager.update(worldManager.getCurrentMap().getWorldData(), player);
             checkCloseToBorder();
             
             // Cek Transisi Level & Memicu Suara Menang
@@ -124,13 +154,31 @@ public class PlayStates extends States implements StateMethods {
 
     @Override
     public void draw(Graphics g) {
-        g.drawImage(backgroundImg, 0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
+        Graphics2D g2 = (Graphics2D) g;
+        int shakeX = 0;
+        int shakeY = 0;
+
+        if (shakeDuration > 0) {
+            shakeX = rnd.nextInt(shakeIntensity * 2) - shakeIntensity;
+            shakeY = rnd.nextInt(shakeIntensity * 2) - shakeIntensity;
+        }
+
+        g2.translate(shakeX, shakeY);
+
+//        g.drawImage(backgroundImg, -xLvlOffset, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
+        float geserX = 0.25f;
+        int bgX = (int)(-xLvlOffset * geserX) % GameCore.GAME_WIDTH;
+        g.drawImage(backgroundImg, bgX, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
+        g.drawImage(backgroundImg, bgX + GameCore.GAME_WIDTH, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
         
+        drawClouds(g);
         worldManager.draw(g, xLvlOffset);
-        objectManager.draw(g, xLvlOffset); 
+        objectManager.draw(g, xLvlOffset);
         player.render(g, xLvlOffset);
-        enemyManager.draw(g, xLvlOffset); 
-        
+        enemyManager.draw(g, xLvlOffset);
+
+        g2.translate(-shakeX, -shakeY);
+
         if (paused) {
             pauseOverlay.draw(g);
         } else if (lvlCompleted) {
@@ -142,15 +190,6 @@ public class PlayStates extends States implements StateMethods {
         }
     }
 
-    private void drawClouds(Graphics g) {
-        for (int i = 0; i < 3 ; i++) {
-            g.drawImage(clouds_01, i * CLOUDS_01_WIDTH - (int)(xLvlOffset * 0.3), (int) (204 * GameCore.SCALE), CLOUDS_01_WIDTH, CLOUDS_01_HEIGHT, null);
-        }
-        
-        for (int i = 0; i < clouds_02Pos.length; i++) {
-            g.drawImage(clouds_02, CLOUDS_02_WIDTH * 4 * i - (int)(xLvlOffset * 0.7), clouds_02Pos[i], CLOUDS_02_WIDTH, CLOUDS_02_HEIGHT, null);
-        }
-    }
 
     public void loadNextLevel() {
         worldManager.loadNextWorld();
@@ -175,13 +214,13 @@ public class PlayStates extends States implements StateMethods {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        // tidak digunakan
+    	
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-        if (gameOver) return;
-        
+        if (gameOver) return; 
+
         if (inventoryOpen) {
             inventoryOverlay.mousePressed(e);
             return;
@@ -211,6 +250,7 @@ public class PlayStates extends States implements StateMethods {
     @Override
     public void mouseMoved(MouseEvent e) {
         if (gameOver) return;
+
         if (inventoryOpen) {
             inventoryOverlay.mouseMoved(e);
             return;
@@ -253,6 +293,7 @@ public class PlayStates extends States implements StateMethods {
         if (inventoryOpen) return; 
 
         if (paused) return;
+        
         switch(e.getKeyCode()) {
             case KeyEvent.VK_A: player.setLeft(true); break;
             case KeyEvent.VK_D: player.setRight(true); break;
@@ -282,7 +323,7 @@ public class PlayStates extends States implements StateMethods {
         lvlCompleted = false;
         gameOver = false; 
         inventoryOpen = false;
-        xLvlOffset = 0;
+        xLvlOffset = 0; 
     }
     
     public void setGameOver(boolean gameOver) {
@@ -292,9 +333,9 @@ public class PlayStates extends States implements StateMethods {
             gc.getAudioPlayer().playEffect(audio.AudioPlayer.GAMEOVER);
         }
     }
-    
+
     public void checkHitEnemy(Rectangle2D.Float AttackBox, int damage) {
-        enemyManager.checkEnemyHit(AttackBox, damage);
+        enemyManager.checkEnemyHit(AttackBox, damage, player);
     }
     
     public void checkObjectHit(Rectangle2D.Float attackBox) {

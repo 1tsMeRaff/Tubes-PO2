@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 
 public class VolumeButton extends PauseButton {
+    
     private int buttonX, minX, maxX;
     private int sliderWidth;
     
@@ -21,7 +22,7 @@ public class VolumeButton extends PauseButton {
         this.sliderWidth = sliderWidth;
         
         // --- PERBAIKAN UKURAN KOTAK SLIDER (KNOB) ---
-        // Kita rampingkan menjadi setengah dari lebar bawaan Kaarin
+        // Kita rampingkan menjadi setengah dari lebar bawaan
         this.knobWidth = width / 2; 
         // Kita pendekkan tingginya menjadi sekitar 60% dari tinggi bawaan
         this.knobHeight = (int)(height * 0.6); 
@@ -62,7 +63,6 @@ public class VolumeButton extends PauseButton {
         g2.fillRect(x + 2, trackY + 2, Math.max(0, fillWidth - 4), trackHeight - 3);
 
         // 3. Gambar Knob (Pegangan)
-        // Hitung sumbu Y agar knob selalu berada persis di tengah garis emas
         int knobY = y + (height / 2) - (knobHeight / 2);
 
         Color knobColor = mouseOver ? new Color(240, 190, 90) : Color.WHITE;
@@ -70,7 +70,6 @@ public class VolumeButton extends PauseButton {
             knobColor = new Color(200, 150, 50); 
         }
         
-        // Menggambar kotak knob yang ukurannya sudah diperkecil
         g2.setColor(knobColor);
         g2.fillRect(buttonX, knobY, knobWidth, knobHeight);
         
@@ -96,8 +95,30 @@ public class VolumeButton extends PauseButton {
         mousePressed = false;
     }
 
-    public boolean isMouseOver() { return mouseOver; }
-    public void setMouseOver(boolean mouseOver) { this.mouseOver = mouseOver; }
-    public boolean isMousePressed() { return mousePressed; }
-    public void setMousePressed(boolean mousePressed) { this.mousePressed = mousePressed; }
+    // --- TAMBAHAN FUNGSI UNTUK MENGAMBIL NILAI VOLUME ---
+    // Menghasilkan angka antara 0.0f (muting) sampai 1.0f (full volume)
+    public float GetFloatValue() {
+        if (maxX - minX > 0) {
+            return (float) (buttonX - minX) / (maxX - minX);
+        }
+        return 0f;
+    }
+
+    // --- GETTERS AND SETTERS ---
+    
+    public boolean isMouseOver() { 
+        return mouseOver; 
+    }
+    
+    public void setMouseOver(boolean mouseOver) { 
+        this.mouseOver = mouseOver; 
+    }
+    
+    public boolean isMousePressed() { 
+        return mousePressed; 
+    }
+    
+    public void setMousePressed(boolean mousePressed) { 
+        this.mousePressed = mousePressed; 
+    }
 }
