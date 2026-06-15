@@ -104,6 +104,7 @@ public abstract class Enemy extends Entity {
 	            invincibilityTick = 0;
 	        }
 	    }
+	    
 	    if (knockbackSpeed > 0) {
 	        float xSpeed = knockbackSpeed * knockbackDir;
 	        if(utilitytools.HelpMethods.canMoveHere(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height, tilesData)) {
@@ -175,16 +176,20 @@ public abstract class Enemy extends Entity {
 	public void hurt(int value) {
 	    hurt(value, 1, false); 
 	}
-
+	
 	protected void checkHitEnemy(Rectangle2D.Float AttackBox, Player player) {
 	    if(AttackBox.intersects(player.getHitbox())) {
 	        player.changeHealth(-getEnemyAtt(enemyType));
 	        
 	        int kbDir = (player.getHitbox().x > hitBox.x) ? 1 : -1;
-	        
 	        boolean fromBoss = (this.enemyType == DEMON_BOSS);
 	        
 	        player.applyKnockback(kbDir, fromBoss);
+	        if (fromBoss) {
+	            player.getPlayStates().triggerHeavyHit(12, 18, 7);
+	        } else {
+	            player.getPlayStates().triggerHeavyHit(0, 4, 2);
+	        }
 	    }
 	    attackChecked = true;
 	}

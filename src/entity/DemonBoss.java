@@ -12,6 +12,10 @@ public class DemonBoss extends Boss {
 
 	private Rectangle2D.Float attackBox;
 	private int attackCooldown = 0;
+	
+	private boolean hp70Triggered = false;
+    private boolean hp40Triggered = false;
+    private boolean hp10Triggered = false;
 
     public DemonBoss(float x, float y) {
         super(x, y, DEMON_BOSS_WIDTH, DEMON_BOSS_HEIGHT, DEMON_BOSS); 
@@ -22,6 +26,24 @@ public class DemonBoss extends Boss {
         attackDistance = GameCore.TILES_SIZE * 2f;
 //      aniSpeed = 12;
         aniSpeed = 4;
+    }
+    
+    public boolean checkHpThresholdEffect() {
+        float hpPercentage = ((float) currentHealth / maxHealth) * 100f;
+
+        if (hpPercentage <= 70 && !hp70Triggered) {
+            hp70Triggered = true;
+            return true;
+        }
+        if (hpPercentage <= 40 && !hp40Triggered) {
+            hp40Triggered = true;
+            return true;
+        }
+        if (hpPercentage <= 10 && !hp10Triggered) {
+            hp10Triggered = true;
+            return true;
+        }
+        return false;
     }
 
 	private void initAttackBox() {
@@ -129,4 +151,10 @@ public class DemonBoss extends Boss {
 		g.drawRect((int) (attackBox.x - xLvlOffset), (int) attackBox.y, 
 				   (int) attackBox.width, (int) attackBox.height);
 	}
+	
+	public void resetBoss() {
+        hp70Triggered = false;
+        hp40Triggered = false;
+        hp10Triggered = false;
+    }
 }

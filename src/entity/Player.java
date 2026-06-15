@@ -239,7 +239,7 @@ public class Player extends Entity {
     private void checkPotionTouched() {
         playStates.checkPotionTouched(hitBox);
     }
-
+    
     private void checkAttack() {
         if (attackCheck) {
             return;
@@ -250,19 +250,48 @@ public class Player extends Entity {
         } else {
             hitFrame = 3;
         }
+        
         if (aniIndex == hitFrame) {
             attackCheck = true;
             int damageToDeal;
+            
             if (isExecutingChargeAttack) {
                 damageToDeal = 25;
+//                playStates.triggerHeavyHit(12, 20, 8); 
             } else {
                 damageToDeal = 10;
+//                playStates.triggerHeavyHit(3, 5, 3);
             }
+            
             playStates.checkHitEnemy(AttackBox, damageToDeal);
             playStates.checkObjectHit(AttackBox);
             playStates.getGameCore().getAudioPlayer().playAttackSound();
         }
     }
+
+//    private void checkAttack() {
+//        if (attackCheck) {
+//            return;
+//        }
+//        int hitFrame;
+//        if (isExecutingChargeAttack) {
+//            hitFrame = 9;
+//        } else {
+//            hitFrame = 3;
+//        }
+//        if (aniIndex == hitFrame) {
+//            attackCheck = true;
+//            int damageToDeal;
+//            if (isExecutingChargeAttack) {
+//                damageToDeal = 25;
+//            } else {
+//                damageToDeal = 10;
+//            }
+//            playStates.checkHitEnemy(AttackBox, damageToDeal);
+//            playStates.checkObjectHit(AttackBox);
+//            playStates.getGameCore().getAudioPlayer().playAttackSound();
+//        }
+//    }
 
     private void updateAttackBox() {
         AttackBox.y = hitBox.y + (GameCore.SCALE * 2 * playerScale);
@@ -666,6 +695,10 @@ public class Player extends Entity {
                 airSpeed = -2.0f * GameCore.SCALE;
             }
         }
+    }
+    
+    public PlayStates getPlayStates() {
+        return playStates;
     }
    
     public int getFlipW() { return flipW; }

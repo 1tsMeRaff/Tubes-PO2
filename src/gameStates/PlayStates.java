@@ -3,6 +3,7 @@ package gameStates;
 import entity.EnemyManager; 
 import entity.Player;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
@@ -40,6 +41,11 @@ public class PlayStates extends States implements StateMethods {
     private int leftBorder = (int) (0.2 * GameCore.GAME_WIDTH);
     private int rightBorder = (int) (0.8 * GameCore.GAME_WIDTH);
     private int maxLvlOffsetX;
+    
+    // Efek hit boss
+    private int hitStopDuration = 0;
+    private int shakeDuration = 0;
+    private int shakeIntensity = 0;
 
     private BufferedImage backgroundImg, clouds_01, clouds_02; 
     private int[] clouds_02Pos;
@@ -57,6 +63,8 @@ public class PlayStates extends States implements StateMethods {
         for(int i = 0; i < clouds_02Pos.length; i++)
             clouds_02Pos[i] = (int)(90 * GameCore.SCALE) +  rnd.nextInt((int)(100*GameCore.SCALE));
     }
+    
+    
     
     private void initClasses() {
         worldManager = new WorldManager(gc);
@@ -96,6 +104,22 @@ public class PlayStates extends States implements StateMethods {
             xLvlOffset = 0;
         }
     }
+    
+    private void drawClouds(Graphics g) {
+        for (int i = 0; i < 3 ; i++) {
+            g.drawImage(clouds_01, i * CLOUDS_01_WIDTH - (int)(xLvlOffset * 0.3), (int) (204 * GameCore.SCALE), CLOUDS_01_WIDTH, CLOUDS_01_HEIGHT, null);
+        }
+        
+        for (int i = 0; i < clouds_02Pos.length; i++) {
+            g.drawImage(clouds_02, CLOUDS_02_WIDTH * 4 * i - (int)(xLvlOffset * 0.7), clouds_02Pos[i], CLOUDS_02_WIDTH, CLOUDS_02_HEIGHT, null);
+        }
+    }
+    
+    public void triggerHeavyHit(int freezeFrames, int shakeFrames, int intensity) {
+        this.hitStopDuration = freezeFrames;
+        this.shakeDuration = shakeFrames;
+        this.shakeIntensity = intensity;
+    }
 
     @Override
     public void update() {
@@ -104,16 +128,28 @@ public class PlayStates extends States implements StateMethods {
         } else if (lvlCompleted) {
             levelCompletedOverlay.update();
         } else if (gameOver) {
-        	
+            // GameOver update
         } else if (inventoryOpen) {
-        	
+            // Inventory update
         } else {
+            // === LOGIKA HIT STOP ===
+            if (hitStopDuration > 0) {
+                hitStopDuration--;
+                // Tetap kurangi durasi shake agar layar bisa bergetar SAAT waktu membeku
+                if (shakeDuration > 0) shakeDuration--;
+                return; // LEWATI semua update di bawah ini (Game membeku)
+            }
+
+            // Kurangi durasi shake saat berjalan normal
+            if (shakeDuration > 0) shakeDuration--;
+
+            // ... [Update normal gamemu berjalan di sini] ...
             worldManager.update();
             objectManager.update();
             player.update();
-            enemyManager.update(worldManager.getCurrentMap().getWorldData(), player); 
+            enemyManager.update(worldManager.getCurrentMap().getWorldData(), player);
             checkCloseToBorder();
-            
+
             int endOfMapX = (worldManager.getCurrentMap().getWorldData()[0].length * GameCore.TILES_SIZE) - 50;
             if (player.getHitbox().x >= endOfMapX) {
                 setLevelCompleted(true);
@@ -124,35 +160,40 @@ public class PlayStates extends States implements StateMethods {
 
     @Override
     public void draw(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g;
+        int shakeX = 0;
+        int shakeY = 0;
+
+        // === LOGIKA SCREEN SHAKE ===
+        if (shakeDuration > 0) {
+            shakeX = rnd.nextInt(shakeIntensity * 2) - shakeIntensity;
+            shakeY = rnd.nextInt(shakeIntensity * 2) - shakeIntensity;
+        }
+
+        // Geser kanvas sebelum mulai menggambar
+        g2.translate(shakeX, shakeY);
+
         g.drawImage(backgroundImg, 0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
-        
         drawClouds(g);
-        
         worldManager.draw(g, xLvlOffset);
-        objectManager.draw(g, xLvlOffset); 
+        objectManager.draw(g, xLvlOffset);
         player.render(g, xLvlOffset);
-        enemyManager.draw(g, xLvlOffset); 
-        
+        enemyManager.draw(g, xLvlOffset);
+
+        // Kembalikan kanvas ke posisi semula agar UI tidak ikut bergetar (opsional, tapi disarankan)
+        g2.translate(-shakeX, -shakeY);
+
         if (paused) {
             pauseOverlay.draw(g);
         } else if (lvlCompleted) {
             levelCompletedOverlay.draw(g);
         } else if (gameOver) {
-            gameOverOverlay.draw(g); 
+            gameOverOverlay.draw(g);
         } else if (inventoryOpen) {
             inventoryOverlay.draw(g);
         }
     }
 
-    private void drawClouds(Graphics g) {
-        for (int i = 0; i < 3 ; i++) {
-            g.drawImage(clouds_01, i * CLOUDS_01_WIDTH - (int)(xLvlOffset * 0.3), (int) (204 * GameCore.SCALE), CLOUDS_01_WIDTH, CLOUDS_01_HEIGHT, null);
-        }
-        
-        for (int i = 0; i < clouds_02Pos.length; i++) {
-            g.drawImage(clouds_02, CLOUDS_02_WIDTH * 4 * i - (int)(xLvlOffset * 0.7), clouds_02Pos[i], CLOUDS_02_WIDTH, CLOUDS_02_HEIGHT, null);
-        }
-    }
 
     public void loadNextLevel() {
         worldManager.loadNextWorld(); 
