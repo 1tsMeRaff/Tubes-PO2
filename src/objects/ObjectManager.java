@@ -104,49 +104,59 @@ public class ObjectManager {
             }
         }
         
-        // Memuat gambar Papan Tanda
+     
         signImg = LoadSave.GetSpriteAtlas("MediavelFree.png");
     }
 
     public void update() {
         for (Potion p : potions) { if (p.isActive()) p.update(); }
         for (GameContainer gc : containers) { if (gc.isActive()) gc.update(); }
-        // Sign tidak perlu di-update karena tidak memiliki animasi (statis)
     }
 
     public void draw(Graphics g, int xLvlOffset) {
-        drawSigns(g, xLvlOffset); // Gambar sign paling awal agar berada di belakang potion/objek lain
+        drawSigns(g, xLvlOffset); 
         drawPotions(g, xLvlOffset);
         drawContainers(g, xLvlOffset);
     }
     
-    // Fungsi untuk me-render papan tanda beserta teksnya
+ // Fungsi Render Papan Tanda & Teks
     private void drawSigns(Graphics g, int xLvlOffset) {
         for (Sign s : signs) {
             int drawX = (int) (s.getHitbox().x - s.getxDrawOffset() - xLvlOffset);
             int drawY = (int) (s.getHitbox().y - s.getyDrawOffset());
 
-            // 1. Gambar papan kayu utama
+            // 1. Selalu gambar papan kayunya
             g.drawImage(signImg, drawX, drawY, SIGN_WIDTH, SIGN_HEIGHT, null);
 
-            // 2. Setup font untuk teks (Monospaced Bold)
+            // 2. Persiapkan ukuran Font untuk SEMUA teks
             g.setFont(new Font("Monospaced", Font.BOLD, (int)(10 * GameCore.SCALE))); 
             FontMetrics fm = g.getFontMetrics();
 
-            // 3. Render Teks Atas (Warna Putih)
-            if (s.getTopText() != null && !s.getTopText().isEmpty()) {
-                g.setColor(Color.WHITE);
-                int tx = drawX + (SIGN_WIDTH / 2) - (fm.stringWidth(s.getTopText()) / 2);
-                int ty = drawY - (int)(8 * GameCore.SCALE); 
-                g.drawString(s.getTopText(), tx, ty);
-            }
-
-            // 4. Render Teks Tengah (Warna Hitam)
+            // 3. SELALU gambar Teks Tengah (Warna Hitam / Tulisan "E")
             if (s.getMiddleText() != null && !s.getMiddleText().isEmpty()) {
-                g.setColor(Color.BLACK);
+                g.setColor(java.awt.Color.BLACK);
                 int mx = drawX + (SIGN_WIDTH / 2) - (fm.stringWidth(s.getMiddleText()) / 2);
                 int my = drawY + (SIGN_HEIGHT / 2) + (fm.getAscent() / 3); 
                 g.drawString(s.getMiddleText(), mx, my);
+            }
+
+            // 4. Hitung jarak karakter dengan papan
+            java.awt.geom.Rectangle2D.Float pBox = playStates.getPlayer().getHitbox();
+            java.awt.geom.Rectangle2D.Float sBox = s.getHitbox();
+
+            float xDist = Math.abs((pBox.x + pBox.width / 2) - (sBox.x + sBox.width / 2));
+            float yDist = Math.abs((pBox.y + pBox.height / 2) - (sBox.y + sBox.height / 2));
+
+            float maxDist = 40 * GameCore.SCALE; 
+
+            // 5. JIKA PEMAIN DEKAT, BARU GAMBAR TEKS ATAS (Warna Putih / Tulisan "gunakan")
+            if (xDist < maxDist && yDist < maxDist) {
+                if (s.getTopText() != null && !s.getTopText().isEmpty()) {
+                    g.setColor(java.awt.Color.WHITE);
+                    int tx = drawX + (SIGN_WIDTH / 2) - (fm.stringWidth(s.getTopText()) / 2);
+                    int ty = drawY - (int)(8 * GameCore.SCALE); 
+                    g.drawString(s.getTopText(), tx, ty);
+                }
             }
         }
     }
@@ -173,9 +183,7 @@ public class ObjectManager {
                     (int) (p.getHitbox().y - p.getyDrawOffset()), 
                     POTION_WIDTH, POTION_HEIGHT, null);
                 
-                // Hilangkan tanda // pada dua baris di bawah ini jika ingin melihat hitbox (untuk debug)
-                // g.setColor(Color.RED);
-                // g.drawRect((int) (p.getHitbox().x - xLvlOffset), (int) p.getHitbox().y, (int) p.getHitbox().width, (int) p.getHitbox().height);
+
             }
         }
     }
@@ -185,12 +193,12 @@ public class ObjectManager {
         for (GameContainer gc : containers) gc.reset();
     }
 
-    // Method pembaca CSV Map yang sudah dimodifikasi
+    //CSV Map 
     public void loadObjectsFromMap(int[][] mapData) {
         // 1. Bersihkan arena dari objek map sebelumnya
         potions.clear();
         containers.clear();
-        signs.clear(); // Bersihkan list papan tanda lama
+        signs.clear();
 
         for (int j = 0; j < mapData.length; j++) {
             for (int i = 0; i < mapData[0].length; i++) {
@@ -198,7 +206,7 @@ public class ObjectManager {
                 int id = mapData[j][i];
                 int xPos = i * GameCore.TILES_SIZE;
                 
-                // --- RAMUAN ---
+                //  RAMUAN 
                 if (id >= 300 && id <= 305) {
                     int yPosPotion = (j * GameCore.TILES_SIZE) + (int)(0 * GameCore.SCALE);
                     
@@ -210,7 +218,7 @@ public class ObjectManager {
                     else if (id == 305) { potions.add(new Potion(xPos, yPosPotion, BLUE_POTION_3)); mapData[j][i] = 0; }
                 }
                 
-                // --- CONTAINER ---
+                // CONTAINER 
                 else if (id == 401 || id == 402) {
                     int yPosContainer = (j * GameCore.TILES_SIZE) - (int)(0 * GameCore.SCALE); 
                     
@@ -219,18 +227,19 @@ public class ObjectManager {
                 }
                 
      
+                
+                //sign
                 else if (id >= 500 && id <= 503) {
                 	int yPosSign = (j * GameCore.TILES_SIZE) + (int)(15 * GameCore.SCALE);
                 	
                 	int xPosSign = xPos + (int)(4 * GameCore.SCALE);
                     
                 	if (id == 500) { 
-          
                 	    signs.add(new Sign(xPosSign, yPosSign, SIGN, "E", "gunakan")); 
                     } 
              
 
-                    // Ubah jadi 0 agar tubuh pemain tidak menabrak invisible wall dari papan
+                    
                     mapData[j][i] = 0; 
                 }
             }
@@ -244,16 +253,16 @@ public class ObjectManager {
         return null;
     }
     
-    // Method untuk mengecek tabrakan pemain dengan objek yang solid
+    // Metho objek olid
     public GameContainer getIntersectingContainer(Rectangle2D.Float nextHitbox) {
         for (GameContainer gc : containers) {
-            // Objek dianggap solid hanya jika dia masih aktif dan BUKAN sedang hancur
+          
             if (gc.isActive() && !gc.doAnimation) {
                 if (nextHitbox.intersects(gc.getHitbox())) {
-                    return gc; // Kembalikan data kotak yang ditabrak
+                    return gc;
                 }
             }
         }
-        return null; // Tidak nabrak apa-apa
+        return null; 
     }
 }
