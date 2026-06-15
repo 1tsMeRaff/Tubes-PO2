@@ -22,4 +22,6 @@ public interface StateMethods {
 	
 	public void keyReleased(KeyEvent e);
 
+	void triggerHeavyHit(int freezeFrames, int shakeFrames, int intensity);
+
 }

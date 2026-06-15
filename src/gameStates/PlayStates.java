@@ -3,6 +3,7 @@ package gameStates;
 import entity.EnemyManager; 
 import entity.Player;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
@@ -40,6 +41,11 @@ public class PlayStates extends States implements StateMethods {
     private int leftBorder = (int) (0.2 * GameCore.GAME_WIDTH);
     private int rightBorder = (int) (0.8 * GameCore.GAME_WIDTH);
     private int maxLvlOffsetX;
+    
+    // Efek hit boss
+    private int hitStopDuration = 0;
+    private int shakeDuration = 0;
+    private int shakeIntensity = 0;
 
     private BufferedImage backgroundImg, clouds_01, clouds_02; 
     private int[] clouds_02Pos;
@@ -57,6 +63,8 @@ public class PlayStates extends States implements StateMethods {
         for(int i = 0; i < clouds_02Pos.length; i++)
             clouds_02Pos[i] = (int)(90 * GameCore.SCALE) +  rnd.nextInt((int)(100*GameCore.SCALE));
     }
+    
+    
     
     private void initClasses() {
         worldManager = new WorldManager(gc);
@@ -96,6 +104,22 @@ public class PlayStates extends States implements StateMethods {
             xLvlOffset = 0;
         }
     }
+    
+    private void drawClouds(Graphics g) {
+        for (int i = 0; i < 3 ; i++) {
+            g.drawImage(clouds_01, i * CLOUDS_01_WIDTH - (int)(xLvlOffset * 0.3), (int) (204 * GameCore.SCALE), CLOUDS_01_WIDTH, CLOUDS_01_HEIGHT, null);
+        }
+        
+        for (int i = 0; i < clouds_02Pos.length; i++) {
+            g.drawImage(clouds_02, CLOUDS_02_WIDTH * 4 * i - (int)(xLvlOffset * 0.7), clouds_02Pos[i], CLOUDS_02_WIDTH, CLOUDS_02_HEIGHT, null);
+        }
+    }
+    
+    public void triggerHeavyHit(int freezeFrames, int shakeFrames, int intensity) {
+        this.hitStopDuration = freezeFrames;
+        this.shakeDuration = shakeFrames;
+        this.shakeIntensity = intensity;
+    }
 
     @Override
     public void update() {
@@ -104,17 +128,28 @@ public class PlayStates extends States implements StateMethods {
         } else if (lvlCompleted) {
             levelCompletedOverlay.update();
         } else if (gameOver) {
-            // Saat game over, layar akan freeze
+            // GameOver update
         } else if (inventoryOpen) {
-            // Pause pergerakan dunia saat menu inventory dibuka
+            // Inventory update
         } else {
+            // === LOGIKA HIT STOP ===
+            if (hitStopDuration > 0) {
+                hitStopDuration--;
+                // Tetap kurangi durasi shake agar layar bisa bergetar SAAT waktu membeku
+                if (shakeDuration > 0) shakeDuration--;
+                return; // LEWATI semua update di bawah ini (Game membeku)
+            }
+
+            // Kurangi durasi shake saat berjalan normal
+            if (shakeDuration > 0) shakeDuration--;
+
+            // ... [Update normal gamemu berjalan di sini] ...
             worldManager.update();
             objectManager.update();
             player.update();
-            enemyManager.update(worldManager.getCurrentMap().getWorldData(), player); 
+            enemyManager.update(worldManager.getCurrentMap().getWorldData(), player);
             checkCloseToBorder();
-            
-            // Cek Transisi Level & Memicu Suara Menang (dari dev)
+
             int endOfMapX = (worldManager.getCurrentMap().getWorldData()[0].length * GameCore.TILES_SIZE) - 50;
             if (player.getHitbox().x >= endOfMapX) {
                 setLevelCompleted(true);
@@ -125,35 +160,40 @@ public class PlayStates extends States implements StateMethods {
 
     @Override
     public void draw(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g;
+        int shakeX = 0;
+        int shakeY = 0;
+
+        // === LOGIKA SCREEN SHAKE ===
+        if (shakeDuration > 0) {
+            shakeX = rnd.nextInt(shakeIntensity * 2) - shakeIntensity;
+            shakeY = rnd.nextInt(shakeIntensity * 2) - shakeIntensity;
+        }
+
+        // Geser kanvas sebelum mulai menggambar
+        g2.translate(shakeX, shakeY);
+
         g.drawImage(backgroundImg, 0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
-        
-        drawClouds(g);      // awan tetap digambar (dari dev)
-        
+        drawClouds(g);
         worldManager.draw(g, xLvlOffset);
-        objectManager.draw(g, xLvlOffset); 
+        objectManager.draw(g, xLvlOffset);
         player.render(g, xLvlOffset);
-        enemyManager.draw(g, xLvlOffset); 
-        
+        enemyManager.draw(g, xLvlOffset);
+
+        // Kembalikan kanvas ke posisi semula agar UI tidak ikut bergetar (opsional, tapi disarankan)
+        g2.translate(-shakeX, -shakeY);
+
         if (paused) {
             pauseOverlay.draw(g);
         } else if (lvlCompleted) {
             levelCompletedOverlay.draw(g);
         } else if (gameOver) {
-            gameOverOverlay.draw(g); 
+            gameOverOverlay.draw(g);
         } else if (inventoryOpen) {
-            inventoryOverlay.draw(g);        // dari dev-Rizal
+            inventoryOverlay.draw(g);
         }
     }
 
-    private void drawClouds(Graphics g) {
-        for (int i = 0; i < 3 ; i++) {
-            g.drawImage(clouds_01, i * CLOUDS_01_WIDTH - (int)(xLvlOffset * 0.3), (int) (204 * GameCore.SCALE), CLOUDS_01_WIDTH, CLOUDS_01_HEIGHT, null);
-        }
-        
-        for (int i = 0; i < clouds_02Pos.length; i++) {
-            g.drawImage(clouds_02, CLOUDS_02_WIDTH * 4 * i - (int)(xLvlOffset * 0.7), clouds_02Pos[i], CLOUDS_02_WIDTH, CLOUDS_02_HEIGHT, null);
-        }
-    }
 
     public void loadNextLevel() {
         worldManager.loadNextWorld(); 
@@ -166,20 +206,18 @@ public class PlayStates extends States implements StateMethods {
         player.loadmapData(newMapData); 
         calcLvlOffset();
         
-        // [PEMICU BGM] Ganti lagu ke Level 2 saat map baru dimuat (dari dev)
         gc.getAudioPlayer().playSong(audio.AudioPlayer.LEVEL_2);
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        // tidak digunakan
+    	
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
         if (gameOver) return; 
 
-        // Kalau inventory terbuka, klik hanya untuk UI, bukan untuk menyerang (dari dev-Rizal)
         if (inventoryOpen) {
             inventoryOverlay.mousePressed(e);
             return; 
@@ -190,7 +228,7 @@ public class PlayStates extends States implements StateMethods {
         } else if (lvlCompleted) {
             levelCompletedOverlay.mousePressed(e);
         } else if(e.getButton() == MouseEvent.BUTTON1) {
-            player.setCharging(true);       // charge attack (dari dev)
+            player.setCharging(true);
         }
     }
 
@@ -203,7 +241,7 @@ public class PlayStates extends States implements StateMethods {
         } else if (lvlCompleted) {
             levelCompletedOverlay.mouseReleased(e);
         } else if (e.getButton() == MouseEvent.BUTTON1) {
-            player.releaseAttack();         // lepas charge (dari dev)
+            player.releaseAttack();
         }
     }
 
@@ -211,7 +249,6 @@ public class PlayStates extends States implements StateMethods {
     public void mouseMoved(MouseEvent e) {
         if (gameOver) return;
 
-        // mouse buat inventory (dari dev-Rizal)
         if (inventoryOpen) {
             inventoryOverlay.mouseMoved(e);
             return;
@@ -245,7 +282,6 @@ public class PlayStates extends States implements StateMethods {
             return;
         }
         
-        // Tombol F untuk buka/tutup inventory (dari dev-Rizal)
         if (e.getKeyCode() == KeyEvent.VK_F) {
             inventoryOpen = !inventoryOpen;
             if (inventoryOpen) {
@@ -254,7 +290,6 @@ public class PlayStates extends States implements StateMethods {
             return;
         }
 
-        // Jangan proses input game jika inventory terbuka
         if (inventoryOpen) {
             return; 
         }
@@ -271,7 +306,7 @@ public class PlayStates extends States implements StateMethods {
             case KeyEvent.VK_SPACE:
                 player.setJump(true);
                 break;
-            case KeyEvent.VK_Q:                  // dash (dari dev)
+            case KeyEvent.VK_Q:
                 player.setDash(true);
                 break;
         }
@@ -279,7 +314,6 @@ public class PlayStates extends States implements StateMethods {
 
     @Override
     public void keyReleased(KeyEvent e) {
-        // Tidak menerima input jika game di pause, level selesai, game over, atau inventory terbuka
         if (paused || lvlCompleted || gameOver || inventoryOpen) return;
         
         switch(e.getKeyCode()) {
@@ -305,11 +339,10 @@ public class PlayStates extends States implements StateMethods {
         paused = false;
         lvlCompleted = false;
         gameOver = false; 
-        inventoryOpen = false;        // dari dev-Rizal
+        inventoryOpen = false;
         xLvlOffset = 0; 
     }
     
-    // [MODIFIKASI] Mematikan lagu dan memainkan efek suara saat mati (dari dev)
     public void setGameOver(boolean gameOver) {
         this.gameOver = gameOver;
         if (gameOver) {
@@ -317,18 +350,15 @@ public class PlayStates extends States implements StateMethods {
             gc.getAudioPlayer().playEffect(audio.AudioPlayer.GAMEOVER); 
         }
     }
-    
-    // Method dari dev (dengan damage)
+
     public void checkHitEnemy(Rectangle2D.Float AttackBox, int damage) {
-        enemyManager.checkEnemyHit(AttackBox, damage);
+        enemyManager.checkEnemyHit(AttackBox, damage, player);
     }
     
-    // Untuk mendeteksi tebasan pedang ke barel/kotak (dari dev)
     public void checkObjectHit(Rectangle2D.Float attackBox) {
         objectManager.checkObjectHit(attackBox);
     }
 
-    // Untuk mendeteksi sentuhan badan ke potion (dari dev)
     public void checkPotionTouched(Rectangle2D.Float hitbox) {
         objectManager.checkObjectTouched(hitbox);
     }

@@ -1,6 +1,7 @@
 package utilitytools;
 
 import entity.Slime;
+import entity.DemonBoss;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -11,7 +12,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
 import main.GameCore;
-import static utilitytools.Konstanta.EnemyConstants.SLIME_HITBOX_HEIGHT;
+import static utilitytools.Konstanta.EnemyConstants.*;
 import static utilitytools.Konstanta.UI.PauseButtons.*;
 
 public class LoadSave {
@@ -28,6 +29,8 @@ public class LoadSave {
 	public static final String VOLUME_SLIDER = "volume_slider.png";
 	
 	public static final String SLIME_SPRITE = "enemy_slime.png";
+	public static final String DEMON_BOSS_SPRITE = "demon_boss_spritesheet.png";
+//	public static final String MENU_BACKGROUND = "MediavelFree.png";
 	public static final String MENU_BACKGROUND_IMG = "mainn_menu.jpeg";
 	public static final String PLAY_BACKGROUND_IMG = "Background_0.png";
 	public static final String CLOUDS_01 = "awan_01.png";
@@ -110,7 +113,9 @@ public class LoadSave {
 				
 				for (int col = 0; col < numbers.length; col++) {
 					int value = Integer.parseInt(numbers[col].trim());
-					if (value == 200) {
+					
+					// 2. PERBAIKAN: Jika angkanya spawn musuh (200=Slime, 201=DemonBoss), jadikan -1 (udara) agar tidak digambar
+					if (value == 200 || value == 201) {
 						row[col] = -1; 
 					} else {
 						row[col] = value;
@@ -170,6 +175,50 @@ public class LoadSave {
 			
 		} catch (Exception e) {
 			System.out.println("Gagal memuat musuh Slime!");
+			e.printStackTrace();
+		}
+		
+		return list;
+	}
+	
+	public static ArrayList<DemonBoss> GetDemonBosses(String filePath) {
+		ArrayList<DemonBoss> list = new ArrayList<>();
+		int[][] tilesData = GetTilesData(filePath);
+		
+		try {
+			InputStream is = GameCore.class.getResourceAsStream(filePath); 
+			BufferedReader br = new BufferedReader(new InputStreamReader(is));
+			
+			String line;
+			int row = 0;
+			
+			while ((line = br.readLine()) != null) {
+				if (line.trim().isEmpty()) {
+					continue;
+				}
+				
+				String[] numbers = line.split(","); 
+				
+				for (int col = 0; col < numbers.length; col++) {
+					int value = Integer.parseInt(numbers[col].trim());
+					
+					if (value == 201) { 
+						int xPos = col * GameCore.TILES_SIZE; 
+						int yPos = row * GameCore.TILES_SIZE;
+						int groundRow = findGroundRow(row, col, tilesData);
+						if (groundRow != -1) {
+							yPos = (groundRow * GameCore.TILES_SIZE) - DEMON_BOSS_HITBOX_HEIGHT;
+						}
+						
+						list.add(new DemonBoss(xPos, yPos));
+					}
+				}
+				row++;
+			}
+			br.close();
+			
+		} catch (Exception e) {
+			System.out.println("Gagal memuat Demon Boss!");
 			e.printStackTrace();
 		}
 		

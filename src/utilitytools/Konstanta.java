@@ -67,6 +67,7 @@ public class Konstanta {
 
 	public static class EnemyConstants{
 		public static final int SLIME = 0;
+		public static final int DEMON_BOSS = 1;
 		
 		public static final int IDLE = 0;
 		public static final int WALK = 1;
@@ -86,6 +87,19 @@ public class Konstanta {
 		
 		public static final int SLIME_DRAWOFFSET_X = (int) (16 * GameCore.SCALE);
 		public static final int SLIME_DRAWOFFSET_Y = (int) (52 * GameCore.SCALE);
+
+		public static final int DEMON_BOSS_WIDTH_DEFAULT = 288;
+		public static final int DEMON_BOSS_HEIGHT_DEFAULT = 160;
+		public static final int DEMON_BOSS_SPRITE_COLUMNS = 22;
+		
+		public static final int DEMON_BOSS_WIDTH = (int) (DEMON_BOSS_WIDTH_DEFAULT * GameCore.SCALE);
+		public static final int DEMON_BOSS_HEIGHT = (int) (DEMON_BOSS_HEIGHT_DEFAULT * GameCore.SCALE);
+		
+		public static final int DEMON_BOSS_HITBOX_WIDTH = (int) (46 * GameCore.SCALE);
+		public static final int DEMON_BOSS_HITBOX_HEIGHT = (int) (72 * GameCore.SCALE);
+		
+		public static final int DEMON_BOSS_DRAWOFFSET_X = (int) (120 * GameCore.SCALE);
+		public static final int DEMON_BOSS_DRAWOFFSET_Y = (int) (85 * GameCore.SCALE);
 		
 		public static int GetSpriteAmount(int enemy_type, int enemy_state) {
 			
@@ -105,6 +119,19 @@ public class Konstanta {
 				case MATI:
 					return 3;
 				}
+			case DEMON_BOSS:
+				switch(enemy_state) {
+				case IDLE:
+					return 6;
+				case WALK:
+					return 12;
+				case ATTACK:
+					return 15;
+				case HURT:
+					return 5;
+				case MATI:
+					return 22;
+				}
 			}
 			return 0;
 		}
@@ -112,7 +139,9 @@ public class Konstanta {
 		public static int getMaxHealth(int enemy_type) {
 			switch(enemy_type) {
 			case SLIME:
-				return 10;
+				return 100;
+			case DEMON_BOSS:
+				return 80;
 			default:
 				return 1;
 			}
@@ -121,7 +150,9 @@ public class Konstanta {
 		public static int getEnemyAtt(int enemy_type) {
 			switch(enemy_type) {
 			case SLIME:
-				return 10;
+				return 5;
+			case DEMON_BOSS:
+				return 25;
 			default:
 				return 0;
 			}
@@ -159,6 +190,7 @@ public class Konstanta {
 		public static final int RIGHT = 2;
 		public static final int DOWN = 3;
 	}
+	
 	public static class KonstantaPlayerRight{
 		public static final int IDLE_ACTIVE = 0;
 		public static final int IDLE_CHILL = 1;
@@ -169,15 +201,18 @@ public class Konstanta {
 		public static final int ATTACK_1 = 11;
 		public static final int CHARGE_ATTACK = 12;
 		public static final int GUARD = 15;
-		public static final int MATI = 23;
+		public static final int DOWN = 23;
+		public static final int ARISE = 24;
 		
 		public static int GetSpriteAmount(int player_action) {
 			
 			switch(player_action) {
-			case MATI:
+			case DOWN:
 				return 7;
 			case IDLE_CHILL:
 				return 8;
+			case ARISE:
+				return 7;
 			case IDLE_ACTIVE:
 				return 8;
 			case LARI:
