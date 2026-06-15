@@ -4,282 +4,106 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import gameStates.PlayStates;
 import main.GameCore;
-import utilitytools.Konstanta.ObjectConstants;
+import utilitytools.LoadSave;
 
 public class InventoryOverlay {
 
     private PlayStates playing;
+    private BufferedImage bgInventory;
     
-    // State Navigasi
-    private int currentTab = -1; 
-    private String[] tabNames = {"Karakter", "Inventory", "Skill", ""};
-    private int hoveredTab = -1;
-    private int hoveredSlot = -1;
-    private int selectedSlot = -1;
-
-    // Rectangle untuk interaksi kotak Equipment di tab Karakter
-    private Rectangle helmetSlot, armorSlot, glovesSlot, shoesSlot, acc1Slot, acc2Slot;
-    
-    // Array Rectangle untuk 20 kotak di Inventory Tab
-    private Rectangle[] inventoryGrid = new Rectangle[20];
+    // Variabel Ukuran & Posisi
+    private int panelX, panelY, panelW, panelH;
 
     public InventoryOverlay(PlayStates playing) {
         this.playing = playing;
+        loadImages();
         initLayout();
     }
 
-    private void initLayout() {
-        // Init Rectangle Layout untuk Karakter / Equipments
-        int contentX = (int) (50 * GameCore.SCALE) + (int) (140 * GameCore.SCALE) + (int)(15 * GameCore.SCALE);
-        int contentY = (int) (100 * GameCore.SCALE);
-        int slotSize = (int) (45 * GameCore.SCALE);
-
-        int eqSlotX = contentX + (int)(30 * GameCore.SCALE);
-        helmetSlot = new Rectangle(eqSlotX, contentY + (int)(50 * GameCore.SCALE), slotSize, slotSize);
-        armorSlot  = new Rectangle(eqSlotX, contentY + (int)(50 * GameCore.SCALE) + (slotSize + 10), slotSize, slotSize);
-        shoesSlot  = new Rectangle(eqSlotX, contentY + (int)(50 * GameCore.SCALE) + ((slotSize + 10) * 2), slotSize, slotSize);
-        
-        int rightEqSlotX = eqSlotX + slotSize + (int)(40 * GameCore.SCALE);
-        glovesSlot   = new Rectangle(rightEqSlotX, contentY + (int)(50 * GameCore.SCALE), slotSize, slotSize);
-        acc1Slot     = new Rectangle(rightEqSlotX, contentY + (int)(50 * GameCore.SCALE) + (slotSize + 10), slotSize, slotSize);
-        acc2Slot     = new Rectangle(rightEqSlotX, contentY + (int)(50 * GameCore.SCALE) + ((slotSize + 10) * 2), slotSize, slotSize);
-
-        // Init Rectangle Layout untuk Inventory (4 Baris x 5 Kolom)
-        int slotXStart = contentX + (int)(20 * GameCore.SCALE);
-        int slotYStart = contentY + (int)(20 * GameCore.SCALE);
-        
-        int index = 0;
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 5; j++) {
-                inventoryGrid[index] = new Rectangle(
-                    slotXStart + (slotSize * j), 
-                    slotYStart + (slotSize * i), 
-                    slotSize, slotSize
-                );
-                index++;
-            }
-        }
+    private void loadImages() {
+        // Memanggil gambar UI barumu
+        bgInventory = LoadSave.GetSpriteAtlas(LoadSave.INVENTORY_BG);
     }
 
-    public void resetMenu() {
-        currentTab = -1;
-        selectedSlot = -1;
+    private void initLayout() {
+        // --- KITA TAMBAHKAN SKALA KHUSUS DI SINI ---
+        // 0.80f artinya kita menyusutkan gambar menjadi 80% dari ukuran sebelumnya.
+        // Jika masih kurang kecil/kepotong, ubah jadi 0.75f atau 0.7f. 
+        // Jika terlalu kecil, naikkan ke 0.9f.
+        float customScale = 0.80f; 
+
+        // Rasio asli 466 x 535 tetap terjaga, hanya ukurannya yang disesuaikan
+        panelW = (int) (490 * GameCore.SCALE * customScale); 
+        panelH = (int) (560 * GameCore.SCALE * customScale); 
+        
+        // Posisikan tepat di tengah layar
+        panelX = GameCore.GAME_WIDTH / 2 - panelW / 2;
+        panelY = GameCore.GAME_HEIGHT / 2 - panelH / 2;
+    }
+
+    public void update() {
+        // Dikosongkan sementara
     }
 
     public void draw(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
 
-        // --- 1. GAMBAR SIDEBAR ---
-        int sidebarX = (int) (50 * GameCore.SCALE);
-        int sidebarY = (int) (100 * GameCore.SCALE);
-        int sidebarW = (int) (140 * GameCore.SCALE);
-        int sidebarH = (int) (220 * GameCore.SCALE);
+        // 1. Latar Belakang Gelap
+        g2.setColor(new Color(0, 0, 0, 150));
+        g2.fillRect(0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT);
 
-        g2.setColor(Color.BLACK);
-        g2.fillRect(sidebarX, sidebarY, sidebarW, sidebarH);
-        g2.setColor(Color.WHITE);
-        g2.drawRect(sidebarX, sidebarY, sidebarW, sidebarH);
-
-        // Teks Menu Sidebar
-        g2.setFont(new Font("Arial", Font.BOLD, (int)(18 * GameCore.SCALE)));
-        for (int i = 0; i < tabNames.length; i++) {
-            int tabY = sidebarY + (int)(20 * GameCore.SCALE) + (i * (int)(50 * GameCore.SCALE));
-            g2.setColor(i == currentTab ? Color.YELLOW : Color.WHITE);
-            g2.drawString(tabNames[i], sidebarX + (int)(30 * GameCore.SCALE), tabY + (int)(25 * GameCore.SCALE));
-        }
-
-        g2.setColor(Color.WHITE);
-        g2.setFont(new Font("Arial", Font.BOLD, (int)(14 * GameCore.SCALE)));
-        g2.drawString("Keluar tekan F", sidebarX + (int)(10 * GameCore.SCALE), sidebarY + sidebarH + (int)(25 * GameCore.SCALE));
-
-        // --- 2. GAMBAR PANEL KONTEN ---
-        if (currentTab != -1) {
-            int contentX = sidebarX + sidebarW + (int)(15 * GameCore.SCALE);
-            int contentY = sidebarY;
-            int contentW = (int) (320 * GameCore.SCALE);
-            int contentH = (int) (220 * GameCore.SCALE);
-
-            g2.setColor(Color.BLACK);
-            g2.fillRect(contentX, contentY, contentW, contentH);
-            g2.setColor(Color.WHITE);
-            g2.drawRect(contentX, contentY, contentW, contentH);
-
-            if (currentTab == 0) {
-                drawKarakterTab(g2, contentX, contentY);
-            } else if (currentTab == 1) {
-                drawInventory(g2, contentX, contentY);
-            }
-        }
-    }
-
-    private void drawKarakterTab(Graphics2D g2, int contentX, int contentY) {
-        g2.setFont(new Font("Arial", Font.BOLD, (int)(14 * GameCore.SCALE)));
-        g2.setColor(Color.WHITE);
-        
-        // Menampilkan Total Defense Player
-        g2.drawString("EQUIPMENT & STATUS", contentX + (int)(20 * GameCore.SCALE), contentY + (int)(30 * GameCore.SCALE));
-        g2.setColor(Color.GREEN);
-        g2.drawString("Defense Saat ini : " + playing.getPlayer().getTotalDefense(), contentX + (int)(20 * GameCore.SCALE), contentY + (int)(50 * GameCore.SCALE));
-
-        // Gambar Kotak + Labelnya
-        drawSingleEquipmentBox(g2, helmetSlot, "Head", playing.getPlayer().getEquippedHelmet());
-        drawSingleEquipmentBox(g2, armorSlot, "Body", playing.getPlayer().getEquippedArmor());
-        
-        // --- INI BAGIAN YANG DIPERBAIKI ---
-        drawSingleEquipmentBox(g2, shoesSlot, "Feet", playing.getPlayer().getEquippedShoes()); 
-        
-        drawSingleEquipmentBox(g2, glovesSlot, "Hands", playing.getPlayer().getEquippedGloves());
-        drawSingleEquipmentBox(g2, acc1Slot, "Accessory 1", playing.getPlayer().getEquippedAcc1());
-        drawSingleEquipmentBox(g2, acc2Slot, "Accessory 2", playing.getPlayer().getEquippedAcc2());
-    }
-
-    private void drawSingleEquipmentBox(Graphics2D g2, Rectangle slotBox, String label, int itemTypeID) {
-        // Kotak Dasar
-        g2.setColor(Color.GRAY);
-        g2.drawRect(slotBox.x, slotBox.y, slotBox.width, slotBox.height);
-        
-        // Teks Label
-        g2.setColor(Color.WHITE);
-        g2.setFont(new Font("Arial", Font.PLAIN, (int)(10 * GameCore.SCALE)));
-        g2.drawString(label, slotBox.x, slotBox.y - 2);
-
-        // Gambar Jika Dipakai
-        if (itemTypeID != -1) {
-            BufferedImage img = playing.getObjectManager().getItemImg(itemTypeID);
-            if (img != null) {
-                g2.drawImage(img, slotBox.x + 5, slotBox.y + 5, slotBox.width - 10, slotBox.height - 10, null);
-            }
-        }
-    }
-
-    private void drawInventory(Graphics2D g2, int contentX, int contentY) {
-        int slotSize = (int) (45 * GameCore.SCALE);
-        int slotXStart = contentX + (int)(20 * GameCore.SCALE);
-        int slotYStart = contentY + (int)(20 * GameCore.SCALE);
-
-        for (int i = 0; i < playing.getPlayer().inventory.size(); i++) {
-            Rectangle box = inventoryGrid[i];
+        // 2. Gambar Papan Inventory
+        if (bgInventory != null) {
+            g2.drawImage(bgInventory, panelX, panelY, panelW, panelH, null);
             
-            // Background Slot
-            g2.setColor(Color.DARK_GRAY);
-            g2.fillRect(box.x, box.y, box.width, box.height);
-            g2.setColor(Color.GRAY);
-            g2.drawRect(box.x, box.y, box.width, box.height);
+         // --- 3. MENGGAMBAR TEKS ANGKA STATUS (RATA KANAN) ---
+            g2.setColor(new Color(230, 230, 230)); // Warna teks putih terang
+            float customScale = 0.80f; 
+            g2.setFont(new Font("Monospaced", Font.BOLD, (int)(14 * GameCore.SCALE * customScale)));
 
-            int objType = playing.getPlayer().inventory.get(i);
-            BufferedImage img = playing.getObjectManager().getItemImg(objType);
-            if (img != null) {
-                g2.drawImage(img, box.x + 5, box.y + 5, box.width - 10, box.height - 10, null);
-            }
+            // Koordinat yang SUDAH DIKOREKSI:
+            // textX ditambah nilainya agar geser lebih ke kanan menjauhi teks
+            int textX = panelX + (int)(225 * GameCore.SCALE * customScale); 
+            // startY dikurangi 18 agar naik persis 1 baris ke atas sejajar dengan "Level"
+            int startY = panelY + (int)(125 * GameCore.SCALE * customScale); 
+            // gapY tetap, karena jarak antar barisnya sudah pas
+            int gapY = (int)(18 * GameCore.SCALE * customScale); 
 
-            if (selectedSlot == i) {
-                int btnY = box.y + slotSize + 2;
-                g2.setFont(new Font("Arial", Font.PLAIN, 10));
-                g2.setColor(Color.GREEN);
-                g2.drawRect(box.x, btnY, 20, 12);
-                g2.drawString("Use", box.x + 2, btnY + 10);
-                
-                g2.setColor(Color.RED);
-                g2.drawRect(box.x + 25, btnY, 20, 12);
-                g2.drawString("X", box.x + 30, btnY + 10);
-            }
-        }
+            entity.Player p = playing.getPlayer();
+            java.awt.FontMetrics fm = g2.getFontMetrics(); // Untuk fitur rata kanan
 
-        // Kursor Kuning Terkunci pada Target
-        int targetSlot = (selectedSlot != -1) ? selectedSlot : hoveredSlot;
-        if (targetSlot != -1 && targetSlot < playing.getPlayer().inventory.size()) {
-            Rectangle hlBox = inventoryGrid[targetSlot];
-            g2.setColor(Color.YELLOW);
-            g2.drawRect(hlBox.x, hlBox.y, hlBox.width, hlBox.height);
-        }
-    }
-    
-    public void mouseMoved(MouseEvent e) {
-        if (selectedSlot != -1) return;
+            // Baris 1: Level
+            String lvlTxt = String.valueOf(p.getLevel());
+            g2.drawString(lvlTxt, textX - fm.stringWidth(lvlTxt), startY);
 
-        int mx = e.getX();
-        int my = e.getY();
-        hoveredTab = -1;
-        hoveredSlot = -1;
+            // Baris 2: EXP
+            String expTxt = p.getExp() + " / " + p.getMaxExp();
+            g2.drawString(expTxt, textX - fm.stringWidth(expTxt), startY + gapY);
 
-        int sidebarX = (int) (50 * GameCore.SCALE);
-        int sidebarY = (int) (100 * GameCore.SCALE);
-        int sidebarW = (int) (140 * GameCore.SCALE);
+            // Baris 3: HP
+            String hpTxt = p.getCurrentHealth() + " / " + p.getMaxHealth();
+            g2.drawString(hpTxt, textX - fm.stringWidth(hpTxt), startY + gapY * 2);
 
-        // Hover Tab Selection
-        for (int i = 0; i < tabNames.length; i++) {
-            int tabY = sidebarY + (int)(20 * GameCore.SCALE) + (i * (int)(50 * GameCore.SCALE));
-            if (mx >= sidebarX && mx <= sidebarX + sidebarW && my >= tabY && my <= tabY + (int)(40 * GameCore.SCALE)) {
-                hoveredTab = i;
-            }
-        }
+            // Baris 4: MP
+            String mpTxt = p.getCurrentMana() + " / " + p.getMaxMana();
+            g2.drawString(mpTxt, textX - fm.stringWidth(mpTxt), startY + gapY * 3);
 
-        // Hover Item Slots
-        if (currentTab == 1) {
-            for (int i = 0; i < playing.getPlayer().maxInventorySize; i++) {
-                if (inventoryGrid[i].contains(mx, my)) {
-                    hoveredSlot = i;
-                }
-            }
+            // Baris 5: Defense (Hanya menampilkan total defense saja)
+            String defTxt = String.valueOf(p.getTotalDefense());
+            g2.drawString(defTxt, textX - fm.stringWidth(defTxt), startY + gapY * 4);
+
+            // Baris 6: DPS (Dibatasi 1 angka di belakang koma)
+            String dpsTxt = String.format("%.1f", p.getDps());
+            g2.drawString(dpsTxt, textX - fm.stringWidth(dpsTxt), startY + gapY * 5);
         }
     }
 
-    public void mousePressed(MouseEvent e) {
-        if (e.getButton() == MouseEvent.BUTTON1) {
-            int mx = e.getX();
-            int my = e.getY();
-
-            // Pindah Tab Menu
-            if (hoveredTab != -1) {
-                currentTab = (currentTab == hoveredTab) ? -1 : hoveredTab;
-                selectedSlot = -1;
-            } 
-            // Konfirmasi Use atau Batalkan Item
-            else if (currentTab == 1 && selectedSlot != -1) {
-                int slotSize = (int) (45 * GameCore.SCALE);
-                Rectangle box = inventoryGrid[selectedSlot];
-                int btnY = box.y + slotSize + 2;
-
-                // Tombol hijau "Use/Equip"
-                if (mx >= box.x && mx <= box.x + 20 && my >= btnY && my <= btnY + 12) {
-                    
-                    int itemID = playing.getPlayer().inventory.get(selectedSlot);
-                    
-                    // Filter: Potion Atau Armor?
-                    if (itemID >= 0 && itemID <= 5) {
-                        playing.getPlayer().useItem(selectedSlot); // Heal Player
-                    } else {
-                        // Memanggil konstanta database asli (RING dan SACK)
-                        String slotTarget = "";
-                        switch(itemID) {
-                            case ObjectConstants.HELMET: slotTarget = "head"; break;
-                            case ObjectConstants.ARMOR: slotTarget = "body"; break;
-                            case ObjectConstants.GLOVES: slotTarget = "hands"; break;
-                            case ObjectConstants.SHOES: slotTarget = "shoes"; break;
-                            case ObjectConstants.RING: slotTarget = "accessory1"; break;
-                            case ObjectConstants.SACK: slotTarget = "accessory2"; break;
-                        }
-                        if (!slotTarget.isEmpty()) {
-                            playing.equipPlayerItem(selectedSlot, slotTarget);
-                        }
-                    }
-                    selectedSlot = -1;
-                    
-                } 
-                // Tombol Merah Batal "X"
-                else if (mx >= box.x + 25 && mx <= box.x + 45 && my >= btnY && my <= btnY + 12) {
-                    selectedSlot = -1;
-                }
-            } 
-            // Pilih Kotak Item untuk dipakai
-            else if (currentTab == 1 && hoveredSlot != -1 && hoveredSlot < playing.getPlayer().inventory.size()) {
-                selectedSlot = hoveredSlot;
-            }
-        }
-    }
+    public void mouseMoved(MouseEvent e) {}
+    public void mousePressed(MouseEvent e) {}
+    public void mouseReleased(MouseEvent e) {}
+    public void resetMenu() {}
 }

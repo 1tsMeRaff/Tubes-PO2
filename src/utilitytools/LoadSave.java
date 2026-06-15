@@ -40,7 +40,8 @@ public class LoadSave {
 	
 	public static final String STATUS_BAR = "statusbar.png";
 	public static final String MENU_PANEL = "menu_panel.png";
-	
+	// --- ASET UNTUK INVENTORY ---
+	public static final String INVENTORY_BG = "inventory_skill_karakter_panel.png";
 	// --- ASET BARU UNTUK PAUSE MENU ---
     public static final String PAUSE_TITLE = "pause.png";
     public static final String PAUSE_MUSIC_TEXT = "music.png";

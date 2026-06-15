@@ -361,7 +361,7 @@ public class PlayStates extends States implements StateMethods {
     }
 
     public void checkHitEnemy(Rectangle2D.Float AttackBox, int damage) {
-        enemyManager.checkEnemyHit(AttackBox, damage, player);
+        enemyManager.checkEnemyHit(AttackBox, damage);
     }
     
     public void checkObjectHit(Rectangle2D.Float attackBox) {

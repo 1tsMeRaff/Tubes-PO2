@@ -16,6 +16,12 @@ import static utilitytools.HelpMethods.*;
 
 public class Player extends Entity {
 
+    // --- SISTEM LEVEL & STATUS BARU ---
+    private int level = 1;
+    private int exp = 0;
+    private int maxExp = 100;
+    private float dps = 5.0f; 
+
     // Animasi & Render
     private BufferedImage[][] animasi;
     private int aniTick, aniIndex, aniSpeed = 4;
@@ -146,7 +152,7 @@ public class Player extends Entity {
             playStates.setGameOver(true);
             return;
         }
-      
+
         checkChasm();
         updateAttackBox();
         updatePos();
@@ -305,11 +311,13 @@ public class Player extends Entity {
         if (attackCheck) {
             return;
         }
+        
         int hitFrame = isExecutingChargeAttack ? 9 : 3;
         
         if (aniIndex == hitFrame) {
             attackCheck = true;
-            int damageToDeal = isExecutingChargeAttack ? 25 : 10;
+            // Gunakan dps asli untuk serang biasa, dps tambahan jika charge attack
+            int damageToDeal = isExecutingChargeAttack ? (int)(dps * 2.5) : (int)dps;
             
             playStates.checkHitEnemy(AttackBox, damageToDeal);
             playStates.checkObjectHit(AttackBox);
@@ -697,8 +705,37 @@ public class Player extends Entity {
         if (mapData != null && !IsEntityOnFloor(hitBox, mapData)) {
             inAir = true;
         }
-        if (currentHealth <= 0) currentHealth = 0;
-        else if (currentHealth >= maxHealth) currentHealth = maxHealth;
+        if (currentHealth <= 0) {
+            currentHealth = 0;
+        } else if (currentHealth >= maxHealth) {
+            currentHealth = maxHealth;
+        }
+    }
+
+    // --- LOGIKA EXP & LEVEL UP ---
+    public void gainExp(int amount) {
+        exp += amount;
+        System.out.println("Mendapatkan " + amount + " EXP!");
+        
+        while (exp >= maxExp) {
+            levelUp();
+        }
+    }
+
+    private void levelUp() {
+        level++;
+        exp -= maxExp;               
+        maxExp = (int)(maxExp * 1.5); 
+        
+        maxHealth += 20;
+        currentHealth = maxHealth;   
+        maxMana += 10;
+        currentMana = maxMana;
+        baseDefense += 2;            
+        dps += 1.5f;                 
+        calculateDefense();          
+        
+        System.out.println("Level Up! Sekarang Level " + level);
     }
 
     // --- GETTER & SETTER ---
@@ -725,4 +762,14 @@ public class Player extends Entity {
     public int getEquippedAcc1() { return equippedAcc1; }
     public int getEquippedAcc2() { return equippedAcc2; }
     public int getTotalDefense() { return totalDefense; }
+
+    // Tambahan Getter untuk UI Status
+    public int getLevel() { return level; }
+    public int getExp() { return exp; }
+    public int getMaxExp() { return maxExp; }
+    public float getDps() { return dps; }
+    public int getCurrentHealth() { return currentHealth; }
+    public int getMaxHealth() { return maxHealth; }
+    public int getCurrentMana() { return currentMana; }
+    public int getMaxMana() { return maxMana; }
 }
