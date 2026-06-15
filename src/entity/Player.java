@@ -93,12 +93,12 @@ public class Player extends Entity {
     private int totalDefense = baseDefense;
 
     // Slot armor (-1 berarti slot kosong / tidak pakai apa-apa)
-    private int equippedHelmet = -1;
-    private int equippedArmor = -1;
-    private int equippedGloves = -1;
-    private int equippedShoes = -1;
-    private int equippedRing = -1;
-    private int equippedSack = -1; // Karung
+    private int equippedHelmet = -1; // Head
+    private int equippedArmor = -1;  // Body
+    private int equippedGloves = -1; // Hands
+    private int equippedShoes = -1;  // Shoes
+    private int equippedAcc1 = -1;   // Accessory 1
+    private int equippedAcc2 = -1;   // Accessory 2
 
     private Rectangle2D.Float AttackBox;
     private int flipX = 0;
@@ -224,13 +224,14 @@ public class Player extends Entity {
         totalDefense += getEquipmentDefenseValue(equippedArmor);
         totalDefense += getEquipmentDefenseValue(equippedGloves);
         totalDefense += getEquipmentDefenseValue(equippedShoes);
-        totalDefense += getEquipmentDefenseValue(equippedRing);
-        totalDefense += getEquipmentDefenseValue(equippedSack);
+        totalDefense += getEquipmentDefenseValue(equippedAcc1);
+        totalDefense += getEquipmentDefenseValue(equippedAcc2);
         System.out.println("Total Defense Player Sekarang: " + totalDefense);
     }
 
     private int getEquipmentDefenseValue(int itemType) {
         if (itemType == -1) return 0;
+        // Membaca Database Asli Konstanta (RING dan SACK) agar tidak error
         switch (itemType) {
             case utilitytools.Konstanta.ObjectConstants.HELMET: return 5;
             case utilitytools.Konstanta.ObjectConstants.ARMOR: return 15;
@@ -248,12 +249,12 @@ public class Player extends Entity {
             int oldItem = -1;
 
             switch (equipmentType.toLowerCase()) {
-                case "helmet": oldItem = equippedHelmet; equippedHelmet = itemToEquip; break;
-                case "armor": oldItem = equippedArmor; equippedArmor = itemToEquip; break;
-                case "gloves": oldItem = equippedGloves; equippedGloves = itemToEquip; break;
+                case "head": oldItem = equippedHelmet; equippedHelmet = itemToEquip; break;
+                case "body": oldItem = equippedArmor; equippedArmor = itemToEquip; break;
+                case "hands": oldItem = equippedGloves; equippedGloves = itemToEquip; break;
                 case "shoes": oldItem = equippedShoes; equippedShoes = itemToEquip; break;
-                case "ring": oldItem = equippedRing; equippedRing = itemToEquip; break;
-                case "sack": oldItem = equippedSack; equippedSack = itemToEquip; break;
+                case "accessory1": oldItem = equippedAcc1; equippedAcc1 = itemToEquip; break;
+                case "accessory2": oldItem = equippedAcc2; equippedAcc2 = itemToEquip; break;
                 default: System.out.println("Tipe perlengkapan salah!"); return;
             }
 
@@ -678,7 +679,7 @@ public class Player extends Entity {
     public int getEquippedArmor() { return equippedArmor; }
     public int getEquippedGloves() { return equippedGloves; }
     public int getEquippedShoes() { return equippedShoes; }
-    public int getEquippedRing() { return equippedRing; }
-    public int getEquippedSack() { return equippedSack; }
+    public int getEquippedAcc1() { return equippedAcc1; }
+    public int getEquippedAcc2() { return equippedAcc2; }
     public int getTotalDefense() { return totalDefense; }
 }

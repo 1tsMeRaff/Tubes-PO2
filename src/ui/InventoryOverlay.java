@@ -23,7 +23,7 @@ public class InventoryOverlay {
     private int selectedSlot = -1;
 
     // Rectangle untuk interaksi kotak Equipment di tab Karakter
-    private Rectangle helmetSlot, armorSlot, glovesSlot, shoesSlot, ringSlot, sackSlot;
+    private Rectangle helmetSlot, armorSlot, glovesSlot, shoesSlot, acc1Slot, acc2Slot;
     
     // Array Rectangle untuk 20 kotak di Inventory Tab
     private Rectangle[] inventoryGrid = new Rectangle[20];
@@ -45,9 +45,9 @@ public class InventoryOverlay {
         shoesSlot  = new Rectangle(eqSlotX, contentY + (int)(50 * GameCore.SCALE) + ((slotSize + 10) * 2), slotSize, slotSize);
         
         int rightEqSlotX = eqSlotX + slotSize + (int)(40 * GameCore.SCALE);
-        glovesSlot = new Rectangle(rightEqSlotX, contentY + (int)(50 * GameCore.SCALE), slotSize, slotSize);
-        ringSlot   = new Rectangle(rightEqSlotX, contentY + (int)(50 * GameCore.SCALE) + (slotSize + 10), slotSize, slotSize);
-        sackSlot   = new Rectangle(rightEqSlotX, contentY + (int)(50 * GameCore.SCALE) + ((slotSize + 10) * 2), slotSize, slotSize);
+        glovesSlot   = new Rectangle(rightEqSlotX, contentY + (int)(50 * GameCore.SCALE), slotSize, slotSize);
+        acc1Slot     = new Rectangle(rightEqSlotX, contentY + (int)(50 * GameCore.SCALE) + (slotSize + 10), slotSize, slotSize);
+        acc2Slot     = new Rectangle(rightEqSlotX, contentY + (int)(50 * GameCore.SCALE) + ((slotSize + 10) * 2), slotSize, slotSize);
 
         // Init Rectangle Layout untuk Inventory (4 Baris x 5 Kolom)
         int slotXStart = contentX + (int)(20 * GameCore.SCALE);
@@ -74,7 +74,7 @@ public class InventoryOverlay {
     public void draw(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
 
-        // --- 1. GAMBAR SIDEBAR (HITAM PEKAT) ---
+        // --- 1. GAMBAR SIDEBAR ---
         int sidebarX = (int) (50 * GameCore.SCALE);
         int sidebarY = (int) (100 * GameCore.SCALE);
         int sidebarW = (int) (140 * GameCore.SCALE);
@@ -127,13 +127,15 @@ public class InventoryOverlay {
         g2.drawString("Defense Saat ini : " + playing.getPlayer().getTotalDefense(), contentX + (int)(20 * GameCore.SCALE), contentY + (int)(50 * GameCore.SCALE));
 
         // Gambar Kotak + Labelnya
-        drawSingleEquipmentBox(g2, helmetSlot, "Helm", playing.getPlayer().getEquippedHelmet());
-        drawSingleEquipmentBox(g2, armorSlot, "Armor", playing.getPlayer().getEquippedArmor());
-        drawSingleEquipmentBox(g2, shoesSlot, "Sepatu", playing.getPlayer().getEquippedShoes());
+        drawSingleEquipmentBox(g2, helmetSlot, "Head", playing.getPlayer().getEquippedHelmet());
+        drawSingleEquipmentBox(g2, armorSlot, "Body", playing.getPlayer().getEquippedArmor());
         
-        drawSingleEquipmentBox(g2, glovesSlot, "Sarung Tangan", playing.getPlayer().getEquippedGloves());
-        drawSingleEquipmentBox(g2, ringSlot, "Cincin", playing.getPlayer().getEquippedRing());
-        drawSingleEquipmentBox(g2, sackSlot, "Karung", playing.getPlayer().getEquippedSack());
+        // --- INI BAGIAN YANG DIPERBAIKI ---
+        drawSingleEquipmentBox(g2, shoesSlot, "Feet", playing.getPlayer().getEquippedShoes()); 
+        
+        drawSingleEquipmentBox(g2, glovesSlot, "Hands", playing.getPlayer().getEquippedGloves());
+        drawSingleEquipmentBox(g2, acc1Slot, "Accessory 1", playing.getPlayer().getEquippedAcc1());
+        drawSingleEquipmentBox(g2, acc2Slot, "Accessory 2", playing.getPlayer().getEquippedAcc2());
     }
 
     private void drawSingleEquipmentBox(Graphics2D g2, Rectangle slotBox, String label, int itemTypeID) {
@@ -237,7 +239,7 @@ public class InventoryOverlay {
                 currentTab = (currentTab == hoveredTab) ? -1 : hoveredTab;
                 selectedSlot = -1;
             } 
-            // Konfirmasi Use atau Batalkan Item (Klik Y/T)
+            // Konfirmasi Use atau Batalkan Item
             else if (currentTab == 1 && selectedSlot != -1) {
                 int slotSize = (int) (45 * GameCore.SCALE);
                 Rectangle box = inventoryGrid[selectedSlot];
@@ -252,15 +254,15 @@ public class InventoryOverlay {
                     if (itemID >= 0 && itemID <= 5) {
                         playing.getPlayer().useItem(selectedSlot); // Heal Player
                     } else {
-                        // Equipment Armor
+                        // Memanggil konstanta database asli (RING dan SACK)
                         String slotTarget = "";
                         switch(itemID) {
-                            case ObjectConstants.HELMET: slotTarget = "helmet"; break;
-                            case ObjectConstants.ARMOR: slotTarget = "armor"; break;
+                            case ObjectConstants.HELMET: slotTarget = "head"; break;
+                            case ObjectConstants.ARMOR: slotTarget = "body"; break;
+                            case ObjectConstants.GLOVES: slotTarget = "hands"; break;
                             case ObjectConstants.SHOES: slotTarget = "shoes"; break;
-                            case ObjectConstants.GLOVES: slotTarget = "gloves"; break;
-                            case ObjectConstants.RING: slotTarget = "ring"; break;
-                            case ObjectConstants.SACK: slotTarget = "sack"; break;
+                            case ObjectConstants.RING: slotTarget = "accessory1"; break;
+                            case ObjectConstants.SACK: slotTarget = "accessory2"; break;
                         }
                         if (!slotTarget.isEmpty()) {
                             playing.equipPlayerItem(selectedSlot, slotTarget);
