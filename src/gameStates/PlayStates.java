@@ -107,11 +107,11 @@ public class PlayStates extends States implements StateMethods {
     
     private void drawClouds(Graphics g) {
         for (int i = 0; i < 3 ; i++) {
-            g.drawImage(clouds_01, i * CLOUDS_01_WIDTH - (int)(xLvlOffset * 0.3), (int) (204 * GameCore.SCALE), CLOUDS_01_WIDTH, CLOUDS_01_HEIGHT, null);
+//            g.drawImage(clouds_01, i * CLOUDS_01_WIDTH - (int)(xLvlOffset * 0.3), (int) (204 * GameCore.SCALE), CLOUDS_01_WIDTH, CLOUDS_01_HEIGHT, null);
         }
         
         for (int i = 0; i < clouds_02Pos.length; i++) {
-            g.drawImage(clouds_02, CLOUDS_02_WIDTH * 4 * i - (int)(xLvlOffset * 0.7), clouds_02Pos[i], CLOUDS_02_WIDTH, CLOUDS_02_HEIGHT, null);
+//            g.drawImage(clouds_02, CLOUDS_02_WIDTH * 4 * i - (int)(xLvlOffset * 0.7), clouds_02Pos[i], CLOUDS_02_WIDTH, CLOUDS_02_HEIGHT, null);
         }
     }
     
@@ -128,22 +128,18 @@ public class PlayStates extends States implements StateMethods {
         } else if (lvlCompleted) {
             levelCompletedOverlay.update();
         } else if (gameOver) {
-            // GameOver update
+        	
         } else if (inventoryOpen) {
-            // Inventory update
+        	
         } else {
-            // === LOGIKA HIT STOP ===
             if (hitStopDuration > 0) {
                 hitStopDuration--;
-                // Tetap kurangi durasi shake agar layar bisa bergetar SAAT waktu membeku
                 if (shakeDuration > 0) shakeDuration--;
-                return; // LEWATI semua update di bawah ini (Game membeku)
+                return;
             }
 
-            // Kurangi durasi shake saat berjalan normal
             if (shakeDuration > 0) shakeDuration--;
 
-            // ... [Update normal gamemu berjalan di sini] ...
             worldManager.update();
             objectManager.update();
             player.update();
@@ -164,23 +160,26 @@ public class PlayStates extends States implements StateMethods {
         int shakeX = 0;
         int shakeY = 0;
 
-        // === LOGIKA SCREEN SHAKE ===
         if (shakeDuration > 0) {
             shakeX = rnd.nextInt(shakeIntensity * 2) - shakeIntensity;
             shakeY = rnd.nextInt(shakeIntensity * 2) - shakeIntensity;
         }
 
-        // Geser kanvas sebelum mulai menggambar
         g2.translate(shakeX, shakeY);
 
-        g.drawImage(backgroundImg, 0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
+//        g.drawImage(backgroundImg, -xLvlOffset, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
+        float geserX = 0.25f;
+        int bgX = (int)(-xLvlOffset * geserX) % GameCore.GAME_WIDTH;
+        g.drawImage(backgroundImg, bgX, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
+        g.drawImage(backgroundImg, bgX + GameCore.GAME_WIDTH, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
+        
+        
         drawClouds(g);
         worldManager.draw(g, xLvlOffset);
         objectManager.draw(g, xLvlOffset);
         player.render(g, xLvlOffset);
         enemyManager.draw(g, xLvlOffset);
 
-        // Kembalikan kanvas ke posisi semula agar UI tidak ikut bergetar (opsional, tapi disarankan)
         g2.translate(-shakeX, -shakeY);
 
         if (paused) {

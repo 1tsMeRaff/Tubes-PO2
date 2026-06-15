@@ -323,8 +323,8 @@ public class Player extends Entity {
                     (int) (hitBox.y - yDrawOffSet),
                     width * flipW, height, null);
         }
-//        drawAttackBox(g, xLvlOffset);
-//        drawHitbox(g);
+        drawAttackBox(g, xLvlOffset);
+        drawHitbox(g);
         drawUI(g);
     }
 
@@ -520,6 +520,11 @@ public class Player extends Entity {
         }
         
         if (inAir) {
+        	float maxFallSpeed = GameCore.TILES_SIZE - 1.0f; 
+            if (airSpeed > maxFallSpeed) {
+                airSpeed = maxFallSpeed;
+            }
+            
             Rectangle2D.Float nextYHitbox = new Rectangle2D.Float(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height);
             objects.GameContainer gcY = playStates.getObjectManager().getIntersectingContainer(nextYHitbox);
             
@@ -625,7 +630,7 @@ public class Player extends Entity {
 
     private void loadAnimations() {
         BufferedImage image = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_SPRITE);
-        animasi = new BufferedImage[24][16];
+        animasi = new BufferedImage[25][16];
         for (int j = 0; j < animasi.length; j++) {
             for (int i = 0; i < animasi[j].length; i++) {
                 animasi[j][i] = image.getSubimage(i * 80, j * 64, 80, 64);

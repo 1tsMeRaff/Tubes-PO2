@@ -18,7 +18,8 @@ import static utilitytools.Konstanta.UI.PauseButtons.*;
 public class LoadSave {
 
 	public static final String PLAYER_SPRITE = "player_right.png";
-	public static final String WORLD_SPRITE = "main_tileset.png";
+	public static final String WORLD_SPRITE = "map_jungle_fix.png";
+//	public static final String MAP_TUTORIAL = "map_tutorial.png";
 	public static final String MAP_1_DATA = "map_1_data.png";
 	public static final String MENU_BUTTONS = "Menu_Frames.png";
 	public static final String MENU_BACKGROUND = "Frames_baru.png";
@@ -32,7 +33,8 @@ public class LoadSave {
 	public static final String DEMON_BOSS_SPRITE = "demon_boss_spritesheet.png";
 //	public static final String MENU_BACKGROUND = "MediavelFree.png";
 	public static final String MENU_BACKGROUND_IMG = "mainn_menu.jpeg";
-	public static final String PLAY_BACKGROUND_IMG = "Background_0.png";
+//	public static final String PLAY_BACKGROUND_IMG = "Background_0.png";
+	public static final String PLAY_BACKGROUND_IMG = "Background_jungle2.png";
 	public static final String CLOUDS_01 = "awan_01.png";
 	public static final String CLOUDS_02 = "awan_02.png";
 	
@@ -102,7 +104,6 @@ public class LoadSave {
 			String line;
 			
 			while ((line = br.readLine()) != null) {
-				// Lewati baris jika kosong (Dari dev-Rizal)
 				if (line.trim().isEmpty()) {
 					continue;
 				}
@@ -111,11 +112,8 @@ public class LoadSave {
 				int[] row = new int[numbers.length]; 
 				
 				for (int col = 0; col < numbers.length; col++) {
-					// 1. Ambil nilai angka dari CSV
 					int value = Integer.parseInt(numbers[col].trim());
-					
-					// 2. PERBAIKAN: Jika angkanya spawn musuh, jadikan -1 (udara) agar tidak digambar (Dari dev)
-					if (value == 200 || value == 201) {
+					if (value == 2000 || value == 2001) {
 						row[col] = -1; 
 					} else {
 						row[col] = value;
@@ -124,7 +122,6 @@ public class LoadSave {
 				rowList.add(row);
 			}
 			br.close();
-			
 		} catch (Exception e) {
 			System.out.println("Gagal memuat map!");
 			e.printStackTrace();
@@ -143,14 +140,11 @@ public class LoadSave {
 		int[][] tilesData = GetTilesData(filePath);
 		
 		try {
-			// Membaca langsung dari file luar agar bisa melihat angka 200 yang asli
 			InputStream is = GameCore.class.getResourceAsStream(filePath); 
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
 			
 			String line;
-			int row = 0; // Counter baris dinamis
-			
-			// Diubah menjadi dinamis mengikuti panjang/lebar CSV aktual
+			int row = 0;
 			while ((line = br.readLine()) != null) {
 				if (line.trim().isEmpty()) {
 					continue;
@@ -161,8 +155,7 @@ public class LoadSave {
 				for (int col = 0; col < numbers.length; col++) {
 					int value = Integer.parseInt(numbers[col].trim());
 					
-					// Cek ID Spawn khusus musuh (angka 200 yang kita sepakati di CSV)
-					if (value == 200) { 
+					if (value == 2000) { 
 						int xPos = col * GameCore.TILES_SIZE; 
 						int yPos = row * GameCore.TILES_SIZE;
 						int groundRow = findGroundRow(row, col, tilesData);
@@ -206,7 +199,7 @@ public class LoadSave {
 				for (int col = 0; col < numbers.length; col++) {
 					int value = Integer.parseInt(numbers[col].trim());
 					
-					if (value == 201) { 
+					if (value == 2001) { 
 						int xPos = col * GameCore.TILES_SIZE; 
 						int yPos = row * GameCore.TILES_SIZE;
 						int groundRow = findGroundRow(row, col, tilesData);
