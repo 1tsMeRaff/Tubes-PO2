@@ -113,7 +113,6 @@ public class MainMenu extends States implements StateMethods {
         }
     }
 
-    // Method untuk menggambar teks tombol dibiarkan saja tapi tidak dipanggil agar tidak error
     private void drawMenuText(Graphics g, Rectangle bounds, String text, boolean isHover, boolean isPressed) {
         g.setFont(new Font("Arial", Font.BOLD, (int)(24 * GameCore.SCALE)));
         int stringWidth = g.getFontMetrics().stringWidth(text);
@@ -175,7 +174,12 @@ public class MainMenu extends States implements StateMethods {
     public void mouseClicked(MouseEvent e) {}
 
     @Override
-    public void keyPressed(KeyEvent e) {}
+    public void keyPressed(KeyEvent e) {
+    	if (e.getKeyCode() == KeyEvent.VK_F11) {
+            gc.getGameFrame().toggleFullScreen();
+            return;
+        }
+    }
 
     @Override
     public void keyReleased(KeyEvent e) {}

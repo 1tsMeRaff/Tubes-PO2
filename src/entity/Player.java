@@ -10,6 +10,7 @@ import gameStates.PlayStates;
 import main.GameCore;
 import utilitytools.LoadSave;
 import objects.GameContainer;
+import objects.Potion;
 
 import static utilitytools.Konstanta.KonstantaPlayerRight.*;
 import static utilitytools.HelpMethods.*;
