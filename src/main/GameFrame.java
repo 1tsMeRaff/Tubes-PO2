@@ -37,22 +37,19 @@ public class GameFrame {
 		});
 	}
 
-	// Method baru untuk mengatur Full Screen
 	public void toggleFullScreen() {
 		isFullScreen = !isFullScreen;
 		
-		// Dispose JFrame sementara untuk memodifikasi dekorasinya
 		jFrame.dispose();
 		
-		// Set undecorated (tanpa border/tombol close) jika fullscreen
 		jFrame.setUndecorated(isFullScreen);
 		
 		if (isFullScreen) {
 			jFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		} else {
 			jFrame.setExtendedState(JFrame.NORMAL);
-			jFrame.pack(); // Kembalikan ke ukuran sesuai GamePanel
-			jFrame.setLocationRelativeTo(null); // Tengahkan kembali
+			jFrame.pack();
+			jFrame.setLocationRelativeTo(null);
 		}
 		
 		jFrame.setVisible(true);

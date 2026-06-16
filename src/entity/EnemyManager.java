@@ -48,7 +48,7 @@ public class EnemyManager {
         drawBossUI(g);
     }
     
-    private void drawBossUI(Graphics g) {
+    public void drawBossUI(Graphics g) {
         for (DemonBoss db : demonBosses) {
             if(db.isActive()) {
                 int maxWidth = (int) (400 * GameCore.SCALE); 
