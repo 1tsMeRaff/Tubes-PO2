@@ -110,6 +110,7 @@ public abstract class Enemy extends Entity {
 	        if(utilitytools.HelpMethods.canMoveHere(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height, tilesData)) {
 	            hitBox.x += xSpeed;
 	        } else {
+	        	hitBox.x = utilitytools.HelpMethods.GetEntityPosNextToWall(hitBox, xSpeed);
 	            knockbackSpeed = 0;
 	        }
 	        knockbackSpeed -= knockbackFriction;
