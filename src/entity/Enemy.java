@@ -5,11 +5,16 @@ import static utilitytools.HelpMethods.*;
 import static utilitytools.Konstanta.Directions.*;
 import static utilitytools.Konstanta.EnemyConstants.*;
 
+import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+
+import gameStates.PlayStates;
 
 
 public abstract class Enemy extends Entity {
-	protected int aniIndex, enemyState, enemyType;
+	protected int aniIndex, enemyState;
+	public int enemyType;
 	protected int aniTick;
 	protected int aniSpeed = 7;
 	protected boolean firstUpdate = true;
@@ -39,7 +44,7 @@ public abstract class Enemy extends Entity {
 	    super(x, y, width, height);
 	    this.enemyType = enemyType;
 	    initHitBox(x, y, width, height);
-	    maxHealth = getMaxHealth(enemyType);
+	    maxHealth = utilitytools.Konstanta.EnemyConstants.getMaxHealth(enemyType);
 	    currentHealth = maxHealth;
 	    this.tileY = (int) (y / GameCore.TILES_SIZE);
 	}
@@ -217,6 +222,40 @@ public abstract class Enemy extends Entity {
 		}else {
 			walkDir = LEFT;
 		}
+	}
+	
+	// Metode Abstrak wajib untuk memisahkan logika spesifik musuh
+    public abstract void update(int[][] tilesData, Player player);
+    public abstract void draw(Graphics g, int xLvlOffset, BufferedImage[][] spriteAtlas);
+    public abstract int getExpReward();
+
+    // Hooks/Metode opsional untuk efek khusus (misal: Boss Screen Shake/Freeze)
+    protected void handleHurtEffects(PlayStates playStates) {}
+    protected void handleDeathEffects(PlayStates playStates) {}
+
+    // Sistem penerimaan damage yang seragam (Unified Hit System)
+    public void hit(int damage, Player player, PlayStates playStates) {
+        if (!active || isInvincible) return;
+
+        int kbDir = (player != null && player.getHitbox().x < hitBox.x) ? 1 : -1;
+        boolean isCharge = (player != null) && player.isChargeAttack();
+
+        hurt(damage, kbDir, isCharge);
+
+        if (currentHealth <= 0) {
+            if (player != null) player.gainExp(getExpReward());
+            handleDeathEffects(playStates);
+        } else {
+            handleHurtEffects(playStates);
+        }
+    }
+	
+    public int getEnemyType() {
+		return enemyType;
+	}
+
+	public int getMaxHealth() {
+		return maxHealth;
 	}
 	
 	public void resetEnemy() {

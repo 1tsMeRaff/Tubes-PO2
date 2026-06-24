@@ -4,6 +4,8 @@ import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import gameStates.PlayStates;
 import main.GameCore;
 import utilitytools.LoadSave;
@@ -12,10 +14,9 @@ import static utilitytools.Konstanta.EnemyConstants.*;
 public class EnemyManager {
 
     private PlayStates playStates;
-    private BufferedImage[][] slimeImg;
-    private BufferedImage[][] demonBossImg;
     
-    // Menggunakan list tunggal untuk semua musuh
+    // Menggunakan Map untuk menyimpan sprite atlas semua musuh secara dinamis
+    private Map<Integer, BufferedImage[][]> enemySpriteMap = new HashMap<>();
     private ArrayList<Enemy> enemies = new ArrayList<>();
 
     public EnemyManager(PlayStates playStates) {
@@ -33,70 +34,41 @@ public class EnemyManager {
     public void update(int[][] tilesData, Player player) {
         for (Enemy e : enemies) {
             if (e.isActive()) {
-                if (e instanceof Slime) {
-                    ((Slime) e).update(tilesData, player);
-                } else if (e instanceof DemonBoss) {
-                    ((DemonBoss) e).update(tilesData, player);
-                }
+                // Memanggil update() dari masing-masing subclass musuh tanpa instanceof
+                e.update(tilesData, player); 
             }
         }
     }
 
     public void draw(Graphics g, int xLvlOffset) {
-        drawEnemies(g, xLvlOffset);
-        drawBossUI(g);
-    }
-    
-    private void drawEnemies(Graphics g, int xLvlOffset) {
         Graphics g2 = g.create();
         g2.translate(-xLvlOffset, 0);
         
         for (Enemy e : enemies) {
             if (e.isActive()) {
-                if (e instanceof Slime) {
-                    Slime s = (Slime) e;
-                    int stateIndex = s.getEnemyState();
-                    if (stateIndex == MATI) {
-                        stateIndex = HURT;
-                    }
-                    
-                    if (s.getEnemyState() == MATI && s.getAniTick() % 8 < 4) {
-                        continue;
-                    }
-                    
-                    g2.drawImage(slimeImg[stateIndex][s.getAniIndex()],
-                            (int) (s.getHitBox().x - SLIME_DRAWOFFSET_X + s.flipX()),
-                            (int) (s.getHitBox().y - SLIME_DRAWOFFSET_Y),
-                            SLIME_WIDTH * s.flipW(), SLIME_HEIGHT, null);
-                            
-                } else if (e instanceof DemonBoss) {
-                    DemonBoss demonBoss = (DemonBoss) e;
-                    BufferedImage frame = demonBossImg[demonBoss.getEnemyState()][demonBoss.getAniIndex()];
-                    if (frame != null) {
-                        g2.drawImage(frame,
-                                demonBoss.drawX(),
-                                demonBoss.drawY(),
-                                DEMON_BOSS_WIDTH * demonBoss.flipW(), 
-                                DEMON_BOSS_HEIGHT, null);
-                    }
+                BufferedImage[][] atlas = enemySpriteMap.get(e.getEnemyType());
+                if (atlas != null) {
+                    // Tiap musuh bertanggung jawab menggambar dirinya sendiri
+                    e.draw(g2, xLvlOffset, atlas); 
                 }
             }
         } 
         g2.dispose();
+        
+        drawBossUI(g);
     }
     
     private void drawBossUI(Graphics g) {
         for (Enemy e : enemies) {
-            // Kita harus melakukan pengecekan instanceof karena kita sekarang menggunakan list umum 'enemies'
-            if (e instanceof DemonBoss && e.isActive()) {
-                DemonBoss db = (DemonBoss) e;
+            // Cukup cek tipe menggunakan method bawaan Enemy, tidak perlu instanceof
+            if (e.getEnemyType() == DEMON_BOSS && e.isActive()) {
                 int maxWidth = (int) (400 * GameCore.SCALE); 
                 int height = (int) (20 * GameCore.SCALE);
                 int xPos = (GameCore.GAME_WIDTH / 2) - (maxWidth / 2);
                 int yPos = (int) (GameCore.GAME_HEIGHT - (40 * GameCore.SCALE));
                 
-                float distance = Math.abs(playStates.getPlayer().getHitbox().x - db.getHitBox().x);
-                float healthPercentage = (float) db.getCurrentHealth() / db.getMaxHealth();
+                float distance = Math.abs(playStates.getPlayer().getHitbox().x - e.getHitBox().x);
+                float healthPercentage = (float) e.getCurrentHealth() / e.getMaxHealth(); // Pastikan getMaxHealth() public di Enemy
                 int currentWidth = (int) (maxWidth * healthPercentage);
 
                 if (currentWidth < 0) currentWidth = 0;
@@ -123,68 +95,46 @@ public class EnemyManager {
     public void checkEnemyHit(Rectangle2D.Float attackBox, int damage, Player player) {
         for (Enemy e : enemies) {
             if (e.isActive() && attackBox.intersects(e.getHitBox())) {
-                
-                if (e instanceof Slime) {
-                    Slime s = (Slime) e;
-                    s.hurt(damage); 
-                    if (s.getCurrentHealth() <= 0) {
-                        playStates.getPlayer().gainExp(20);
-                    }
-                    
-                } else if (e instanceof DemonBoss) {
-                    DemonBoss demonBoss = (DemonBoss) e;
-                    int kbDir = (player != null && player.getHitbox().x < demonBoss.getHitBox().x) ? 1 : -1;
-                    boolean isCharge = (player != null) && player.isChargeAttack();
-                    
-                    demonBoss.hurt(damage, kbDir, isCharge);
-                    
-                    if (demonBoss.getCurrentHealth() <= 0 || demonBoss.isDead()) {
-                        playStates.getPlayer().gainExp(100);
-                    }
-                    
-                    if (demonBoss.isDead() || demonBoss.getCurrentHealth() <= 0) {
-                        playStates.triggerHeavyHit(45, 120, 8); 
-                    } else if (demonBoss.checkHpThresholdEffect()) {
-                        playStates.triggerHeavyHit(20, 25, 12); 
-                    }
-                }
+                // Menggunakan Unified Hit System yang di-handle di class induk Enemy.java
+                e.hit(damage, player, playStates);
                 return;
             }
         }
     }
     
     private void loadEnemyImages() {
-        slimeImg = new BufferedImage[5][9];
-        BufferedImage temp = LoadSave.GetSpriteAtlas(LoadSave.SLIME_SPRITE);
+        // Load Slime
+        BufferedImage[][] slimeImg = new BufferedImage[5][9];
+        BufferedImage tempSlime = LoadSave.GetSpriteAtlas(LoadSave.SLIME_SPRITE);
         for (int j = 0; j < slimeImg.length; j++) {
             for (int i = 0; i < slimeImg[j].length; i++) {
-                slimeImg[j][i] = temp.getSubimage(i * SLIME_WIDTH_DEFAULT, j * SLIME_HEIGHT_DEFAULT,
+                slimeImg[j][i] = tempSlime.getSubimage(i * SLIME_WIDTH_DEFAULT, j * SLIME_HEIGHT_DEFAULT,
                         SLIME_WIDTH_DEFAULT, SLIME_HEIGHT_DEFAULT);
             }
         }
+        enemySpriteMap.put(SLIME, slimeImg);
         
-        demonBossImg = new BufferedImage[6][DEMON_BOSS_SPRITE_COLUMNS];
+        // Load Demon Boss
+        BufferedImage[][] demonBossImg = new BufferedImage[6][DEMON_BOSS_SPRITE_COLUMNS];
         BufferedImage demonBossSheet = LoadSave.GetSpriteAtlas(LoadSave.DEMON_BOSS_SPRITE);
-        loadDemonBossAnimation(demonBossSheet, IDLE, 0);
-        loadDemonBossAnimation(demonBossSheet, WALK, 1);
-        loadDemonBossAnimation(demonBossSheet, ATTACK, 2);
-        loadDemonBossAnimation(demonBossSheet, HURT, 3);
-        loadDemonBossAnimation(demonBossSheet, MATI, 4);
+        loadDemonBossAnimation(demonBossImg, demonBossSheet, IDLE, 0);
+        loadDemonBossAnimation(demonBossImg, demonBossSheet, WALK, 1);
+        loadDemonBossAnimation(demonBossImg, demonBossSheet, ATTACK, 2);
+        loadDemonBossAnimation(demonBossImg, demonBossSheet, HURT, 3);
+        loadDemonBossAnimation(demonBossImg, demonBossSheet, MATI, 4);
+        enemySpriteMap.put(DEMON_BOSS, demonBossImg);
     }
     
-    private void loadDemonBossAnimation(BufferedImage demonBossSheet, int targetState, int sourceRow) {
+    private void loadDemonBossAnimation(BufferedImage[][] targetArray, BufferedImage sheet, int targetState, int sourceRow) {
         for (int i = 0; i < GetSpriteAmount(DEMON_BOSS, targetState); i++) {
-            demonBossImg[targetState][i] = demonBossSheet.getSubimage(i * DEMON_BOSS_WIDTH_DEFAULT,
+            targetArray[targetState][i] = sheet.getSubimage(i * DEMON_BOSS_WIDTH_DEFAULT,
                     sourceRow * DEMON_BOSS_HEIGHT_DEFAULT, DEMON_BOSS_WIDTH_DEFAULT, DEMON_BOSS_HEIGHT_DEFAULT);
         }
     }
 
     public void resetAllEnemies() {
         for (Enemy e : enemies) {
-            e.resetEnemy();
-            if (e instanceof DemonBoss) {
-                ((DemonBoss) e).resetBoss();
-            }
+            e.resetEnemy(); 
         }
     }
 }
