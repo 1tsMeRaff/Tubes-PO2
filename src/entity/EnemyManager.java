@@ -95,9 +95,34 @@ public class EnemyManager {
     public void checkEnemyHit(Rectangle2D.Float attackBox, int damage, Player player) {
         for (Enemy e : enemies) {
             if (e.isActive() && attackBox.intersects(e.getHitBox())) {
-                // Menggunakan Unified Hit System yang di-handle di class induk Enemy.java
+                
+                // 1. Menggunakan Unified Hit System dari branch dev-Rafi
                 e.hit(damage, player, playStates);
-                return;
+
+                // 2. Menyelamatkan fitur spesifik dari branch dev (Loot, EXP, Screen Shake)
+                if (e.getEnemyType() == DEMON_BOSS) {
+                    DemonBoss demonBoss = (DemonBoss) e;
+
+                    // Logika ketika Boss mati
+                    if (demonBoss.getCurrentHealth() <= 0 || demonBoss.isDead()) {
+                        playStates.getPlayer().gainExp(100);
+                        
+                        // Spawn item equipment
+                        playStates.getObjectManager().spawnEquipment(
+                            (int) demonBoss.getHitBox().x, 
+                            (int) demonBoss.getHitBox().y
+                        );
+                        
+                        // Guncangan besar saat mati
+                        playStates.triggerHeavyHit(45, 120, 8); 
+                    } 
+                    // Logika ketika HP Boss rendah
+                    else if (demonBoss.checkHpThresholdEffect()) {
+                        playStates.triggerHeavyHit(20, 25, 12); 
+                    }
+                }
+                
+                return; // Keluar dari loop setelah berhasil mengenai 1 musuh
             }
         }
     }

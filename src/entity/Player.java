@@ -98,7 +98,8 @@ public class Player extends Entity {
 
     // Inventory
     public ArrayList<Integer> inventory = new ArrayList<>();
-    public final int maxInventorySize = 20;
+    public final int maxInventorySize = 24;
+    
 
     // Sistem Defense & Equipment
     private int baseDefense = 5;
@@ -160,6 +161,7 @@ public class Player extends Entity {
         
         if (attacking) {
             checkAttack();
+            
         }
         if (charging) {
             chargeTick++;
@@ -175,9 +177,15 @@ public class Player extends Entity {
         updateAnimationTick();
     }
 
+
     private void checkChasm() {
         if (hitBox.y + hitBox.height >= main.GameCore.GAME_HEIGHT - 5) {
             if (currentHealth > 0) {
+                
+   //damage yang di terima
+                changeHealth(-20); 
+                
+         
                 hitBox.x = lastSafeX;
                 hitBox.y = lastSafeY - 15; 
                 inAir = true; 
@@ -187,7 +195,6 @@ public class Player extends Entity {
             }
         }
     }
-
     private void updateHealthBar() {
         healthWidth = (int) ((currentHealth / (float) maxHealth) * healthBarWidth);
     }
@@ -219,15 +226,44 @@ public class Player extends Entity {
         }
     }
 
-    public void addItemToInventory(int objType) {
+    public boolean addItemToInventory(int objType) {
         if (inventory.size() < maxInventorySize) {
             inventory.add(objType);
             System.out.println("Item masuk tas. Tipe ID: " + objType);
+            return true; // Berhasil masuk tas
         } else {
-            System.out.println("Penyimpanan Penuh!");
+            System.out.println("Penyimpanan Penuh! Tidak bisa mengambil barang.");
+            return false; // Tas penuh, gagal mengambil
         }
     }
 
+    // melepaskan armor dan mengembalikannya ke tas
+    public void unequipItem(int equipSlotIndex) {
+        if (inventory.size() >= maxInventorySize) {
+            System.out.println("Tas penuh, tidak bisa melepas perlengkapan!");
+            return; // Batalkan jika tas penuh
+        }
+        
+        int itemToReturn = -1;
+        
+        // Cek slot mana yang mau dilepas (0 sampai 5)
+        switch (equipSlotIndex) {
+            case 0: itemToReturn = equippedHelmet; equippedHelmet = -1; break;
+            case 1: itemToReturn = equippedArmor; equippedArmor = -1; break;
+            case 2: itemToReturn = equippedShoes; equippedShoes = -1; break;
+            case 3: itemToReturn = equippedAcc1; equippedAcc1 = -1; break;
+            case 4: itemToReturn = equippedAcc2; equippedAcc2 = -1; break;
+            case 5: itemToReturn = equippedGloves; equippedGloves = -1; break;
+        }
+        
+        if (itemToReturn != -1) {
+            inventory.add(itemToReturn); // Masukkan lagi ke tas
+            calculateDefense(); // Hitung ulang pertahanan 
+            System.out.println("Perlengkapan dilepas!");
+        }
+    }
+    
+    // Memisahkan logika potion (useItem) dan equipment (equipItem) yang sebelumnya menyatu
     public void useItem(int itemIndex) {
         if (itemIndex < inventory.size()) {
             int potionType = inventory.get(itemIndex);
@@ -305,9 +341,7 @@ public class Player extends Entity {
     }
 
     private void checkAttack() {
-        if (attackCheck) {
-            return;
-        }
+        if (attackCheck) return;
         
         int hitFrame = isExecutingChargeAttack ? 9 : 3;
         
@@ -315,9 +349,15 @@ public class Player extends Entity {
             attackCheck = true;
             int damageToDeal = isExecutingChargeAttack ? (int)(dps * 2.5) : (int)dps;
             
+
+            int randomAttack = 4 + new java.util.Random().nextInt(3);
+            playStates.getGameCore().getAudioPlayer().playEffect(randomAttack);
+            
+
+
+
             playStates.checkHitEnemy(AttackBox, damageToDeal);
             playStates.checkObjectHit(AttackBox);
-            playStates.getGameCore().getAudioPlayer().playAttackSound();
         }
     }
 
@@ -488,6 +528,8 @@ public class Player extends Entity {
         }
         attacking = true;
         chargeTick = 0;
+        
+        playStates.getGameCore().getAudioPlayer().playEffect(audio.AudioPlayer.SLASH_SOUND);
     }
 
     private void updatePos() {
