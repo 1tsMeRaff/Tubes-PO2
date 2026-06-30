@@ -180,9 +180,9 @@ public class PlayStates extends States implements StateMethods {
         objectManager.draw(g, xLvlOffset);
         player.render(g, xLvlOffset);
         
-        if (isBossEncountered) {
-            enemyManager.drawBossUI(g); // HP Boss tetap tenang di atas layar
-        }
+//        if (isBossEncountered) {
+//            enemyManager.drawBossUI(g);
+//        }
         enemyManager.draw(g, xLvlOffset);
 
         g2.translate(-shakeX, -shakeY);

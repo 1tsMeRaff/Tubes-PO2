@@ -17,7 +17,6 @@ import static utilitytools.HelpMethods.*;
 
 public class Player extends Entity {
 
-    // --- SISTEM LEVEL & STATUS BARU ---
     private int level = 1;
     private int exp = 0;
     private int maxExp = 100;
@@ -47,13 +46,13 @@ public class Player extends Entity {
     // Dash
     private boolean dashing = false;
     private boolean canDash = true;
-    private int dashDuration = 30;
+    private int dashDuration = 18; 
     private int dashTick = 0;
     private int dashCooldown = 30;
     private int dashCooldownTick = 0;
     private float dashSpeed = 5.0f * GameCore.SCALE;
 
-    // Save Point (Jatuh ke jurang)
+    // Save Point
     private float lastSafeX;
     private float lastSafeY;
     
@@ -102,7 +101,7 @@ public class Player extends Entity {
     public final int maxInventorySize = 24;
     
 
-    // Sistem Defense & Equipment (Dari dev-Rizal)
+    // Sistem Defense & Equipment
     private int baseDefense = 5;
     private int totalDefense = baseDefense;
     private int equippedHelmet = -1; 
@@ -204,7 +203,6 @@ public class Player extends Entity {
         manaWidth = (int) ((currentMana / (float) maxMana) * manaBarWidth);
     }
 
-    // --- SISTEM DEFENSE & INVENTORY ---
     public void calculateDefense() {
         totalDefense = baseDefense;
         totalDefense += getEquipmentDefenseValue(equippedHelmet);
@@ -239,9 +237,7 @@ public class Player extends Entity {
         }
     }
 
-    
-    
- //  melepaskan armor dan mengembalikannya ke tas
+    // melepaskan armor dan mengembalikannya ke tas
     public void unequipItem(int equipSlotIndex) {
         if (inventory.size() >= maxInventorySize) {
             System.out.println("Tas penuh, tidak bisa melepas perlengkapan!");
@@ -267,13 +263,12 @@ public class Player extends Entity {
         }
     }
     
-    
     // Memisahkan logika potion (useItem) dan equipment (equipItem) yang sebelumnya menyatu
     public void useItem(int itemIndex) {
         if (itemIndex < inventory.size()) {
             int potionType = inventory.get(itemIndex);
             int value = 0;
-            boolean isRed = potionType <= 2; // Asumsi ID <= 2 adalah potion merah
+            boolean isRed = potionType <= 2;
             
             switch (potionType) {
                 case utilitytools.Konstanta.ObjectConstants.RED_POTION_1: value = utilitytools.Konstanta.ObjectConstants.RED_VAL_1; break;
@@ -312,7 +307,7 @@ public class Player extends Entity {
             }
             
             inventory.remove(itemIndex);
-            if (oldItem != -1) inventory.add(oldItem); // Mengembalikan item lama ke tas
+            if (oldItem != -1) inventory.add(oldItem);
             calculateDefense();
         }
     }
@@ -321,11 +316,11 @@ public class Player extends Entity {
         if (value < 0) {
             if (isInvincible) return;
             int incomingDamage = Math.abs(value);
-            int finalDamage = Math.max(1, incomingDamage - totalDefense); // Defense diaplikasikan di sini
+            int finalDamage = Math.max(1, incomingDamage - totalDefense);
             currentHealth -= finalDamage;
             isInvincible = true;
         } else {
-            currentHealth += value; // Perbaikan: tidak ada lagi duplikasi penambahan health
+            currentHealth += value;
         }
         
         if (currentHealth <= 0) {
@@ -344,8 +339,7 @@ public class Player extends Entity {
     private void checkPotionTouched() {
         playStates.checkPotionTouched(hitBox);
     }
-    
-    // --- SISTEM COMBAT ---
+
     private void checkAttack() {
         if (attackCheck) return;
         
@@ -387,20 +381,18 @@ public class Player extends Entity {
         }
     }
 
-    // --- SISTEM RENDER & ANIMASI ---
     public void render(Graphics g, int xLvlOffset) {
-        // Efek kedip saat I-frame
         if (isInvincible && invincibilityTick % 10 < 5) {
-            // Jangan gambar apa-apa (blink effect)
+        	// efek berkedip
         } else {
             g.drawImage(animasi[playerAction][aniIndex],
                     (int) (hitBox.x - xDrawOffSet) - xLvlOffset + flipX,
                     (int) (hitBox.y - yDrawOffSet),
                     width * flipW, height, null);
         }
-        // Hapus atau comment method draw hitbox ini jika sudah rilis
-        drawAttackBox(g, xLvlOffset);
-        drawHitbox(g);
+        
+        // drawAttackBox(g, xLvlOffset);
+        // drawHitbox(g);
         drawUI(g);
     }
 
@@ -441,7 +433,7 @@ public class Player extends Entity {
                     if (!inAir) {
                         playerAction = ARISE;
                     } else {
-                        aniIndex = GetSpriteAmount(DOWN) - 1; // Freeze on last frame if still in air
+                        aniIndex = GetSpriteAmount(DOWN) - 1;
                     }
                 } else if (playerAction == ARISE) {
                     isKnockedDown = false;
@@ -502,8 +494,7 @@ public class Player extends Entity {
         aniTick = 0;
         aniIndex = 0;
     }
-
-    // --- KONTROL & FISIKA GERAKAN ---
+    
     public void setDash(boolean dash) {
         if (dash && canDash && !dashing && !attacking && !charging) {
             this.dashing = true;
@@ -559,12 +550,19 @@ public class Player extends Entity {
         if (knockbackSpeed > 0) {
             xSpeed = knockbackSpeed * knockbackDir;
             knockbackSpeed -= 0.15f * GameCore.SCALE;
-            if (knockbackSpeed < 0) knockbackSpeed = 0;
+            if (knockbackSpeed < 0) {
+            	knockbackSpeed = 0;
+            }
         } else if (dashing) {
-            if (flipW == 1) xSpeed = dashSpeed;
-            else xSpeed = -dashSpeed;
+            airSpeed = 0;
+            if (flipW == 1) {
+            	xSpeed = dashSpeed;
+            }
+            else {
+            	xSpeed = -dashSpeed;
+            }
         } else if (!isKnockedDown) {
-            if (!attacking || inAir) {
+            if (!attacking && !isExecutingChargeAttack && !charging) {
                 if (left) {
                     xSpeed -= playerSpeed;
                     flipX = width;
@@ -574,6 +572,10 @@ public class Player extends Entity {
                     xSpeed += playerSpeed;
                     flipX = 0;
                     flipW = 1;
+                }
+            } else {
+                if (inAir && attacking) {
+                    xSpeed = (flipW == 1) ? playerSpeed * 0.4f : -playerSpeed * 0.4f;
                 }
             }
         }
@@ -707,7 +709,6 @@ public class Player extends Entity {
         }
     }
 
-    // --- INISIALISASI & RESET ---
     private void loadAnimations() {
         BufferedImage image = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_SPRITE);
         animasi = new BufferedImage[25][16];
@@ -756,7 +757,6 @@ public class Player extends Entity {
         }
     }
 
-    // --- LOGIKA EXP & LEVEL UP ---
     public void gainExp(int amount) {
         exp += amount;
         System.out.println("Mendapatkan " + amount + " EXP!");
@@ -782,7 +782,7 @@ public class Player extends Entity {
         System.out.println("Level Up! Sekarang Level " + level);
     }
 
-    // --- GETTER & SETTER ---
+    // GETTER & SETTER
     public boolean isChargeAttack() { return isExecutingChargeAttack; }
     public void setAttack(boolean attacking) { this.attacking = attacking; }
     public PlayStates getPlayStates() { return playStates; }

@@ -4,6 +4,8 @@ import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import gameStates.PlayStates;
 import main.GameCore;
 import utilitytools.LoadSave;
@@ -12,10 +14,10 @@ import static utilitytools.Konstanta.EnemyConstants.*;
 public class EnemyManager {
 
     private PlayStates playStates;
-    private BufferedImage[][] slimeImg;
-    private BufferedImage[][] demonBossImg;
-    private ArrayList<Slime> Slimes = new ArrayList<Slime>();
-    private ArrayList<DemonBoss> demonBosses = new ArrayList<DemonBoss>();
+    
+    // Menggunakan Map untuk menyimpan sprite atlas semua musuh secara dinamis
+    private Map<Integer, BufferedImage[][]> enemySpriteMap = new HashMap<>();
+    private ArrayList<Enemy> enemies = new ArrayList<>();
 
     public EnemyManager(PlayStates playStates) {
         this.playStates = playStates;
@@ -24,40 +26,49 @@ public class EnemyManager {
     }
 
     private void addEnemies() {
-        // Menggunakan map_tutorial_fix.txt dari branch dev-Rafi
-        Slimes = LoadSave.GetSlimes("/map_tutorial_fix.txt");
-        demonBosses = LoadSave.GetDemonBosses("/map_tutorial_fix.txt");
+        enemies.clear();
+        enemies.addAll(LoadSave.GetSlimes("/map_tutorial_fix.txt"));
+        enemies.addAll(LoadSave.GetDemonBosses("/map_tutorial_fix.txt"));
     }
 
     public void update(int[][] tilesData, Player player) {
-        for (Slime s : Slimes) {
-            if(s.isActive()) {
-                s.update(tilesData, player);
-            }
-        }
-        for (DemonBoss demonBoss : demonBosses) {
-            if(demonBoss.isActive()) {
-                demonBoss.update(tilesData, player);
+        for (Enemy e : enemies) {
+            if (e.isActive()) {
+                // Memanggil update() dari masing-masing subclass musuh tanpa instanceof
+                e.update(tilesData, player); 
             }
         }
     }
 
     public void draw(Graphics g, int xLvlOffset) {
-        drawSlimes(g, xLvlOffset);
-        drawDemonBosses(g, xLvlOffset);
+        Graphics g2 = g.create();
+        g2.translate(-xLvlOffset, 0);
+        
+        for (Enemy e : enemies) {
+            if (e.isActive()) {
+                BufferedImage[][] atlas = enemySpriteMap.get(e.getEnemyType());
+                if (atlas != null) {
+                    // Tiap musuh bertanggung jawab menggambar dirinya sendiri
+                    e.draw(g2, xLvlOffset, atlas); 
+                }
+            }
+        } 
+        g2.dispose();
+        
         drawBossUI(g);
     }
     
-    public void drawBossUI(Graphics g) {
-        for (DemonBoss db : demonBosses) {
-            if(db.isActive()) {
+    private void drawBossUI(Graphics g) {
+        for (Enemy e : enemies) {
+            // Cukup cek tipe menggunakan method bawaan Enemy, tidak perlu instanceof
+            if (e.getEnemyType() == DEMON_BOSS && e.isActive()) {
                 int maxWidth = (int) (400 * GameCore.SCALE); 
                 int height = (int) (20 * GameCore.SCALE);
                 int xPos = (GameCore.GAME_WIDTH / 2) - (maxWidth / 2);
                 int yPos = (int) (GameCore.GAME_HEIGHT - (40 * GameCore.SCALE));
                 
-                float distance = Math.abs(playStates.getPlayer().getHitbox().x - db.getHitBox().x);
-                float healthPercentage = (float) db.getCurrentHealth() / db.getMaxHealth();
+                float distance = Math.abs(playStates.getPlayer().getHitbox().x - e.getHitBox().x);
+                float healthPercentage = (float) e.getCurrentHealth() / e.getMaxHealth(); // Pastikan getMaxHealth() public di Enemy
                 int currentWidth = (int) (maxWidth * healthPercentage);
 
                 if (currentWidth < 0) currentWidth = 0;
@@ -75,149 +86,80 @@ public class EnemyManager {
                     g.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, (int)(16 * GameCore.SCALE)));
                     g.drawString("DEMON BOSS", xPos, yPos - (int)(5 * GameCore.SCALE));
                     
-                    break;
+                    break; // Hanya render UI untuk satu Boss yang aktif
                 }
             }
         }
     }
     
-    private void drawSlimes(Graphics g, int xLvlOffset) {
-        Graphics g2 = g.create();
-        g2.translate(-xLvlOffset, 0);
-        for (Slime s : Slimes) {
-            if(s.isActive()) {
-                int stateIndex = s.getEnemyState();
-                if (stateIndex == MATI) {
-                    stateIndex = HURT;
-                }
+    public void checkEnemyHit(Rectangle2D.Float attackBox, int damage, Player player) {
+        for (Enemy e : enemies) {
+            if (e.isActive() && attackBox.intersects(e.getHitBox())) {
                 
-                if (s.getEnemyState() == MATI) {
-                    if (s.getAniTick() % 8 < 4) {
-                        continue;
+                // 1. Menggunakan Unified Hit System dari branch dev-Rafi
+                e.hit(damage, player, playStates);
+
+                // 2. Menyelamatkan fitur spesifik dari branch dev (Loot, EXP, Screen Shake)
+                if (e.getEnemyType() == DEMON_BOSS) {
+                    DemonBoss demonBoss = (DemonBoss) e;
+
+                    // Logika ketika Boss mati
+                    if (demonBoss.getCurrentHealth() <= 0 || demonBoss.isDead()) {
+                        playStates.getPlayer().gainExp(100);
+                        
+                        // Spawn item equipment
+                        playStates.getObjectManager().spawnEquipment(
+                            (int) demonBoss.getHitBox().x, 
+                            (int) demonBoss.getHitBox().y
+                        );
+                        
+                        // Guncangan besar saat mati
+                        playStates.triggerHeavyHit(45, 120, 8); 
+                    } 
+                    // Logika ketika HP Boss rendah
+                    else if (demonBoss.checkHpThresholdEffect()) {
+                        playStates.triggerHeavyHit(20, 25, 12); 
                     }
                 }
                 
-                g2.drawImage(slimeImg[stateIndex][s.getAniIndex()],
-                        (int) (s.getHitBox().x - SLIME_DRAWOFFSET_X + s.flipX()),
-                        (int) (s.getHitBox().y - SLIME_DRAWOFFSET_Y),
-                        SLIME_WIDTH * s.flipW(), SLIME_HEIGHT, null);
-                
-                // Debugging Hitbox - Un-comment untuk melihat garis batas serangan/tubuh
-                // s.drawHitbox(g2); 
-                // s.drawAttackBox(g2, xLvlOffset);
-            }
-        } 
-        g2.dispose();
-    }
-    
-    private void drawDemonBosses(Graphics g, int xLvlOffset) {
-        Graphics g2 = g.create();
-        g2.translate(-xLvlOffset, 0);
-        for (DemonBoss demonBoss : demonBosses) {
-            if(demonBoss.isActive()) {
-                BufferedImage frame = demonBossImg[demonBoss.getEnemyState()][demonBoss.getAniIndex()];
-                if (frame == null) {
-                    continue;
-                }
-                
-                g2.drawImage(frame,
-                        demonBoss.drawX(),
-                        demonBoss.drawY(),
-                        DEMON_BOSS_WIDTH * demonBoss.flipW(), 
-                        DEMON_BOSS_HEIGHT, null);
-                
-                // Debugging Hitbox - Un-comment untuk melihat garis batas serangan/tubuh
-                // demonBoss.drawHitbox(g2); 
-                // demonBoss.drawAttackBox(g2, xLvlOffset);
-            }
-        } 
-        g2.dispose();
-    }
-    
-    // Logika tergabung: Hit, Knockback, Screen Shake (dari dev-Rafi) + EXP System (dari dev)
-    public void checkEnemyHit(Rectangle2D.Float attackBox, int damage, Player player) {
-        // 1. Cek Slime
-    	for (DemonBoss demonBoss : demonBosses) {
-    	    if (demonBoss.isActive() && attackBox.intersects(demonBoss.getHitBox())) {
-    	        
-    	        int kbDir = (player != null && player.getHitbox().x < demonBoss.getHitBox().x) ? 1 : -1;
-    	        boolean isCharge = (player != null) && player.isChargeAttack();
-    	        
-    	        demonBoss.hurt(damage, kbDir, isCharge);
-    	        
-    	        if (demonBoss.getCurrentHealth() <= 0 || demonBoss.isDead()) {
-    	            playStates.getPlayer().gainExp(100);
-    	            
-    	            // spawn item
-    	            playStates.getObjectManager().spawnEquipment(
-    	                (int) demonBoss.getHitBox().x, 
-    	                (int) demonBoss.getHitBox().y
-    	            );
-    	        }
-    	        
-    	
-    	    }
-    	}
-        
-        // 2. Cek DemonBoss
-        for (DemonBoss demonBoss : demonBosses) {
-            if (demonBoss.isActive() && attackBox.intersects(demonBoss.getHitBox())) {
-                
-                // Logika Knockback & Charge
-                int kbDir = (player != null && player.getHitbox().x < demonBoss.getHitBox().x) ? 1 : -1;
-                boolean isCharge = (player != null) && player.isChargeAttack();
-                
-                demonBoss.hurt(damage, kbDir, isCharge);
-                
-                // Logika EXP ketika Boss mati
-                if (demonBoss.getCurrentHealth() <= 0 || demonBoss.isDead()) {
-                    playStates.getPlayer().gainExp(100);
-                }
-                
-                // Logika HeavyHit (Screen Shake)
-                if (demonBoss.isDead() || demonBoss.getCurrentHealth() <= 0) {
-                    playStates.triggerHeavyHit(45, 120, 8); // Guncangan besar saat mati
-                } else if (demonBoss.checkHpThresholdEffect()) {
-                    playStates.triggerHeavyHit(20, 25, 12); // Guncangan saat HP rendah
-                }
-                
-                return;
+                return; // Keluar dari loop setelah berhasil mengenai 1 musuh
             }
         }
     }
     
     private void loadEnemyImages() {
-        slimeImg = new BufferedImage[5][9];
-        BufferedImage temp = LoadSave.GetSpriteAtlas(LoadSave.SLIME_SPRITE);
+        // Load Slime
+        BufferedImage[][] slimeImg = new BufferedImage[5][9];
+        BufferedImage tempSlime = LoadSave.GetSpriteAtlas(LoadSave.SLIME_SPRITE);
         for (int j = 0; j < slimeImg.length; j++) {
             for (int i = 0; i < slimeImg[j].length; i++) {
-                slimeImg[j][i] = temp.getSubimage(i * SLIME_WIDTH_DEFAULT, j * SLIME_HEIGHT_DEFAULT,
+                slimeImg[j][i] = tempSlime.getSubimage(i * SLIME_WIDTH_DEFAULT, j * SLIME_HEIGHT_DEFAULT,
                         SLIME_WIDTH_DEFAULT, SLIME_HEIGHT_DEFAULT);
             }
         }
+        enemySpriteMap.put(SLIME, slimeImg);
         
-        demonBossImg = new BufferedImage[6][DEMON_BOSS_SPRITE_COLUMNS];
+        // Load Demon Boss
+        BufferedImage[][] demonBossImg = new BufferedImage[6][DEMON_BOSS_SPRITE_COLUMNS];
         BufferedImage demonBossSheet = LoadSave.GetSpriteAtlas(LoadSave.DEMON_BOSS_SPRITE);
-        loadDemonBossAnimation(demonBossSheet, IDLE, 0);
-        loadDemonBossAnimation(demonBossSheet, WALK, 1);
-        loadDemonBossAnimation(demonBossSheet, ATTACK, 2);
-        loadDemonBossAnimation(demonBossSheet, HURT, 3);
-        loadDemonBossAnimation(demonBossSheet, MATI, 4);
+        loadDemonBossAnimation(demonBossImg, demonBossSheet, IDLE, 0);
+        loadDemonBossAnimation(demonBossImg, demonBossSheet, WALK, 1);
+        loadDemonBossAnimation(demonBossImg, demonBossSheet, ATTACK, 2);
+        loadDemonBossAnimation(demonBossImg, demonBossSheet, HURT, 3);
+        loadDemonBossAnimation(demonBossImg, demonBossSheet, MATI, 4);
+        enemySpriteMap.put(DEMON_BOSS, demonBossImg);
     }
     
-    private void loadDemonBossAnimation(BufferedImage demonBossSheet, int targetState, int sourceRow) {
+    private void loadDemonBossAnimation(BufferedImage[][] targetArray, BufferedImage sheet, int targetState, int sourceRow) {
         for (int i = 0; i < GetSpriteAmount(DEMON_BOSS, targetState); i++) {
-            demonBossImg[targetState][i] = demonBossSheet.getSubimage(i * DEMON_BOSS_WIDTH_DEFAULT,
+            targetArray[targetState][i] = sheet.getSubimage(i * DEMON_BOSS_WIDTH_DEFAULT,
                     sourceRow * DEMON_BOSS_HEIGHT_DEFAULT, DEMON_BOSS_WIDTH_DEFAULT, DEMON_BOSS_HEIGHT_DEFAULT);
         }
     }
 
     public void resetAllEnemies() {
-        for(Slime s : Slimes) {
-            s.resetEnemy();
-        }
-        for(DemonBoss demonBoss : demonBosses) {
-            demonBoss.resetEnemy();
+        for (Enemy e : enemies) {
+            e.resetEnemy(); 
         }
     }
 }
