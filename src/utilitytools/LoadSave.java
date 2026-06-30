@@ -1,6 +1,7 @@
 package utilitytools;
 
 import entity.Slime;
+import entity.BlueGolem;
 import entity.DemonBoss;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -31,6 +32,9 @@ public class LoadSave {
 	
 	public static final String SLIME_SPRITE = "enemy_slime.png";
 	public static final String DEMON_BOSS_SPRITE = "demon_boss_spritesheet.png";
+	public static final String BLUE_GOLEM_SPRITE = "golem_blue.png";
+	
+	
 //	public static final String MENU_BACKGROUND = "MediavelFree.png";
 	public static final String MENU_BACKGROUND_IMG = "mainn_menu.jpeg";
 //	public static final String PLAY_BACKGROUND_IMG = "Background_0.png";
@@ -239,6 +243,51 @@ public class LoadSave {
 		}
 		
 		return list;
+	}
+	
+	public static ArrayList<BlueGolem> GetBlueGolems(String filePath) {
+	    ArrayList<BlueGolem> list = new ArrayList<>();
+	    int[][] tilesData = GetTilesData(filePath);
+
+	    try {
+	        InputStream is = GameCore.class.getResourceAsStream(filePath);
+	        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+
+	        String line;
+	        int row = 0;
+
+	        while ((line = br.readLine()) != null) {
+	            if (line.trim().isEmpty()) {
+	                continue;
+	            }
+
+	            String[] numbers = line.split(",");
+
+	            for (int col = 0; col < numbers.length; col++) {
+	                int value = Integer.parseInt(numbers[col].trim());
+
+	                // Kita gunakan angka 802 sebagai ID penanda Blue Golem di file CSV/TXT map
+	                if (value == 802) { 
+	                    int xPos = col * GameCore.TILES_SIZE;
+	                    int yPos = row * GameCore.TILES_SIZE;
+	                    int groundRow = findGroundRow(row, col, tilesData);
+	                    if (groundRow != -1) {
+	                        yPos = (groundRow * GameCore.TILES_SIZE) - BLUE_GOLEM_HITBOX_HEIGHT;
+	                    }
+
+	                    list.add(new BlueGolem(xPos, yPos));
+	                }
+	            }
+	            row++;
+	        }
+	        br.close();
+
+	    } catch (Exception e) {
+	        System.out.println("Gagal memuat Blue Golem!");
+	        e.printStackTrace();
+	    }
+
+	    return list;
 	}
 
 	private static int findGroundRow(int startRow, int col, int[][] tilesData) {

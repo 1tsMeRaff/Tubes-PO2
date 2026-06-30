@@ -89,6 +89,7 @@ public class Konstanta {
 	public static class EnemyConstants{
 		public static final int SLIME = 0;
 		public static final int DEMON_BOSS = 1;
+		public static final int BLUE_GOLEM = 2;
 		
 		public static final int IDLE = 0;
 		public static final int WALK = 1;
@@ -99,10 +100,13 @@ public class Konstanta {
 
 		public static final int SLIME_WIDTH_DEFAULT = 80;
 		public static final int SLIME_HEIGHT_DEFAULT = 80;
+		
 		public static final int SLIME_WIDTH = (int) (SLIME_WIDTH_DEFAULT * GameCore.SCALE);
 		public static final int SLIME_HEIGHT = (int) (SLIME_HEIGHT_DEFAULT * GameCore.SCALE);
+		
 		public static final int SLIME_HITBOX_WIDTH = (int) (16 * GameCore.SCALE);
 		public static final int SLIME_HITBOX_HEIGHT = (int) (9 * GameCore.SCALE);
+		
 		public static final int SLIME_DRAWOFFSET_X = (int) (16 * GameCore.SCALE);
 		public static final int SLIME_DRAWOFFSET_Y = (int) (52 * GameCore.SCALE);
 
@@ -118,6 +122,20 @@ public class Konstanta {
 		
 		public static final int DEMON_BOSS_DRAWOFFSET_X = (int) (120 * GameCore.SCALE);
 		public static final int DEMON_BOSS_DRAWOFFSET_Y = (int) (85 * GameCore.SCALE);
+		
+		// --- KONSTANTA BLUE GOLEM ---
+	    public static final int BLUE_GOLEM_WIDTH_DEFAULT = 97;  // 1170 / 12 (Dibulatkan)
+	    public static final int BLUE_GOLEM_HEIGHT_DEFAULT = 64; // 320 / 5
+	    public static final int BLUE_GOLEM_SPRITE_COLUMNS = 12;
+
+	    public static final int BLUE_GOLEM_WIDTH = (int) (BLUE_GOLEM_WIDTH_DEFAULT * GameCore.SCALE);
+	    public static final int BLUE_GOLEM_HEIGHT = (int) (BLUE_GOLEM_HEIGHT_DEFAULT * GameCore.SCALE);
+
+	    // Sesuaikan nilai hitbox dan offset ini setelah testing agar pas dengan visual
+	    public static final int BLUE_GOLEM_HITBOX_WIDTH = (int) (40 * GameCore.SCALE);
+	    public static final int BLUE_GOLEM_HITBOX_HEIGHT = (int) (55 * GameCore.SCALE);
+	    public static final int BLUE_GOLEM_DRAWOFFSET_X = (int) (28 * GameCore.SCALE);
+	    public static final int BLUE_GOLEM_DRAWOFFSET_Y = (int) (9 * GameCore.SCALE);
 
 		public static int GetSpriteAmount(int enemy_type, int enemy_state) {
 			switch(enemy_type) {
@@ -138,6 +156,14 @@ public class Konstanta {
 				case HURT: return 5;
 				case MATI: return 22;
 				}
+			case BLUE_GOLEM:
+	            switch(enemy_state) {
+	            case IDLE: return 1;
+	            case WALK: return 1;   
+	            case ATTACK: return 1;
+	            case HURT: return 1;
+	            case MATI: return 1;
+	            }
 			}
 			return 0;
 		}
@@ -146,6 +172,7 @@ public class Konstanta {
 			switch(enemy_type) {
 			case SLIME: return 10;
 			case DEMON_BOSS: return 80;
+			case BLUE_GOLEM: return 150;
 			default: return 1;
 			}
 		}
@@ -154,6 +181,7 @@ public class Konstanta {
 			switch(enemy_type) {
 			case SLIME: return 10;
 			case DEMON_BOSS: return 25;
+			case BLUE_GOLEM: return 40;
 			default: return 0;
 			}
 		}

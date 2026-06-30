@@ -29,6 +29,7 @@ public class EnemyManager {
         enemies.clear();
         enemies.addAll(LoadSave.GetSlimes("/map_tutorial_fix.txt"));
         enemies.addAll(LoadSave.GetDemonBosses("/map_tutorial_fix.txt"));
+        enemies.addAll(LoadSave.GetBlueGolems("/map_tutorial_fix.txt"));
     }
 
     public void update(int[][] tilesData, Player player) {
@@ -60,15 +61,15 @@ public class EnemyManager {
     
     private void drawBossUI(Graphics g) {
         for (Enemy e : enemies) {
-            // Cukup cek tipe menggunakan method bawaan Enemy, tidak perlu instanceof
-            if (e.getEnemyType() == DEMON_BOSS && e.isActive()) {
-                int maxWidth = (int) (400 * GameCore.SCALE); 
+            // Kita ubah kondisinya menggunakan OR (||) agar berlaku untuk DEMON_BOSS atau BLUE_GOLEM
+            if ((e.getEnemyType() == DEMON_BOSS || e.getEnemyType() == BLUE_GOLEM) && e.isActive()) {
+                int maxWidth = (int) (400 * GameCore.SCALE);
                 int height = (int) (20 * GameCore.SCALE);
                 int xPos = (GameCore.GAME_WIDTH / 2) - (maxWidth / 2);
                 int yPos = (int) (GameCore.GAME_HEIGHT - (40 * GameCore.SCALE));
-                
+
                 float distance = Math.abs(playStates.getPlayer().getHitbox().x - e.getHitBox().x);
-                float healthPercentage = (float) e.getCurrentHealth() / e.getMaxHealth(); // Pastikan getMaxHealth() public di Enemy
+                float healthPercentage = (float) e.getCurrentHealth() / e.getMaxHealth();
                 int currentWidth = (int) (maxWidth * healthPercentage);
 
                 if (currentWidth < 0) currentWidth = 0;
@@ -84,9 +85,12 @@ public class EnemyManager {
                     g.drawRect(xPos, yPos, maxWidth, height);
 
                     g.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, (int)(16 * GameCore.SCALE)));
-                    g.drawString("DEMON BOSS", xPos, yPos - (int)(5 * GameCore.SCALE));
                     
-                    break; // Hanya render UI untuk satu Boss yang aktif
+                    // Cek nama berdasarkan ID
+                    String bossName = (e.getEnemyType() == DEMON_BOSS) ? "DEMON BOSS" : "BLUE GOLEM";
+                    g.drawString(bossName, xPos, yPos - (int)(5 * GameCore.SCALE));
+
+                    break;
                 }
             }
         }
@@ -148,12 +152,33 @@ public class EnemyManager {
         loadDemonBossAnimation(demonBossImg, demonBossSheet, HURT, 3);
         loadDemonBossAnimation(demonBossImg, demonBossSheet, MATI, 4);
         enemySpriteMap.put(DEMON_BOSS, demonBossImg);
+        
+     // --- TAMBAHKAN KODE LOAD BLUE GOLEM DI BAWAH INI ---
+        BufferedImage[][] blueGolemImg = new BufferedImage[6][BLUE_GOLEM_SPRITE_COLUMNS];
+        BufferedImage blueGolemSheet = LoadSave.GetSpriteAtlas(LoadSave.BLUE_GOLEM_SPRITE);
+        loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, IDLE, 0);
+        loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, WALK, 1);
+        loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, ATTACK, 2);
+        loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, HURT, 3);
+        loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, MATI, 4);
+        enemySpriteMap.put(BLUE_GOLEM, blueGolemImg);
     }
     
     private void loadDemonBossAnimation(BufferedImage[][] targetArray, BufferedImage sheet, int targetState, int sourceRow) {
         for (int i = 0; i < GetSpriteAmount(DEMON_BOSS, targetState); i++) {
             targetArray[targetState][i] = sheet.getSubimage(i * DEMON_BOSS_WIDTH_DEFAULT,
                     sourceRow * DEMON_BOSS_HEIGHT_DEFAULT, DEMON_BOSS_WIDTH_DEFAULT, DEMON_BOSS_HEIGHT_DEFAULT);
+        }
+    }
+    
+    private void loadBlueGolemAnimation(BufferedImage[][] targetArray, BufferedImage sheet, int targetState, int sourceRow) {
+        for (int i = 0; i < GetSpriteAmount(BLUE_GOLEM, targetState); i++) {
+            targetArray[targetState][i] = sheet.getSubimage(
+                i * BLUE_GOLEM_WIDTH_DEFAULT,
+                sourceRow * BLUE_GOLEM_HEIGHT_DEFAULT, 
+                BLUE_GOLEM_WIDTH_DEFAULT, 
+                BLUE_GOLEM_HEIGHT_DEFAULT
+            );
         }
     }
 
