@@ -17,24 +17,17 @@ public class ObjectManager {
     private PlayStates playStates;
     private BufferedImage[][] potionImgs, containerImgs;
     private BufferedImage signImg;
-
-    // Variabel untuk Kandang
     private BufferedImage kandangImg;
     private BufferedImage kandangBwImg;
-
-    // Variabel untuk Equipment
     private BufferedImage[] equipmentImgs;
     
     private ArrayList<Potion> potions = new ArrayList<>();
     private ArrayList<GameContainer> containers = new ArrayList<>();
     private ArrayList<Sign> signs = new ArrayList<>();
     private ArrayList<Cage> cages = new ArrayList<>();
-    
-    // --- VARIABEL BARU UNTUK DROP EQUIPMENT ---
     private ArrayList<DroppedEquipment> droppedEquipments = new ArrayList<>();
 
-    // UBAH CHANCE DROP DI SINI: (0.75 = 75% Peluang Item Jatuh)
-    public static double BOSS_ARMOR_DROP_CHANCE = 0.75; 
+    public static double BOSS_ARMOR_DROP_CHANCE = 0.75; // 75% Drop Boss
 
     public ObjectManager(PlayStates playStates) {
         this.playStates = playStates;
@@ -45,8 +38,9 @@ public class ObjectManager {
         // Cek Sentuhan Potion
         for (Potion p : potions) {
             if (p.isActive() && hitbox.intersects(p.getHitbox())) {
-                p.setActive(false);
-                playStates.getPlayer().addItemToInventory(p.getObjType());
+                if (playStates.getPlayer().addItemToInventory(p.getObjType())) {
+                    p.setActive(false);
+                }
             }
         }
 
@@ -54,9 +48,9 @@ public class ObjectManager {
         for (int i = 0; i < droppedEquipments.size(); i++) {
             DroppedEquipment de = droppedEquipments.get(i);
             if (de.isActive() && hitbox.intersects(de.getHitbox())) {
-                de.setActive(false);
-                // Menambahkan item otomatis ke inventory player
-                playStates.getPlayer().addItemToInventory(de.getItemType());
+                if (playStates.getPlayer().addItemToInventory(de.getItemType())) {
+                    de.setActive(false);
+                }
             }
         }
     }
@@ -125,7 +119,6 @@ public class ObjectManager {
         signImg = LoadSave.GetSpriteAtlas("MediavelFree.png");
         kandangImg = LoadSave.GetSpriteAtlas("kandang .png");
         kandangBwImg = new BufferedImage(kandangImg.getWidth(), kandangImg.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        
         for (int y = 0; y < kandangImg.getHeight(); y++) {
             for (int x = 0; x < kandangImg.getWidth(); x++) {
                 int p = kandangImg.getRGB(x, y);
@@ -139,8 +132,7 @@ public class ObjectManager {
             }
         }
 
-        // LOAD GAMBAR EQUIPMENT (6 Item Terpisah)
-        equipmentImgs = new BufferedImage[6]; 
+        equipmentImgs = new BufferedImage[6];
         try {
             equipmentImgs[0] = LoadSave.GetSpriteAtlas("helmet.png");
             equipmentImgs[1] = LoadSave.GetSpriteAtlas("armor.png");
@@ -165,7 +157,6 @@ public class ObjectManager {
         drawPotions(g, xLvlOffset);
         drawContainers(g, xLvlOffset);
         
-        // GAMBAR EQUIPMENT YANG JATUH DI TANAH
         for (DroppedEquipment de : droppedEquipments) {
             if (de.isActive()) {
                 de.draw(g, xLvlOffset);
@@ -173,11 +164,9 @@ public class ObjectManager {
         }
     }
 
-    // --- FUNGSI BARU SPAWN EQUIPMENT KETIKA BOSS MATI ---
     public void spawnEquipment(int x, int y) {
         if (Math.random() <= BOSS_ARMOR_DROP_CHANCE) {
-            // Acak ID dari 10 sampai 15 (Sesuai konstanta)
-            int randomType = 10 + (int) (Math.random() * 6); 
+            int randomType = 10 + (int) (Math.random() * 6);
             int eqIndex = randomType - 10; 
             
             if (equipmentImgs != null && eqIndex >= 0 && eqIndex < equipmentImgs.length) {
@@ -224,7 +213,6 @@ public class ObjectManager {
             float xDist = Math.abs((pBox.x + pBox.width / 2) - (sBox.x + sBox.width / 2));
             float yDist = Math.abs((pBox.y + pBox.height / 2) - (sBox.y + sBox.height / 2));
             float maxDist = 40 * GameCore.SCALE;
-            
             if (xDist < maxDist && yDist < maxDist) {
                 if (s.getTopText() != null && !s.getTopText().isEmpty()) {
                     g.setColor(Color.WHITE);
@@ -263,7 +251,7 @@ public class ObjectManager {
         for (Potion p : potions) p.reset();
         for (GameContainer gc : containers) gc.reset();
         for (Cage c : cages) c.reset();
-        droppedEquipments.clear(); // Bersihkan item di tanah
+        droppedEquipments.clear();
     }
 
     public void loadObjectsFromMap(int[][] mapData) {
@@ -271,39 +259,49 @@ public class ObjectManager {
         containers.clear();
         signs.clear();
         cages.clear();
+        droppedEquipments.clear(); 
         
         for (int j = 0; j < mapData.length; j++) {
             for (int i = 0; i < mapData[0].length; i++) {
-
                 int id = mapData[j][i];
                 int xPos = i * GameCore.TILES_SIZE;
 
                 if (id >= 500 && id <= 505) {
                     int yPosPotion = (j * GameCore.TILES_SIZE);
                     potions.add(new Potion(xPos, yPosPotion, id - 500));
-                    mapData[j][i] = 11;
+                    mapData[j][i] = -1;
                 }
-                
                 else if (id == 601 || id == 602) {
                     int yPosContainer = (j * GameCore.TILES_SIZE);
                     containers.add(new GameContainer(xPos, yPosContainer, (id == 601) ? BOX : BARREL));
-                    mapData[j][i] = 11;
+                    mapData[j][i] = -1; 
                 }
                 else if (id >= 700 && id <= 703) {
                     int yPosSign = (j * GameCore.TILES_SIZE) + (int)(15 * GameCore.SCALE);
                     int xPosSign = xPos + (int)(4 * GameCore.SCALE);
-
                     if (id == 700) signs.add(new Sign(xPosSign, yPosSign, SIGN, "E", "gunakan"));
                     else if (id == 701) signs.add(new Sign(xPosSign, yPosSign, SIGN, "SHOP", "WEAPONS"));
                     else if (id == 702) signs.add(new Sign(xPosSign, yPosSign, SIGN, "DANGER", "BOSS AREA"));
                     else if (id == 703) signs.add(new Sign(xPosSign, yPosSign, SIGN, "SAVE", "POINT"));
-
-                    mapData[j][i] = 11;
+                    mapData[j][i] = -1; 
                 }
                 else if (id == 403) {
                     int yPosKandang = (j * GameCore.TILES_SIZE);
                     cages.add(new Cage(xPos, yPosKandang, KANDANG));
-                    mapData[j][i] = 11;
+                    mapData[j][i] = -1; 
+                }
+                // --- MEMUNCULKAN ARMOR LANGSUNG DI MAP JIKA ADA KODE 910-915 ---
+                else if (id >= 910 && id <= 915) {
+                    int yPosEq = (j * GameCore.TILES_SIZE);
+                    int eqType = id - 900; 
+                    int eqIndex = eqType - 10;
+                    if (equipmentImgs != null && eqIndex >= 0 && eqIndex < equipmentImgs.length) {
+                        java.awt.image.BufferedImage itemImg = equipmentImgs[eqIndex];
+                        int centerX = xPos + (GameCore.TILES_SIZE / 2);
+                        int centerY = yPosEq + (GameCore.TILES_SIZE / 2);
+                        droppedEquipments.add(new DroppedEquipment(centerX, centerY, eqType, itemImg));
+                    }
+                    mapData[j][i] = -1; 
                 }
             }
         }
@@ -321,7 +319,7 @@ public class ObjectManager {
             return getPotionImg(type);
         } 
         else if (type >= 10 && type <= 15) {
-            int eqIndex = type - 10; 
+            int eqIndex = type - 10;
             if (equipmentImgs != null && eqIndex >= 0 && eqIndex < equipmentImgs.length) {
                 return equipmentImgs[eqIndex];
             }

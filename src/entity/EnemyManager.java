@@ -137,17 +137,27 @@ public class EnemyManager {
     // Logika tergabung: Hit, Knockback, Screen Shake (dari dev-Rafi) + EXP System (dari dev)
     public void checkEnemyHit(Rectangle2D.Float attackBox, int damage, Player player) {
         // 1. Cek Slime
-        for (Slime s : Slimes) {
-            if (s.isActive() && attackBox.intersects(s.getHitBox())) {
-                s.hurt(damage); 
-                
-                // Logika EXP ketika Slime mati
-                if (s.getCurrentHealth() <= 0) {
-                    playStates.getPlayer().gainExp(20);
-                }
-                return;
-            }
-        }
+    	for (DemonBoss demonBoss : demonBosses) {
+    	    if (demonBoss.isActive() && attackBox.intersects(demonBoss.getHitBox())) {
+    	        
+    	        int kbDir = (player != null && player.getHitbox().x < demonBoss.getHitBox().x) ? 1 : -1;
+    	        boolean isCharge = (player != null) && player.isChargeAttack();
+    	        
+    	        demonBoss.hurt(damage, kbDir, isCharge);
+    	        
+    	        if (demonBoss.getCurrentHealth() <= 0 || demonBoss.isDead()) {
+    	            playStates.getPlayer().gainExp(100);
+    	            
+    	            // spawn item
+    	            playStates.getObjectManager().spawnEquipment(
+    	                (int) demonBoss.getHitBox().x, 
+    	                (int) demonBoss.getHitBox().y
+    	            );
+    	        }
+    	        
+    	
+    	    }
+    	}
         
         // 2. Cek DemonBoss
         for (DemonBoss demonBoss : demonBosses) {
