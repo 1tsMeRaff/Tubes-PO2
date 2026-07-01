@@ -25,13 +25,21 @@ public class AudioPlayer {
 	public static int ATTACK_ONE = 4;
 	public static int ATTACK_TWO = 5;
 	public static int ATTACK_THREE = 6;
-
+	public static int POTION = 7; 
+	public static int SLASH_SOUND = 8;
+	
 	private Clip[] songs, effects;
 	private int currentSongId;
 	private float volume = 0.8f;
 	private boolean songMute, effectMute;
 	private Random rand = new Random();
 
+	
+
+	public static int ATTACK_SOUND = 4; 
+	public static int POTION_SOUND = 7; 
+	
+	
 	public AudioPlayer() {
 		loadSongs();
 		loadEffects();
@@ -47,12 +55,13 @@ public class AudioPlayer {
 	}
 
 	private void loadEffects() {
-		String[] names = { "die", "jump", "gameover", "lvlcompleted", "attack1", "attack2", "attack3" };
-		effects = new Clip[names.length];
-		for (int i = 0; i < effects.length; i++) {
-			effects[i] = getClip(names[i]);
-		}
-		updateEffectsVolume();
+        String[] names = { "die", "jump", "gameover", "lvlcompleted", "attack1", "attack2", "attack3", "potion", "slash" };
+        effects = new Clip[names.length]; 
+        
+        for (int i = 0; i < effects.length; i++) {
+            effects[i] = getClip(names[i]);
+        }
+        updateEffectsVolume();
 	}
 
 	private Clip getClip(String name) {

@@ -151,4 +151,8 @@ public class GameCore implements Runnable {
 	public audio.AudioPlayer getAudioPlayer() {
 		return audioPlayer;
 	}
+	
+	public GameFrame getGameFrame() {
+		return gameFrame;
+	}
 }

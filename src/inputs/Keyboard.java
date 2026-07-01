@@ -47,11 +47,11 @@ public class Keyboard implements KeyListener {
 		case PLAYING:
 			gamePanel.getGame().getPlay().keyPressed(e);
 			break;
-		default: 
-			break;
 		case OPTIONS:
 	        gamePanel.getGame().getGameOptions().keyPressed(e);
 	        break;
+		default: 
+			break;  
 		}
 		
 	}

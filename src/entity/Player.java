@@ -10,13 +10,13 @@ import gameStates.PlayStates;
 import main.GameCore;
 import utilitytools.LoadSave;
 import objects.GameContainer;
+import objects.Potion;
 
 import static utilitytools.Konstanta.KonstantaPlayerRight.*;
 import static utilitytools.HelpMethods.*;
 
 public class Player extends Entity {
 
-    // --- SISTEM LEVEL & STATUS BARU ---
     private int level = 1;
     private int exp = 0;
     private int maxExp = 100;
@@ -46,7 +46,7 @@ public class Player extends Entity {
     // Dash
     private boolean dashing = false;
     private boolean canDash = true;
-    private int dashDuration = 30;
+    private int dashDuration = 18; 
     private int dashTick = 0;
     private int dashCooldown = 30;
     private int dashCooldownTick = 0;
@@ -73,7 +73,7 @@ public class Player extends Entity {
     private float knockbackFriction = 0.15f * GameCore.SCALE;
     private boolean isKnockedDown = false;
 
-    // UI Status Bar
+    // UI Status Bar (Health & Mana)
     private BufferedImage statusBarImg;
     private int statusBarWidth = (int) (164 * GameCore.SCALE);
     private int statusBarHeight = (int) (36 * GameCore.SCALE);
@@ -98,10 +98,11 @@ public class Player extends Entity {
 
     // Inventory
     public ArrayList<Integer> inventory = new ArrayList<>();
-    public final int maxInventorySize = 20;
+    public final int maxInventorySize = 24;
+    
 
-    // Sistem Defense
-    private int baseDefense = 50;
+    // Sistem Defense & Equipment
+    private int baseDefense = 5;
     private int totalDefense = baseDefense;
     private int equippedHelmet = -1; 
     private int equippedArmor = -1;  
@@ -152,7 +153,7 @@ public class Player extends Entity {
             playStates.setGameOver(true);
             return;
         }
-       
+
         checkChasm();
         updateAttackBox();
         updatePos();
@@ -160,6 +161,7 @@ public class Player extends Entity {
         
         if (attacking) {
             checkAttack();
+            
         }
         if (charging) {
             chargeTick++;
@@ -175,9 +177,15 @@ public class Player extends Entity {
         updateAnimationTick();
     }
 
+
     private void checkChasm() {
         if (hitBox.y + hitBox.height >= main.GameCore.GAME_HEIGHT - 5) {
             if (currentHealth > 0) {
+                
+   //damage yang di terima
+                changeHealth(-20); 
+                
+         
                 hitBox.x = lastSafeX;
                 hitBox.y = lastSafeY - 15; 
                 inAir = true; 
@@ -187,7 +195,6 @@ public class Player extends Entity {
             }
         }
     }
-
     private void updateHealthBar() {
         healthWidth = (int) ((currentHealth / (float) maxHealth) * healthBarWidth);
     }
@@ -219,15 +226,44 @@ public class Player extends Entity {
         }
     }
 
-    public void addItemToInventory(int objType) {
+    public boolean addItemToInventory(int objType) {
         if (inventory.size() < maxInventorySize) {
             inventory.add(objType);
             System.out.println("Item masuk tas. Tipe ID: " + objType);
+            return true; // Berhasil masuk tas
         } else {
-            System.out.println("Penyimpanan Penuh!");
+            System.out.println("Penyimpanan Penuh! Tidak bisa mengambil barang.");
+            return false; // Tas penuh, gagal mengambil
         }
     }
 
+    // melepaskan armor dan mengembalikannya ke tas
+    public void unequipItem(int equipSlotIndex) {
+        if (inventory.size() >= maxInventorySize) {
+            System.out.println("Tas penuh, tidak bisa melepas perlengkapan!");
+            return; // Batalkan jika tas penuh
+        }
+        
+        int itemToReturn = -1;
+        
+        // Cek slot mana yang mau dilepas (0 sampai 5)
+        switch (equipSlotIndex) {
+            case 0: itemToReturn = equippedHelmet; equippedHelmet = -1; break;
+            case 1: itemToReturn = equippedArmor; equippedArmor = -1; break;
+            case 2: itemToReturn = equippedShoes; equippedShoes = -1; break;
+            case 3: itemToReturn = equippedAcc1; equippedAcc1 = -1; break;
+            case 4: itemToReturn = equippedAcc2; equippedAcc2 = -1; break;
+            case 5: itemToReturn = equippedGloves; equippedGloves = -1; break;
+        }
+        
+        if (itemToReturn != -1) {
+            inventory.add(itemToReturn); // Masukkan lagi ke tas
+            calculateDefense(); // Hitung ulang pertahanan 
+            System.out.println("Perlengkapan dilepas!");
+        }
+    }
+    
+    // Memisahkan logika potion (useItem) dan equipment (equipItem) yang sebelumnya menyatu
     public void useItem(int itemIndex) {
         if (itemIndex < inventory.size()) {
             int potionType = inventory.get(itemIndex);
@@ -245,10 +281,14 @@ public class Player extends Entity {
             
             if (isRed) {
                 changeHealth(value);
+                System.out.println("Berhasil minum Ramuan Merah! Darah sekarang: " + currentHealth);
             } else {
                 changeMana(value);
+                System.out.println("Berhasil minum Ramuan Biru! Mana sekarang: " + currentMana);
             }
             inventory.remove(itemIndex);
+        } else {
+            System.out.println("Slot ini kosong!");
         }
     }
 
@@ -276,11 +316,11 @@ public class Player extends Entity {
         if (value < 0) {
             if (isInvincible) return;
             int incomingDamage = Math.abs(value);
-            int finalDamage = Math.max(1, incomingDamage - totalDefense); 
+            int finalDamage = Math.max(1, incomingDamage - totalDefense);
             currentHealth -= finalDamage;
             isInvincible = true;
         } else {
-            currentHealth += value; 
+            currentHealth += value;
         }
         
         if (currentHealth <= 0) {
@@ -299,7 +339,7 @@ public class Player extends Entity {
     private void checkPotionTouched() {
         playStates.checkPotionTouched(hitBox);
     }
-    
+
     private void checkAttack() {
         if (attackCheck) return;
         
@@ -307,12 +347,17 @@ public class Player extends Entity {
         
         if (aniIndex == hitFrame) {
             attackCheck = true;
-            // Gunakan dps asli untuk serang biasa, dps tambahan jika charge attack
             int damageToDeal = isExecutingChargeAttack ? (int)(dps * 2.5) : (int)dps;
             
+
+            int randomAttack = 4 + new java.util.Random().nextInt(3);
+            playStates.getGameCore().getAudioPlayer().playEffect(randomAttack);
+            
+
+
+
             playStates.checkHitEnemy(AttackBox, damageToDeal);
             playStates.checkObjectHit(AttackBox);
-            playStates.getGameCore().getAudioPlayer().playAttackSound();
         }
     }
 
@@ -338,14 +383,16 @@ public class Player extends Entity {
 
     public void render(Graphics g, int xLvlOffset) {
         if (isInvincible && invincibilityTick % 10 < 5) {
+        	// efek berkedip
         } else {
             g.drawImage(animasi[playerAction][aniIndex],
                     (int) (hitBox.x - xDrawOffSet) - xLvlOffset + flipX,
                     (int) (hitBox.y - yDrawOffSet),
                     width * flipW, height, null);
         }
-        drawAttackBox(g, xLvlOffset);
-        drawHitbox(g);
+        
+        // drawAttackBox(g, xLvlOffset);
+        // drawHitbox(g);
         drawUI(g);
     }
 
@@ -386,7 +433,7 @@ public class Player extends Entity {
                     if (!inAir) {
                         playerAction = ARISE;
                     } else {
-                        aniIndex = GetSpriteAmount(DOWN) - 1; 
+                        aniIndex = GetSpriteAmount(DOWN) - 1;
                     }
                 } else if (playerAction == ARISE) {
                     isKnockedDown = false;
@@ -398,23 +445,36 @@ public class Player extends Entity {
     private void setAnimation() {
         int startAni = playerAction;
         
-        if (isKnockedDown) return;
+        if (isKnockedDown) {
+            return;
+        }
         
-        if (moving) playerAction = LARI;
-        else playerAction = IDLE_ACTIVE;
+        if (moving) {
+            playerAction = LARI;
+        } else {
+            playerAction = IDLE_ACTIVE;
+        }
         
         if (inAir) {
-            if (airSpeed < 0) playerAction = LOMPAT;
-            else playerAction = JATUH;
+            if (airSpeed < 0) {
+                playerAction = LOMPAT;
+            } else {
+                playerAction = JATUH;
+            }
         }
         
         if (dashing) {
-            if(!inAir) playerAction = DASH;
-            else playerAction = JATUH;
+            if(!inAir) {
+                playerAction = DASH;
+            } else {
+                playerAction = JATUH;
+            }
         } else if (attacking) {
-            if (isExecutingChargeAttack) playerAction = CHARGE_ATTACK;
-            else playerAction = ATTACK_1;
-            
+            if (isExecutingChargeAttack) {
+                playerAction = CHARGE_ATTACK;
+            } else {
+                playerAction = ATTACK_1;
+            }
             if (startAni != playerAction) {
                 aniIndex = 0;
                 aniTick = 0;
@@ -425,14 +485,16 @@ public class Player extends Entity {
             playerAction = GUARD;
         }
         
-        if (startAni != playerAction) resetAniTick();
+        if (startAni != playerAction) {
+            resetAniTick();
+        }
     }
 
     private void resetAniTick() {
         aniTick = 0;
         aniIndex = 0;
     }
-
+    
     public void setDash(boolean dash) {
         if (dash && canDash && !dashing && !attacking && !charging) {
             this.dashing = true;
@@ -451,7 +513,9 @@ public class Player extends Entity {
         }
         if (this.charging == charging) return;
         this.charging = charging;
-        if (charging) chargeTick = 0;
+        if (charging) {
+            chargeTick = 0;
+        }
     }
 
     public void releaseAttack() {
@@ -464,28 +528,41 @@ public class Player extends Entity {
         }
         attacking = true;
         chargeTick = 0;
+        
+        playStates.getGameCore().getAudioPlayer().playEffect(audio.AudioPlayer.SLASH_SOUND);
     }
 
     private void updatePos() {
         moving = false;
-        if (jump && !charging && !isKnockedDown) jump();
+        if (jump && !charging && !isKnockedDown) {
+            jump();
+        }
 
         float xSpeed = 0;
 
         if (dashing) {
             dashTick++;
-            if (dashTick >= dashDuration) dashing = false;
+            if (dashTick >= dashDuration) {
+                dashing = false;
+            }
         }
 
         if (knockbackSpeed > 0) {
             xSpeed = knockbackSpeed * knockbackDir;
             knockbackSpeed -= 0.15f * GameCore.SCALE;
-            if (knockbackSpeed < 0) knockbackSpeed = 0;
+            if (knockbackSpeed < 0) {
+            	knockbackSpeed = 0;
+            }
         } else if (dashing) {
-            if (flipW == 1) xSpeed = dashSpeed;
-            else xSpeed = -dashSpeed;
+            airSpeed = 0;
+            if (flipW == 1) {
+            	xSpeed = dashSpeed;
+            }
+            else {
+            	xSpeed = -dashSpeed;
+            }
         } else if (!isKnockedDown) {
-            if (!attacking || inAir) {
+            if (!attacking && !isExecutingChargeAttack && !charging) {
                 if (left) {
                     xSpeed -= playerSpeed;
                     flipX = width;
@@ -495,6 +572,10 @@ public class Player extends Entity {
                     xSpeed += playerSpeed;
                     flipX = 0;
                     flipW = 1;
+                }
+            } else {
+                if (inAir && attacking) {
+                    xSpeed = (flipW == 1) ? playerSpeed * 0.4f : -playerSpeed * 0.4f;
                 }
             }
         }
@@ -515,7 +596,9 @@ public class Player extends Entity {
         
         if (inAir) {
             float maxFallSpeed = GameCore.TILES_SIZE - 1.0f; 
-            if (airSpeed > maxFallSpeed) airSpeed = maxFallSpeed;
+            if (airSpeed > maxFallSpeed) {
+                airSpeed = maxFallSpeed;
+            }
             
             Rectangle2D.Float nextYHitbox = new Rectangle2D.Float(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height);
             GameContainer gcY = playStates.getObjectManager().getIntersectingContainer(nextYHitbox);
@@ -557,7 +640,9 @@ public class Player extends Entity {
             }
         }
         
-        if (xSpeed != 0 && !attacking && !charging && !isKnockedDown && !dashing && knockbackSpeed <= 0) moving = true;
+        if (xSpeed != 0 && !attacking && !charging && !isKnockedDown && !dashing && knockbackSpeed <= 0) {
+            moving = true;
+        }
     }
     
     private void jump() {
@@ -589,8 +674,11 @@ public class Player extends Entity {
             hitBox.x += xSpeed;
         } else {
             if (gcX != null) {
-                if (xSpeed > 0) hitBox.x = gcX.getHitbox().x - hitBox.width - 1f;
-                else if (xSpeed < 0) hitBox.x = gcX.getHitbox().x + gcX.getHitbox().width + 1f;
+                if (xSpeed > 0) {
+                    hitBox.x = gcX.getHitbox().x - hitBox.width - 1f;
+                } else if (xSpeed < 0) {
+                    hitBox.x = gcX.getHitbox().x + gcX.getHitbox().width + 1f;
+                }
             } else {
                 hitBox.x = GetEntityPosNextToWall(hitBox, xSpeed);
             }
@@ -608,6 +696,7 @@ public class Player extends Entity {
             playerAction = DOWN;
             aniIndex = 0;
             aniTick = 0;
+            
             knockbackSpeed = 5.0f * GameCore.SCALE;
             airSpeed = -3.5f * GameCore.SCALE;
             inAir = true;
@@ -633,25 +722,41 @@ public class Player extends Entity {
 
     public void loadmapData(int[][] mapData) {
         this.mapData = mapData;
-        if (!IsEntityOnFloor(hitBox, mapData)) inAir = true;
+        if (!IsEntityOnFloor(hitBox, mapData)) {
+            inAir = true;
+        }
     }
 
     public void resetDirBooleans() {
-        left = false; right = false; up = false; down = false;
+        left = false;
+        right = false;
+        up = false;
+        down = false;
     }
 
     public void resetAll(float newX, float newY) {
         resetDirBooleans();
-        inAir = false; canDoubleJump = true; moving = false;
-        attacking = false; isKnockedDown = false; playerAction = IDLE_ACTIVE;
+        inAir = false;
+        canDoubleJump = true;
+        moving = false;
+        attacking = false;
+        isKnockedDown = false;
+        playerAction = IDLE_ACTIVE;
         currentHealth = maxHealth;
-        this.x = newX; this.y = newY; hitBox.x = newX; hitBox.y = newY;
-        if (mapData != null && !IsEntityOnFloor(hitBox, mapData)) inAir = true;
-        if (currentHealth <= 0) currentHealth = 0;
-        else if (currentHealth >= maxHealth) currentHealth = maxHealth;
+        this.x = newX;
+        this.y = newY;
+        hitBox.x = newX;
+        hitBox.y = newY;
+        if (mapData != null && !IsEntityOnFloor(hitBox, mapData)) {
+            inAir = true;
+        }
+        if (currentHealth <= 0) {
+            currentHealth = 0;
+        } else if (currentHealth >= maxHealth) {
+            currentHealth = maxHealth;
+        }
     }
 
-    // --- LOGIKA EXP & LEVEL UP ---
     public void gainExp(int amount) {
         exp += amount;
         System.out.println("Mendapatkan " + amount + " EXP!");
@@ -693,6 +798,7 @@ public class Player extends Entity {
     public void setJump(boolean jump) { this.jump = jump; }
     public java.awt.geom.Rectangle2D.Float getHitbox() { return hitBox; }
 
+    // Equipment Getter untuk UI Inventory
     public int getEquippedHelmet() { return equippedHelmet; }
     public int getEquippedArmor() { return equippedArmor; }
     public int getEquippedGloves() { return equippedGloves; }

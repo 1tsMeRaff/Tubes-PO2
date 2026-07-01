@@ -6,12 +6,16 @@ import static utilitytools.Konstanta.EnemyConstants.*;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+
+import gameStates.PlayStates;
 import main.GameCore;
 
 public class DemonBoss extends Boss {
 
 	private Rectangle2D.Float attackBox;
 	private int attackCooldown = 0;
+	private boolean Active = false;
 	
 	private boolean hp70Triggered = false;
     private boolean hp40Triggered = false;
@@ -50,12 +54,12 @@ public class DemonBoss extends Boss {
 		attackBox = new Rectangle2D.Float(x, y, (int) (70 * GameCore.SCALE), (int) (55 * GameCore.SCALE));
 	}
 
-	public void update(int[][] tilesData, Player player) {
-		updateEffects(tilesData);
-		updateBehaviour(tilesData, player);
-		updateAnimationTick();
-		updateAttackBox();
-	}
+//	public void update(int[][] tilesData, Player player) {
+//		updateEffects(tilesData);
+//		updateBehaviour(tilesData, player);
+//		updateAnimationTick();
+//		updateAttackBox();
+//	}	
 
 	private void updateAttackBox() {
 		attackBox.y = hitBox.y + (10 * GameCore.SCALE);
@@ -85,7 +89,7 @@ public class DemonBoss extends Boss {
 
 		switch(enemyState) {
 		case IDLE:
-			if (isPlayerCloseEnoughForAttack(player) && attackCooldown > 0) {
+			if (isPlayerCloseEnoughForAttack(player) && attackCooldown > 0 && !Active) {
 				turnToPlayer(player);
 			} else {
 				newState(WALK);
@@ -117,6 +121,37 @@ public class DemonBoss extends Boss {
 		case HURT:
 			break;
 		}
+	}
+	
+	@Override
+	public void update(int[][] tilesData, Player player) {
+	    updateEffects(tilesData);
+	    updateBehaviour(tilesData, player);
+	    updateAnimationTick();
+	    updateAttackBox();
+	}
+
+	@Override
+	public void draw(Graphics g, int xLvlOffset, BufferedImage[][] spriteAtlas) {
+	    BufferedImage frame = spriteAtlas[enemyState][aniIndex];
+	    if (frame != null) {
+	        g.drawImage(frame, drawX(), drawY(), DEMON_BOSS_WIDTH * flipW(), DEMON_BOSS_HEIGHT, null);
+	    }
+	}
+
+	@Override
+	public int getExpReward() { return 100; }
+
+	@Override
+	protected void handleHurtEffects(PlayStates playStates) {
+	    if (checkHpThresholdEffect()) {
+	        playStates.triggerHeavyHit(20, 25, 12);
+	    }
+	}
+
+	@Override
+	protected void handleDeathEffects(PlayStates playStates) {
+	    playStates.triggerHeavyHit(45, 120, 8);
 	}
 
 	private boolean isPlayerCloseEnoughForAttack(Player player) {

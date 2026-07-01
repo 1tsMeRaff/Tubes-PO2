@@ -5,6 +5,7 @@ import static utilitytools.Konstanta.EnemyConstants.*;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 
 import main.GameCore;
 
@@ -22,17 +23,40 @@ public class Slime extends Enemy {
 		initAttackBox();
 	}
 	
+	@Override
+	public void update(int[][] tilesData, Player player) {
+	    updateEffects(tilesData);
+	    updateBehaviour(tilesData, player);
+	    updateAnimationTick();
+	    updateAttackBox();
+	}
+
+	@Override
+	public void draw(Graphics g, int xLvlOffset, BufferedImage[][] spriteAtlas) {
+	    int stateIndex = enemyState;
+	    if (stateIndex == MATI) stateIndex = HURT;
+	    if (enemyState == MATI && aniTick % 8 < 4) return;
+
+	    g.drawImage(spriteAtlas[stateIndex][aniIndex],
+	            (int) (hitBox.x - SLIME_DRAWOFFSET_X + flipX()),
+	            (int) (hitBox.y - SLIME_DRAWOFFSET_Y),
+	            SLIME_WIDTH * flipW(), SLIME_HEIGHT, null);
+	}
+
+	@Override
+	public int getExpReward() { return 20; }
+	
 	private void initAttackBox() {
 		AttackBox = new Rectangle2D.Float(x, y, (int) (30 * GameCore.SCALE), (int) (15 * GameCore.SCALE));
 		attackBoxOffSetX = (int) (GameCore.SCALE * 25);
 	}
 
-	public void update(int[][] tilesData, Player player) {
-		updateEffects(tilesData);
-		updateBehaviour(tilesData, player);
-		updateAnimationTick();
-		updateAttackBox();
-	}
+//	public void update(int[][] tilesData, Player player) {
+//		updateEffects(tilesData);
+//		updateBehaviour(tilesData, player);
+//		updateAnimationTick();
+//		updateAttackBox();
+//	}
 	
 	private void updateAttackBox() {
 	    AttackBox.y = hitBox.y;
@@ -88,13 +112,6 @@ public class Slime extends Enemy {
 		g.setColor(Color.red);
 		g.drawRect((int) (AttackBox.x-xLvlOffset), (int) AttackBox.y, (int) AttackBox.width, (int) AttackBox.height);
 	}
-//	public int flipX() {
-//		if (walkDir == LEFT) {
-//			return width;
-//		}else {
-//			return 0;
-//		}
-//	}
 	
 	public int flipW() {
 		if (walkDir == LEFT) {
