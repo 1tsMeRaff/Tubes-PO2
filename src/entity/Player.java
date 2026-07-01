@@ -803,4 +803,16 @@ public class Player extends Entity {
     public int getMaxHealth() { return maxHealth; }
     public int getCurrentMana() { return currentMana; }
     public int getMaxMana() { return maxMana; }
+    
+    public void setLevel(int level) { this.level = level; }
+    public void setExp(int exp) { this.exp = exp; }
+    public void setMaxExp(int maxExp) { this.maxExp = maxExp; }
+    public void setCurrentHealth(int health) { this.currentHealth = health; }
+    public void setCurrentMana(int mana) { this.currentMana = mana; }
+    public void setEquippedHelmet(int id) { this.equippedHelmet = id; }
+    public void setEquippedArmor(int id) { this.equippedArmor = id; }
+    public void setEquippedGloves(int id) { this.equippedGloves = id; }
+    public void setEquippedShoes(int id) { this.equippedShoes = id; }
+    public void setEquippedAcc1(int id) { this.equippedAcc1 = id; }
+    public void setEquippedAcc2(int id) { this.equippedAcc2 = id; }
 }

@@ -62,6 +62,7 @@ public class LoadSave {
 	
 	public static final String PAUSE_CHAIN = "rantai.png";
 	public static final String MAP_KASTIL_TXT = "/map_tileset.txt";
+	public static final String MAP_JUNGLE_TXT = "/jungle_map.txt";
 
 	public static BufferedImage GetSpriteAtlas(String fileName) {
 		BufferedImage image = null;
@@ -178,7 +179,6 @@ public class LoadSave {
 				for (int col = 0; col < numbers.length; col++) {
 					int value = Integer.parseInt(numbers[col].trim());
 					
-					// Mengakomodasi format ID branch dev (200) dan dev-Rafi (2000)
 					if (value == 800) {
 						int xPos = col * GameCore.TILES_SIZE;
 						int yPos = row * GameCore.TILES_SIZE;
@@ -267,7 +267,6 @@ public class LoadSave {
 	            for (int col = 0; col < numbers.length; col++) {
 	                int value = Integer.parseInt(numbers[col].trim());
 
-	                // Kita gunakan angka 802 sebagai ID penanda Blue Golem di file CSV/TXT map
 	                if (value == 802) { 
 	                    int xPos = col * GameCore.TILES_SIZE;
 	                    int yPos = row * GameCore.TILES_SIZE;

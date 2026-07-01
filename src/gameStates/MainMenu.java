@@ -131,7 +131,13 @@ public class MainMenu extends States implements StateMethods {
             if (startHover && startPressed) {
                 isLevelSelectActive = true; 
             } else if (continueHover && continuePressed) {
-                System.out.println("Continue Game...");
+                if (utilitytools.SaveLoadManager.loadGame(gc)) {
+                    GameStates.state = GameStates.PLAYING;
+                    setLevelSelectActive(false);
+                } else {
+                    System.out.println("Gagal memuat save atau file tidak ditemukan!");
+                }
+            } else if (optionsHover && optionsPressed) {
             } else if (optionsHover && optionsPressed) {
                 GameStates.state = GameStates.OPTIONS;
             } else if (exitHover && exitPressed) {
@@ -150,7 +156,6 @@ public class MainMenu extends States implements StateMethods {
         this.isLevelSelectActive = active;
     }
 
-    // --- SEKARANG MENGGUNAKAN gc.getPlay() ---
     public void startSelectedLevel(String mapFilePath, String tilesetName) {
         gc.getPlay().loadSelectedLevel(mapFilePath, tilesetName); 
         GameStates.state = GameStates.PLAYING;

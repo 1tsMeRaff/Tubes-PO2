@@ -85,9 +85,8 @@ public class SelectLevelOverlay {
         isHoveringBack = btnBack.contains(mx, my);
     }
     
-    // METHOD YANG HILANG (Penting agar tidak error)
     public void mousePressed(MouseEvent e) {
-        // Kosongkan saja tidak apa-apa
+        
     }
 
     public void mouseReleased(MouseEvent e) {
