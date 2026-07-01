@@ -15,7 +15,6 @@ public class EnemyManager {
 
     private PlayStates playStates;
     
-    // Menggunakan Map untuk menyimpan sprite atlas semua musuh secara dinamis
     private Map<Integer, BufferedImage[][]> enemySpriteMap = new HashMap<>();
     private ArrayList<Enemy> enemies = new ArrayList<>();
 
@@ -29,12 +28,14 @@ public class EnemyManager {
         enemies.clear();
         enemies.addAll(LoadSave.GetSlimes("/map_tutorial_fix.txt"));
         enemies.addAll(LoadSave.GetDemonBosses("/map_tutorial_fix.txt"));
+        enemies.addAll(LoadSave.GetBlueGolems("/map_tutorial_fix.txt"));
+        enemies.addAll(LoadSave.GetBringers("/map_tutorial_fix.txt"));
+        enemies.addAll(LoadSave.GetSkullwolves("/map_tutorial_fix.txt"));
     }
 
     public void update(int[][] tilesData, Player player) {
         for (Enemy e : enemies) {
             if (e.isActive()) {
-                // Memanggil update() dari masing-masing subclass musuh tanpa instanceof
                 e.update(tilesData, player); 
             }
         }
@@ -48,7 +49,6 @@ public class EnemyManager {
             if (e.isActive()) {
                 BufferedImage[][] atlas = enemySpriteMap.get(e.getEnemyType());
                 if (atlas != null) {
-                    // Tiap musuh bertanggung jawab menggambar dirinya sendiri
                     e.draw(g2, xLvlOffset, atlas); 
                 }
             }
@@ -60,15 +60,14 @@ public class EnemyManager {
     
     private void drawBossUI(Graphics g) {
         for (Enemy e : enemies) {
-            // Cukup cek tipe menggunakan method bawaan Enemy, tidak perlu instanceof
-            if (e.getEnemyType() == DEMON_BOSS && e.isActive()) {
-                int maxWidth = (int) (400 * GameCore.SCALE); 
+            if ((e.getEnemyType() == DEMON_BOSS || e.getEnemyType() == BLUE_GOLEM) && e.isActive()) {
+                int maxWidth = (int) (400 * GameCore.SCALE);
                 int height = (int) (20 * GameCore.SCALE);
                 int xPos = (GameCore.GAME_WIDTH / 2) - (maxWidth / 2);
                 int yPos = (int) (GameCore.GAME_HEIGHT - (40 * GameCore.SCALE));
-                
+
                 float distance = Math.abs(playStates.getPlayer().getHitbox().x - e.getHitBox().x);
-                float healthPercentage = (float) e.getCurrentHealth() / e.getMaxHealth(); // Pastikan getMaxHealth() public di Enemy
+                float healthPercentage = (float) e.getCurrentHealth() / e.getMaxHealth();
                 int currentWidth = (int) (maxWidth * healthPercentage);
 
                 if (currentWidth < 0) currentWidth = 0;
@@ -84,9 +83,11 @@ public class EnemyManager {
                     g.drawRect(xPos, yPos, maxWidth, height);
 
                     g.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, (int)(16 * GameCore.SCALE)));
-                    g.drawString("DEMON BOSS", xPos, yPos - (int)(5 * GameCore.SCALE));
                     
-                    break; // Hanya render UI untuk satu Boss yang aktif
+                    String bossName = (e.getEnemyType() == DEMON_BOSS) ? "DEMON BOSS" : "BLUE GOLEM";
+                    g.drawString(bossName, xPos, yPos - (int)(5 * GameCore.SCALE));
+
+                    break;
                 }
             }
         }
@@ -96,33 +97,27 @@ public class EnemyManager {
         for (Enemy e : enemies) {
             if (e.isActive() && attackBox.intersects(e.getHitBox())) {
                 
-                // 1. Menggunakan Unified Hit System dari branch dev-Rafi
                 e.hit(damage, player, playStates);
 
-                // 2. Menyelamatkan fitur spesifik dari branch dev (Loot, EXP, Screen Shake)
                 if (e.getEnemyType() == DEMON_BOSS) {
                     DemonBoss demonBoss = (DemonBoss) e;
 
-                    // Logika ketika Boss mati
                     if (demonBoss.getCurrentHealth() <= 0 || demonBoss.isDead()) {
                         playStates.getPlayer().gainExp(100);
                         
-                        // Spawn item equipment
                         playStates.getObjectManager().spawnEquipment(
                             (int) demonBoss.getHitBox().x, 
                             (int) demonBoss.getHitBox().y
                         );
                         
-                        // Guncangan besar saat mati
                         playStates.triggerHeavyHit(45, 120, 8); 
                     } 
-                    // Logika ketika HP Boss rendah
                     else if (demonBoss.checkHpThresholdEffect()) {
                         playStates.triggerHeavyHit(20, 25, 12); 
                     }
                 }
                 
-                return; // Keluar dari loop setelah berhasil mengenai 1 musuh
+                return;
             }
         }
     }
@@ -139,7 +134,30 @@ public class EnemyManager {
         }
         enemySpriteMap.put(SLIME, slimeImg);
         
-        // Load Demon Boss
+        BufferedImage[][] skullwolfImg = new BufferedImage[4][7];
+        BufferedImage tempSkullwolf = LoadSave.GetSpriteAtlas(LoadSave.SKULLWOLF_SPRITE);
+        for (int j = 0; j < 4; j++) {
+            for (int i = 0; i < 7; i++) {
+                skullwolfImg[j][i] = tempSkullwolf.getSubimage(
+                    i * SKULLWOLF_WIDTH_DEFAULT, 
+                    j * SKULLWOLF_HEIGHT_DEFAULT,
+                    SKULLWOLF_WIDTH_DEFAULT, 
+                    SKULLWOLF_HEIGHT_DEFAULT
+                );
+            }
+        }
+        enemySpriteMap.put(SKULLWOLF, skullwolfImg);
+        
+        BufferedImage[][] bringerImg = new BufferedImage[8][BRINGER_SPRITE_COLUMNS]; 
+        BufferedImage bringerSheet = LoadSave.GetSpriteAtlas("Bringer_of_Death.png");
+        
+        loadBringerAnimation(bringerImg, bringerSheet, IDLE, 0);
+        loadBringerAnimation(bringerImg, bringerSheet, WALK, 1);
+        loadBringerAnimation(bringerImg, bringerSheet, ATTACK, 2);
+        loadBringerAnimation(bringerImg, bringerSheet, HURT, 3);
+        loadBringerAnimation(bringerImg, bringerSheet, MATI, 4);
+        enemySpriteMap.put(BRINGER_OF_DEATH, bringerImg);       
+        
         BufferedImage[][] demonBossImg = new BufferedImage[6][DEMON_BOSS_SPRITE_COLUMNS];
         BufferedImage demonBossSheet = LoadSave.GetSpriteAtlas(LoadSave.DEMON_BOSS_SPRITE);
         loadDemonBossAnimation(demonBossImg, demonBossSheet, IDLE, 0);
@@ -148,12 +166,43 @@ public class EnemyManager {
         loadDemonBossAnimation(demonBossImg, demonBossSheet, HURT, 3);
         loadDemonBossAnimation(demonBossImg, demonBossSheet, MATI, 4);
         enemySpriteMap.put(DEMON_BOSS, demonBossImg);
+        
+        BufferedImage[][] blueGolemImg = new BufferedImage[6][BLUE_GOLEM_SPRITE_COLUMNS];
+        BufferedImage blueGolemSheet = LoadSave.GetSpriteAtlas(LoadSave.BLUE_GOLEM_SPRITE);
+        loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, IDLE, 3);
+        loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, WALK, 4);
+        loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, ATTACK, 0);
+        loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, HURT, 2);
+        loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, MATI, 1);
+        enemySpriteMap.put(BLUE_GOLEM, blueGolemImg);
     }
     
     private void loadDemonBossAnimation(BufferedImage[][] targetArray, BufferedImage sheet, int targetState, int sourceRow) {
         for (int i = 0; i < GetSpriteAmount(DEMON_BOSS, targetState); i++) {
             targetArray[targetState][i] = sheet.getSubimage(i * DEMON_BOSS_WIDTH_DEFAULT,
                     sourceRow * DEMON_BOSS_HEIGHT_DEFAULT, DEMON_BOSS_WIDTH_DEFAULT, DEMON_BOSS_HEIGHT_DEFAULT);
+        }
+    }
+    
+    private void loadBlueGolemAnimation(BufferedImage[][] targetArray, BufferedImage sheet, int targetState, int sourceRow) {
+        for (int i = 0; i < GetSpriteAmount(BLUE_GOLEM, targetState); i++) {
+            targetArray[targetState][i] = sheet.getSubimage(
+                i * BLUE_GOLEM_WIDTH_DEFAULT,
+                sourceRow * BLUE_GOLEM_HEIGHT_DEFAULT, 
+                BLUE_GOLEM_WIDTH_DEFAULT, 
+                BLUE_GOLEM_HEIGHT_DEFAULT
+            );
+        }
+    }
+    
+    private void loadBringerAnimation(BufferedImage[][] imgArr, BufferedImage sheet, int state, int row) {
+        for (int i = 0; i < imgArr[state].length; i++) {
+            imgArr[state][i] = sheet.getSubimage(
+                i * BRINGER_WIDTH_DEFAULT, 
+                row * BRINGER_HEIGHT_DEFAULT,
+                BRINGER_WIDTH_DEFAULT, 
+                BRINGER_HEIGHT_DEFAULT
+            );
         }
     }
 

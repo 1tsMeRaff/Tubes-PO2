@@ -24,14 +24,13 @@ public abstract class Enemy extends Entity {
 	protected float walkSpeed = 1.16f * GameCore.SCALE;
 	protected int walkDir = LEFT;
 	protected int tileY;
-	protected float attackDistance = GameCore.TILES_SIZE;
+	protected int attackDistance = (int) (GameCore.SCALE * 30);
 	protected int maxHealth;
 	protected int currentHealth;
 	
 	protected boolean active = true;
 	protected boolean attackChecked;
 	
-	// I-Frames & Knockback Musuh
 	protected boolean isInvincible = false;
 	protected int invincibilityTick = 0;
 	protected final int INVINCIBILITY_DURATION = 20;
@@ -224,16 +223,13 @@ public abstract class Enemy extends Entity {
 		}
 	}
 	
-	// Metode Abstrak wajib untuk memisahkan logika spesifik musuh
     public abstract void update(int[][] tilesData, Player player);
     public abstract void draw(Graphics g, int xLvlOffset, BufferedImage[][] spriteAtlas);
     public abstract int getExpReward();
 
-    // Hooks/Metode opsional untuk efek khusus (misal: Boss Screen Shake/Freeze)
     protected void handleHurtEffects(PlayStates playStates) {}
     protected void handleDeathEffects(PlayStates playStates) {}
 
-    // Sistem penerimaan damage yang seragam (Unified Hit System)
     public void hit(int damage, Player player, PlayStates playStates) {
         if (!active || isInvincible) return;
 
@@ -289,15 +285,3 @@ public abstract class Enemy extends Entity {
         return currentHealth;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

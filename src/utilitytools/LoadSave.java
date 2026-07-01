@@ -1,7 +1,11 @@
 package utilitytools;
 
 import entity.Slime;
+import entity.BlueGolem;
+import entity.BringerOfDeath;
 import entity.DemonBoss;
+import entity.Skullwolf;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -19,7 +23,6 @@ public class LoadSave {
 
 	public static final String PLAYER_SPRITE = "player_right.png";
 	public static final String WORLD_SPRITE = "map_jungle_fix.png";
-//	public static final String MAP_TUTORIAL = "map_tutorial.png";
 	public static final String MAP_1_DATA = "map_1_data.png";
 	public static final String MENU_BUTTONS = "map_panel.png";
 	public static final String MENU_BACKGROUND = "bg_feline.png";
@@ -31,22 +34,21 @@ public class LoadSave {
 	
 	public static final String SLIME_SPRITE = "enemy_slime.png";
 	public static final String DEMON_BOSS_SPRITE = "demon_boss_spritesheet.png";
-//	public static final String MENU_BACKGROUND = "MediavelFree.png";
+	public static final String BLUE_GOLEM_SPRITE = "golem_blue.png";
+	public static final String SKULLWOLF_SPRITE = "skullwolf.png";
+	
+	
 	public static final String MENU_BACKGROUND_IMG = "mainn_menu.jpeg";
-//	public static final String PLAY_BACKGROUND_IMG = "Background_0.png";
 	public static final String PLAY_BACKGROUND_IMG = "Background_jungle2.png";
-	// Tambahkan ini di deretan variabel public static final String lainnya
-    public static final String CASTLE_BACKGROUND_IMG = "castle_map.png";
+  public static final String CASTLE_BACKGROUND_IMG = "castle_map.png";
 	public static final String CLOUDS_01 = "awan_01.png";
 	public static final String CLOUDS_02 = "awan_02.png";
 	
 	public static final String STATUS_BAR = "statusbar.png";
 	public static final String MENU_PANEL = "menu_panel.png";
 	
-	// --- ASET UNTUK INVENTORY ---
 	public static final String INVENTORY_BG = "inventory_skill_karakter_panel.png";
-	
-	// --- ASET BARU UNTUK PAUSE MENU ---
+  
 	public static final String PAUSE_TITLE = "pause.png";
 	public static final String PAUSE_MUSIC_TEXT = "music.png";
 	public static final String PAUSE_SE_TEXT = "SE.png";
@@ -58,11 +60,7 @@ public class LoadSave {
 	public static final String PAUSE_RESTART_BTN = "restart_button.png";
 	public static final String PAUSE_MENU_BTN = "menu_button.png";
 	
-	// (Opsional) Jika kamu mau pakai rantainya sebagai hiasan di belakang bel
 	public static final String PAUSE_CHAIN = "rantai.png";
-
-	// --- ASET UNTUK MAP KASTIL (BARU) ---
-	// Gunakan garis miring "/" agar terbaca langsung dari root folder resources
 	public static final String MAP_KASTIL_TXT = "/map_tileset.txt";
 
 	public static BufferedImage GetSpriteAtlas(String fileName) {
@@ -132,14 +130,13 @@ public class LoadSave {
 					continue;
 				}
 				
-				// PENTING: Pembacaan angka di sini menggunakan KOMA (,)
 				String[] numbers = line.split(",");
 				int[] row = new int[numbers.length];
 				
 				for (int col = 0; col < numbers.length; col++) {
 					int value = Integer.parseInt(numbers[col].trim());
-					if (value == 800 || value == 801) {
-						row[col] = -1; // -1 Biasanya untuk mengosongkan tile jika itu entitas musuh
+					if (value == 800 || value == 801 || value == 802 || value == 803 || value == 804) {
+						row[col] = -1;
 					} else {
 						row[col] = value;
 					}
@@ -247,6 +244,130 @@ public class LoadSave {
 		}
 		
 		return list;
+	}
+	
+	public static ArrayList<BlueGolem> GetBlueGolems(String filePath) {
+	    ArrayList<BlueGolem> list = new ArrayList<>();
+	    int[][] tilesData = GetTilesData(filePath);
+
+	    try {
+	        InputStream is = GameCore.class.getResourceAsStream(filePath);
+	        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+
+	        String line;
+	        int row = 0;
+
+	        while ((line = br.readLine()) != null) {
+	            if (line.trim().isEmpty()) {
+	                continue;
+	            }
+
+	            String[] numbers = line.split(",");
+
+	            for (int col = 0; col < numbers.length; col++) {
+	                int value = Integer.parseInt(numbers[col].trim());
+
+	                // Kita gunakan angka 802 sebagai ID penanda Blue Golem di file CSV/TXT map
+	                if (value == 802) { 
+	                    int xPos = col * GameCore.TILES_SIZE;
+	                    int yPos = row * GameCore.TILES_SIZE;
+	                    int groundRow = findGroundRow(row, col, tilesData);
+	                    if (groundRow != -1) {
+	                        yPos = (groundRow * GameCore.TILES_SIZE) - BLUE_GOLEM_HITBOX_HEIGHT;
+	                    }
+
+	                    list.add(new BlueGolem(xPos, yPos));
+	                }
+	            }
+	            row++;
+	        }
+	        br.close();
+
+	    } catch (Exception e) {
+	        System.out.println("Gagal memuat Blue Golem!");
+	        e.printStackTrace();
+	    }
+
+	    return list;
+	}
+	
+	public static ArrayList<BringerOfDeath> GetBringers(String filePath) {
+	    ArrayList<BringerOfDeath> list = new ArrayList<>();
+	    int[][] tilesData = GetTilesData(filePath);
+
+	    try {
+	        InputStream is = GameCore.class.getResourceAsStream(filePath);
+	        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+
+	        String line;
+	        int row = 0;
+
+	        while ((line = br.readLine()) != null) {
+	            if (line.trim().isEmpty()) continue;
+
+	            String[] numbers = line.split(",");
+
+	            for (int col = 0; col < numbers.length; col++) {
+	                int value = Integer.parseInt(numbers[col].trim());
+
+	                if (value == 803) { 
+	                    int xPos = col * GameCore.TILES_SIZE;
+	                    int yPos = row * GameCore.TILES_SIZE;
+	                    int groundRow = findGroundRow(row, col, tilesData);
+	                    
+	                    if (groundRow != -1) {
+	                        yPos = (groundRow * GameCore.TILES_SIZE) - (int)(93 * GameCore.SCALE * 1.5f);
+	                    }
+
+	                    list.add(new BringerOfDeath(xPos, yPos));
+	                }
+	            }
+	            row++;
+	        }
+	        br.close();
+	    } catch (Exception e) {
+	        System.out.println("Gagal memuat Bringer of Death!");
+	        e.printStackTrace();
+	    }
+
+	    return list;
+	}
+	
+	public static ArrayList<Skullwolf> GetSkullwolves(String filePath) {
+	    ArrayList<Skullwolf> list = new ArrayList<>();
+	    int[][] tilesData = GetTilesData(filePath);
+
+	    try {
+	        InputStream is = GameCore.class.getResourceAsStream(filePath);
+	        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+	        String line;
+	        int row = 0;
+
+	        while ((line = br.readLine()) != null) {
+	            if (line.trim().isEmpty()) continue;
+
+	            String[] numbers = line.split(",");
+	            for (int col = 0; col < numbers.length; col++) {
+	                int value = Integer.parseInt(numbers[col].trim());
+
+	                if (value == 804) {
+	                    int xPos = col * GameCore.TILES_SIZE;
+	                    int yPos = row * GameCore.TILES_SIZE;
+	                    int groundRow = findGroundRow(row, col, tilesData);
+	                    if (groundRow != -1) {
+	                        yPos = (groundRow * GameCore.TILES_SIZE) - SKULLWOLF_HITBOX_HEIGHT;
+	                    }
+	                    list.add(new Skullwolf(xPos, yPos));
+	                }
+	            }
+	            row++;
+	        }
+	        br.close();
+	    } catch (Exception e) {
+	        System.out.println("Gagal memuat musuh Skullwolf!");
+	        e.printStackTrace();
+	    }
+	    return list;
 	}
 
 	private static int findGroundRow(int startRow, int col, int[][] tilesData) {
