@@ -44,8 +44,6 @@ public class BlueGolem extends Boss {
         attackBox = new Rectangle2D.Float(x, y, (int) (20 * GameCore.SCALE * golemScale), (int) (50 * GameCore.SCALE * golemScale));
     }
     
-    // PERBAIKAN: Menambahkan parameter xLvlOffset agar kotak debugging 
-    // tetap berada di posisi yang benar saat kamera bergerak
     protected void drawAttackBox(Graphics g, int xLvlOffset) {
         g.setColor(Color.red);
         g.drawRect((int) attackBox.x - xLvlOffset, (int) attackBox.y, (int) attackBox.width, (int) attackBox.height);
@@ -100,10 +98,9 @@ public class BlueGolem extends Boss {
             }
             if (aniIndex == 6 && !attackChecked) {
                 checkHitEnemy(attackBox, player);
-                attackChecked = true; // PERBAIKAN: Set ke true agar tidak Multi-Hit
+                attackChecked = true; 
             }
-            
-            // PERBAIKAN LOGIKA: Kembali ke IDLE setelah animasi serangan selesai
+
             if (aniIndex >= GetSpriteAmount(BLUE_GOLEM, enemyState) - 1) {
                 newState(IDLE);
             }
@@ -123,11 +120,9 @@ public class BlueGolem extends Boss {
 
     @Override
     public void draw(Graphics g, int xLvlOffset, BufferedImage[][] spriteAtlas) {
-        // PERBAIKAN VISUAL 1: Validasi Baris State
         if (enemyState < 0 || enemyState >= spriteAtlas.length) return;
         BufferedImage[] frames = spriteAtlas[enemyState];
         
-        // PERBAIKAN VISUAL 2: Cegah aniIndex out of bounds (Mencegah Menghilang)
         if (aniIndex < 0) {
             aniIndex = 0;
         }
@@ -138,12 +133,11 @@ public class BlueGolem extends Boss {
         // Gambar Sprite
         BufferedImage frame = frames[aniIndex];
         if (frame != null) {
-            // PERBAIKAN VISUAL 3: Tambahkan ` - xLvlOffset` pada drawX()
             g.drawImage(frame, drawX() - xLvlOffset, drawY(), scaledWidth * flipW(), scaledHeight, null);
         }
 
-        drawHitbox(g); 
-        drawAttackBox(g, xLvlOffset); // Diperbarui untuk memakai xLvlOffset
+//        drawHitbox(g); 
+//        drawAttackBox(g, xLvlOffset);
     }
 
     @Override

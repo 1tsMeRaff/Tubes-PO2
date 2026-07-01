@@ -17,21 +17,17 @@ public class BringerOfDeath extends Boss {
     private int attackCooldown = 0;
     private boolean isActive = false; 
     
-    // Trigger efek HP
     private boolean hp50Triggered = false;
     private boolean hp25Triggered = false;
 
-    // Frame asli: 140 x 93
     private static final float BOSS_SCALE = 1.5f; 
     
     private static final int SCALED_WIDTH = (int) (BRINGER_WIDTH_DEFAULT * GameCore.SCALE * BOSS_SCALE);
     private static final int SCALED_HEIGHT = (int) (BRINGER_HEIGHT_DEFAULT * GameCore.SCALE * BOSS_SCALE);
     
-    // Sesuaikan Hitbox agar presisi dengan tubuh sprite
     private static final int SCALED_HITBOX_W = (int) (35 * GameCore.SCALE * BOSS_SCALE);
     private static final int SCALED_HITBOX_H = (int) (50 * GameCore.SCALE * BOSS_SCALE);
     
-    // Offset untuk menjajarkan hitbox dengan gambar sprite
     private static final int SCALED_OFFSET_X = (int) (90 * GameCore.SCALE * BOSS_SCALE);
     private static final int SCALED_OFFSET_Y = (int) (40 * GameCore.SCALE * BOSS_SCALE);
 
@@ -68,14 +64,12 @@ public class BringerOfDeath extends Boss {
         checkOnFloor(tilesData);
         if (inAir) {
             updateInAir(tilesData);
-            // cooldown tetap berjalan meskipun di udara
             if (attackCooldown > 0) {
                 attackCooldown--;
             }
-            return; // tidak melakukan aksi lain saat di udara
+            return;
         }
 
-        // Di lantai, cooldown berkurang
         if (attackCooldown > 0) {
             attackCooldown--;
         }
@@ -97,11 +91,11 @@ public class BringerOfDeath extends Boss {
                     if (Math.random() < 0.3) {
                         newState(BRINGER_SPECIAL);
                         attackCooldown = 180;
-                        attackChecked = false; // reset flag serangan
+                        attackChecked = false;
                     } else {
                         newState(ATTACK);
                         attackCooldown = 100;
-                        attackChecked = false; // reset flag serangan
+                        attackChecked = false;
                     }
                 } else {
                     newState(IDLE);
@@ -141,7 +135,6 @@ public class BringerOfDeath extends Boss {
         float playerCenterX = player.getHitBox().x + (player.getHitBox().width / 2);
         float bossCenterX = hitBox.x + (hitBox.width / 2);
         
-        // DEADZONE: Boss hanya boleh ganti arah jika jarak titik tengah mereka lebih dari 10 piksel
         if (Math.abs(playerCenterX - bossCenterX) > 10 * GameCore.SCALE) {
             if (playerCenterX > bossCenterX) {
                 walkDir = RIGHT;
@@ -161,28 +154,23 @@ public class BringerOfDeath extends Boss {
 
     @Override
     public void draw(Graphics g, int xLvlOffset, BufferedImage[][] spriteAtlas) {
-        // 1. Validasi baris State Atlas
         if (enemyState < 0 || enemyState >= spriteAtlas.length) return;
         BufferedImage[] frames = spriteAtlas[enemyState];
         
-        // 2. ROBUST SAFEGUARD: Cegah aniIndex out of bounds (Penyebab Menghilang)
         if (aniIndex < 0) {
             aniIndex = 0;
         }
         if (aniIndex >= frames.length) {
-            // Daripada return (menghilang), paksa ke frame terakhir atau frame 0
             aniIndex = frames.length - 1; 
         }
         
-        // 3. Gambar Sprite
         BufferedImage frame = frames[aniIndex];
         if (frame != null) {
             g.drawImage(frame, drawX() - xLvlOffset, drawY(), SCALED_WIDTH * flipW(), SCALED_HEIGHT, null);
         }
 
-        // Hitbox dan Attackbox akan selalu digambar untuk kebutuhan debugging
-        drawHitbox(g); 
-        drawAttackBox(g); 
+//        drawHitbox(g); 
+//        drawAttackBox(g); 
     }
 
     @Override
@@ -213,10 +201,8 @@ public class BringerOfDeath extends Boss {
         return xDistance <= attackDistance && yDistance <= GameCore.TILES_SIZE * 3.0f;
     }
 
- // Metode yang sudah diperbaiki untuk mencegah teleport saat flip
     public int flipX() {
         if (walkDir == RIGHT) {
-            // Tambahkan SCALED_HITBOX_W untuk mengkompensasi ruang kosong asimetris
             return (SCALED_OFFSET_X * 2) + SCALED_HITBOX_W;
         } else {
             return 0;

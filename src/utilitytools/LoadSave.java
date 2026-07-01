@@ -4,6 +4,8 @@ import entity.Slime;
 import entity.BlueGolem;
 import entity.BringerOfDeath;
 import entity.DemonBoss;
+import entity.Skullwolf;
+
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -34,6 +36,7 @@ public class LoadSave {
 	public static final String SLIME_SPRITE = "enemy_slime.png";
 	public static final String DEMON_BOSS_SPRITE = "demon_boss_spritesheet.png";
 	public static final String BLUE_GOLEM_SPRITE = "golem_blue.png";
+	public static final String SKULLWOLF_SPRITE = "skullwolf.png";
 	
 	
 //	public static final String MENU_BACKGROUND = "MediavelFree.png";
@@ -135,7 +138,7 @@ public class LoadSave {
 				
 				for (int col = 0; col < numbers.length; col++) {
 					int value = Integer.parseInt(numbers[col].trim());
-					if (value == 800 || value == 801 || value == 802 || value == 803) {
+					if (value == 800 || value == 801 || value == 802 || value == 803 || value == 804) {
 						row[col] = -1;
 					} else {
 						row[col] = value;
@@ -332,6 +335,44 @@ public class LoadSave {
 	        e.printStackTrace();
 	    }
 
+	    return list;
+	}
+	
+	public static ArrayList<Skullwolf> GetSkullwolves(String filePath) {
+	    ArrayList<Skullwolf> list = new ArrayList<>();
+	    int[][] tilesData = GetTilesData(filePath);
+
+	    try {
+	        InputStream is = GameCore.class.getResourceAsStream(filePath);
+	        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+	        String line;
+	        int row = 0;
+
+	        while ((line = br.readLine()) != null) {
+	            if (line.trim().isEmpty()) continue;
+
+	            String[] numbers = line.split(",");
+	            for (int col = 0; col < numbers.length; col++) {
+	                int value = Integer.parseInt(numbers[col].trim());
+
+	                // ID 804 khusus untuk penanda tile Skullwolf di map
+	                if (value == 804) {
+	                    int xPos = col * GameCore.TILES_SIZE;
+	                    int yPos = row * GameCore.TILES_SIZE;
+	                    int groundRow = findGroundRow(row, col, tilesData);
+	                    if (groundRow != -1) {
+	                        yPos = (groundRow * GameCore.TILES_SIZE) - SKULLWOLF_HITBOX_HEIGHT;
+	                    }
+	                    list.add(new Skullwolf(xPos, yPos));
+	                }
+	            }
+	            row++;
+	        }
+	        br.close();
+	    } catch (Exception e) {
+	        System.out.println("Gagal memuat musuh Skullwolf!");
+	        e.printStackTrace();
+	    }
 	    return list;
 	}
 

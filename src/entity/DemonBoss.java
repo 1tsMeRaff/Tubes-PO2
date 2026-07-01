@@ -54,13 +54,6 @@ public class DemonBoss extends Boss {
 		attackBox = new Rectangle2D.Float(x, y, (int) (70 * GameCore.SCALE), (int) (55 * GameCore.SCALE));
 	}
 
-//	public void update(int[][] tilesData, Player player) {
-//		updateEffects(tilesData);
-//		updateBehaviour(tilesData, player);
-//		updateAnimationTick();
-//		updateAttackBox();
-//	}	
-
 	private void updateAttackBox() {
 		attackBox.y = hitBox.y + (10 * GameCore.SCALE);
 		if (walkDir == LEFT) {

@@ -30,12 +30,12 @@ public class EnemyManager {
         enemies.addAll(LoadSave.GetDemonBosses("/map_tutorial_fix.txt"));
         enemies.addAll(LoadSave.GetBlueGolems("/map_tutorial_fix.txt"));
         enemies.addAll(LoadSave.GetBringers("/map_tutorial_fix.txt"));
+        enemies.addAll(LoadSave.GetSkullwolves("/map_tutorial_fix.txt"));
     }
 
     public void update(int[][] tilesData, Player player) {
         for (Enemy e : enemies) {
             if (e.isActive()) {
-                // Memanggil update() dari masing-masing subclass musuh tanpa instanceof
                 e.update(tilesData, player); 
             }
         }
@@ -60,7 +60,6 @@ public class EnemyManager {
     
     private void drawBossUI(Graphics g) {
         for (Enemy e : enemies) {
-            // Kita ubah kondisinya menggunakan OR (||) agar berlaku untuk DEMON_BOSS atau BLUE_GOLEM
             if ((e.getEnemyType() == DEMON_BOSS || e.getEnemyType() == BLUE_GOLEM) && e.isActive()) {
                 int maxWidth = (int) (400 * GameCore.SCALE);
                 int height = (int) (20 * GameCore.SCALE);
@@ -85,7 +84,6 @@ public class EnemyManager {
 
                     g.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, (int)(16 * GameCore.SCALE)));
                     
-                    // Cek nama berdasarkan ID
                     String bossName = (e.getEnemyType() == DEMON_BOSS) ? "DEMON BOSS" : "BLUE GOLEM";
                     g.drawString(bossName, xPos, yPos - (int)(5 * GameCore.SCALE));
 
@@ -99,33 +97,27 @@ public class EnemyManager {
         for (Enemy e : enemies) {
             if (e.isActive() && attackBox.intersects(e.getHitBox())) {
                 
-                // 1. Menggunakan Unified Hit System dari branch dev-Rafi
                 e.hit(damage, player, playStates);
 
-                // 2. Menyelamatkan fitur spesifik dari branch dev (Loot, EXP, Screen Shake)
                 if (e.getEnemyType() == DEMON_BOSS) {
                     DemonBoss demonBoss = (DemonBoss) e;
 
-                    // Logika ketika Boss mati
                     if (demonBoss.getCurrentHealth() <= 0 || demonBoss.isDead()) {
                         playStates.getPlayer().gainExp(100);
                         
-                        // Spawn item equipment
                         playStates.getObjectManager().spawnEquipment(
                             (int) demonBoss.getHitBox().x, 
                             (int) demonBoss.getHitBox().y
                         );
                         
-                        // Guncangan besar saat mati
                         playStates.triggerHeavyHit(45, 120, 8); 
                     } 
-                    // Logika ketika HP Boss rendah
                     else if (demonBoss.checkHpThresholdEffect()) {
                         playStates.triggerHeavyHit(20, 25, 12); 
                     }
                 }
                 
-                return; // Keluar dari loop setelah berhasil mengenai 1 musuh
+                return;
             }
         }
     }
@@ -142,11 +134,23 @@ public class EnemyManager {
         }
         enemySpriteMap.put(SLIME, slimeImg);
         
-        // Letakkan di dalam loadEnemyImages() di EnemyManager
+        BufferedImage[][] skullwolfImg = new BufferedImage[4][7];
+        BufferedImage tempSkullwolf = LoadSave.GetSpriteAtlas(LoadSave.SKULLWOLF_SPRITE);
+        for (int j = 0; j < 4; j++) {
+            for (int i = 0; i < 7; i++) {
+                skullwolfImg[j][i] = tempSkullwolf.getSubimage(
+                    i * SKULLWOLF_WIDTH_DEFAULT, 
+                    j * SKULLWOLF_HEIGHT_DEFAULT,
+                    SKULLWOLF_WIDTH_DEFAULT, 
+                    SKULLWOLF_HEIGHT_DEFAULT
+                );
+            }
+        }
+        enemySpriteMap.put(SKULLWOLF, skullwolfImg);
+        
         BufferedImage[][] bringerImg = new BufferedImage[8][BRINGER_SPRITE_COLUMNS]; 
         BufferedImage bringerSheet = LoadSave.GetSpriteAtlas("Bringer_of_Death.png");
         
-        // UBAH INI: Gunakan fungsi khusus loadBringerAnimation
         loadBringerAnimation(bringerImg, bringerSheet, IDLE, 0);
         loadBringerAnimation(bringerImg, bringerSheet, WALK, 1);
         loadBringerAnimation(bringerImg, bringerSheet, ATTACK, 2);
@@ -154,7 +158,6 @@ public class EnemyManager {
         loadBringerAnimation(bringerImg, bringerSheet, MATI, 4);
         enemySpriteMap.put(BRINGER_OF_DEATH, bringerImg);       
         
-        // Load Demon Boss
         BufferedImage[][] demonBossImg = new BufferedImage[6][DEMON_BOSS_SPRITE_COLUMNS];
         BufferedImage demonBossSheet = LoadSave.GetSpriteAtlas(LoadSave.DEMON_BOSS_SPRITE);
         loadDemonBossAnimation(demonBossImg, demonBossSheet, IDLE, 0);
@@ -164,7 +167,6 @@ public class EnemyManager {
         loadDemonBossAnimation(demonBossImg, demonBossSheet, MATI, 4);
         enemySpriteMap.put(DEMON_BOSS, demonBossImg);
         
-        // --- TAMBAHKAN KODE LOAD BLUE GOLEM DI BAWAH INI ---
         BufferedImage[][] blueGolemImg = new BufferedImage[6][BLUE_GOLEM_SPRITE_COLUMNS];
         BufferedImage blueGolemSheet = LoadSave.GetSpriteAtlas(LoadSave.BLUE_GOLEM_SPRITE);
         loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, IDLE, 3);
@@ -195,7 +197,6 @@ public class EnemyManager {
     
     private void loadBringerAnimation(BufferedImage[][] imgArr, BufferedImage sheet, int state, int row) {
         for (int i = 0; i < imgArr[state].length; i++) {
-            // Menggunakan konstanta ukuran spesifik milik Bringer of Death
             imgArr[state][i] = sheet.getSubimage(
                 i * BRINGER_WIDTH_DEFAULT, 
                 row * BRINGER_HEIGHT_DEFAULT,

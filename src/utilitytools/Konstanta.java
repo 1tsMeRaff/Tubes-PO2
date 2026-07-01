@@ -91,6 +91,7 @@ public class Konstanta {
 		public static final int DEMON_BOSS = 1;
 		public static final int BLUE_GOLEM = 2;
 		public static final int BRINGER_OF_DEATH = 3;
+		public static final int SKULLWOLF = 4;
 		
 		public static final int IDLE = 0;
 		public static final int WALK = 1;
@@ -145,7 +146,21 @@ public class Konstanta {
 	    // Kanvas original sprite
 	    public static final int BRINGER_WIDTH_DEFAULT = 140;
 	    public static final int BRINGER_HEIGHT_DEFAULT = 93;
-	    public static final int BRINGER_SPRITE_COLUMNS = 8;  
+	    public static final int BRINGER_SPRITE_COLUMNS = 8;
+	    
+	 // Definisi Konstanta Skullwolf
+	    public static final int SKULLWOLF_WIDTH_DEFAULT = 64;
+	    public static final int SKULLWOLF_HEIGHT_DEFAULT = 64;
+	    public static final int SKULLWOLF_WIDTH = (int) (SKULLWOLF_WIDTH_DEFAULT * GameCore.SCALE);
+	    public static final int SKULLWOLF_HEIGHT = (int) (SKULLWOLF_HEIGHT_DEFAULT * GameCore.SCALE);
+
+	    // Ukuran hitbox (disesuaikan agar pas di tengah canvas)
+	    public static final int SKULLWOLF_HITBOX_WIDTH = (int) (30 * GameCore.SCALE);
+	    public static final int SKULLWOLF_HITBOX_HEIGHT = (int) (30 * GameCore.SCALE);
+
+	    // Offset render (Jarak koordinat ujung gambar dengan hitbox)
+	    public static final int SKULLWOLF_DRAWOFFSET_X = (int) (17 * GameCore.SCALE);
+	    public static final int SKULLWOLF_DRAWOFFSET_Y = (int) (34 * GameCore.SCALE);
 
 		public static int GetSpriteAmount(int enemy_type, int enemy_state) {
 			switch(enemy_type) {
@@ -185,6 +200,15 @@ public class Konstanta {
 	                case BRINGER_SPELL: return 8;
 	                case BRINGER_SPECIAL: return 8;
 	            }
+			case SKULLWOLF:
+		        // Karena hanya ada 4 baris (sprite), kita memukul rata semuanya ke 7 frame
+		        switch(enemy_state) {
+		            case IDLE: return 6;
+		            case WALK: return 5;
+		            case ATTACK: return 5;
+		            case HURT: return 4; 
+		            case MATI: return 7;
+		        }
 			}
 			return 0;
 		}
@@ -195,6 +219,7 @@ public class Konstanta {
 			case DEMON_BOSS: return 80;
 			case BLUE_GOLEM: return 150;
 			case BRINGER_OF_DEATH: return 200;
+			case SKULLWOLF: return 40;
 			default: return 1;
 			}
 		}
@@ -205,6 +230,7 @@ public class Konstanta {
 			case DEMON_BOSS: return 25;
 			case BLUE_GOLEM: return 40;
 			case BRINGER_OF_DEATH: return 50;
+			case SKULLWOLF: return 15;
 			default: return 0;
 			}
 		}
