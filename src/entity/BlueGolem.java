@@ -31,13 +31,12 @@ public class BlueGolem extends Boss {
     public BlueGolem(float x, float y) {
         super(x, y, BLUE_GOLEM_WIDTH, BLUE_GOLEM_HEIGHT, BLUE_GOLEM);
         
-        // PERBAIKAN Y-AXIS: Mengkompensasi selisih tinggi skala agar tidak tenggelam di tanah
         float adjustedY = y - (scaledHitboxH - BLUE_GOLEM_HITBOX_HEIGHT);
         initHitBox(x, adjustedY, scaledHitboxW, scaledHitboxH);
         initAttackBox();
 
         walkSpeed = 0.55f * GameCore.SCALE;
-        attackDistance = GameCore.TILES_SIZE * 1.5f;
+        attackDistance = (int) (GameCore.TILES_SIZE * 1.5f);
         aniSpeed = 5;
     }
 
@@ -45,9 +44,11 @@ public class BlueGolem extends Boss {
         attackBox = new Rectangle2D.Float(x, y, (int) (20 * GameCore.SCALE * golemScale), (int) (50 * GameCore.SCALE * golemScale));
     }
     
-    protected void drawAttackBox(Graphics g) {
+    // PERBAIKAN: Menambahkan parameter xLvlOffset agar kotak debugging 
+    // tetap berada di posisi yang benar saat kamera bergerak
+    protected void drawAttackBox(Graphics g, int xLvlOffset) {
         g.setColor(Color.red);
-        g.drawRect((int) attackBox.x, (int) attackBox.y, (int) attackBox.width, (int) attackBox.height);
+        g.drawRect((int) attackBox.x - xLvlOffset, (int) attackBox.y, (int) attackBox.width, (int) attackBox.height);
     }
 
     private void updateAttackBox() {
@@ -99,6 +100,12 @@ public class BlueGolem extends Boss {
             }
             if (aniIndex == 6 && !attackChecked) {
                 checkHitEnemy(attackBox, player);
+                attackChecked = true; // PERBAIKAN: Set ke true agar tidak Multi-Hit
+            }
+            
+            // PERBAIKAN LOGIKA: Kembali ke IDLE setelah animasi serangan selesai
+            if (aniIndex >= GetSpriteAmount(BLUE_GOLEM, enemyState) - 1) {
+                newState(IDLE);
             }
             break;
         case HURT:
@@ -116,13 +123,27 @@ public class BlueGolem extends Boss {
 
     @Override
     public void draw(Graphics g, int xLvlOffset, BufferedImage[][] spriteAtlas) {
-        BufferedImage frame = spriteAtlas[enemyState][aniIndex];
+        // PERBAIKAN VISUAL 1: Validasi Baris State
+        if (enemyState < 0 || enemyState >= spriteAtlas.length) return;
+        BufferedImage[] frames = spriteAtlas[enemyState];
+        
+        // PERBAIKAN VISUAL 2: Cegah aniIndex out of bounds (Mencegah Menghilang)
+        if (aniIndex < 0) {
+            aniIndex = 0;
+        }
+        if (aniIndex >= frames.length) {
+            aniIndex = frames.length - 1; 
+        }
+        
+        // Gambar Sprite
+        BufferedImage frame = frames[aniIndex];
         if (frame != null) {
-            g.drawImage(frame, drawX(), drawY(), scaledWidth * flipW(), scaledHeight, null);
+            // PERBAIKAN VISUAL 3: Tambahkan ` - xLvlOffset` pada drawX()
+            g.drawImage(frame, drawX() - xLvlOffset, drawY(), scaledWidth * flipW(), scaledHeight, null);
         }
 
         drawHitbox(g); 
-        drawAttackBox(g);
+        drawAttackBox(g, xLvlOffset); // Diperbarui untuk memakai xLvlOffset
     }
 
     @Override

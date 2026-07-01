@@ -27,7 +27,7 @@ public class DemonBoss extends Boss {
         initAttackBox();
 //      walkSpeed = 0.22f * GameCore.SCALE;
         walkSpeed = 0.73f * GameCore.SCALE;
-        attackDistance = GameCore.TILES_SIZE * 2f;
+        attackDistance = (int) (GameCore.TILES_SIZE * 2f);
 //      aniSpeed = 12;
         aniSpeed = 4;
     }

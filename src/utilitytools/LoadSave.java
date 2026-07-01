@@ -2,6 +2,7 @@ package utilitytools;
 
 import entity.Slime;
 import entity.BlueGolem;
+import entity.BringerOfDeath;
 import entity.DemonBoss;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -134,7 +135,7 @@ public class LoadSave {
 				
 				for (int col = 0; col < numbers.length; col++) {
 					int value = Integer.parseInt(numbers[col].trim());
-					if (value == 800 || value == 801 || value == 802) {
+					if (value == 800 || value == 801 || value == 802 || value == 803) {
 						row[col] = -1;
 					} else {
 						row[col] = value;
@@ -284,6 +285,50 @@ public class LoadSave {
 
 	    } catch (Exception e) {
 	        System.out.println("Gagal memuat Blue Golem!");
+	        e.printStackTrace();
+	    }
+
+	    return list;
+	}
+	
+	public static ArrayList<BringerOfDeath> GetBringers(String filePath) {
+	    ArrayList<BringerOfDeath> list = new ArrayList<>();
+	    int[][] tilesData = GetTilesData(filePath);
+
+	    try {
+	        InputStream is = GameCore.class.getResourceAsStream(filePath);
+	        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+
+	        String line;
+	        int row = 0;
+
+	        while ((line = br.readLine()) != null) {
+	            if (line.trim().isEmpty()) continue;
+
+	            String[] numbers = line.split(",");
+
+	            for (int col = 0; col < numbers.length; col++) {
+	                int value = Integer.parseInt(numbers[col].trim());
+
+	                // ID 803 untuk Bringer of Death
+	                if (value == 803) { 
+	                    int xPos = col * GameCore.TILES_SIZE;
+	                    int yPos = row * GameCore.TILES_SIZE;
+	                    int groundRow = findGroundRow(row, col, tilesData);
+	                    
+	                    // Kita menggunakan tinggi default (atau offset) agar kaki bos tidak melayang
+	                    if (groundRow != -1) {
+	                        yPos = (groundRow * GameCore.TILES_SIZE) - (int)(93 * GameCore.SCALE * 1.5f);
+	                    }
+
+	                    list.add(new BringerOfDeath(xPos, yPos));
+	                }
+	            }
+	            row++;
+	        }
+	        br.close();
+	    } catch (Exception e) {
+	        System.out.println("Gagal memuat Bringer of Death!");
 	        e.printStackTrace();
 	    }
 

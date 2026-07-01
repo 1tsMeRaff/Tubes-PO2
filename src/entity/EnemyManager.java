@@ -15,7 +15,6 @@ public class EnemyManager {
 
     private PlayStates playStates;
     
-    // Menggunakan Map untuk menyimpan sprite atlas semua musuh secara dinamis
     private Map<Integer, BufferedImage[][]> enemySpriteMap = new HashMap<>();
     private ArrayList<Enemy> enemies = new ArrayList<>();
 
@@ -30,6 +29,7 @@ public class EnemyManager {
         enemies.addAll(LoadSave.GetSlimes("/map_tutorial_fix.txt"));
         enemies.addAll(LoadSave.GetDemonBosses("/map_tutorial_fix.txt"));
         enemies.addAll(LoadSave.GetBlueGolems("/map_tutorial_fix.txt"));
+        enemies.addAll(LoadSave.GetBringers("/map_tutorial_fix.txt"));
     }
 
     public void update(int[][] tilesData, Player player) {
@@ -142,6 +142,18 @@ public class EnemyManager {
         }
         enemySpriteMap.put(SLIME, slimeImg);
         
+        // Letakkan di dalam loadEnemyImages() di EnemyManager
+        BufferedImage[][] bringerImg = new BufferedImage[8][BRINGER_SPRITE_COLUMNS]; 
+        BufferedImage bringerSheet = LoadSave.GetSpriteAtlas("Bringer_of_Death.png");
+        
+        // UBAH INI: Gunakan fungsi khusus loadBringerAnimation
+        loadBringerAnimation(bringerImg, bringerSheet, IDLE, 0);
+        loadBringerAnimation(bringerImg, bringerSheet, WALK, 1);
+        loadBringerAnimation(bringerImg, bringerSheet, ATTACK, 2);
+        loadBringerAnimation(bringerImg, bringerSheet, HURT, 3);
+        loadBringerAnimation(bringerImg, bringerSheet, MATI, 4);
+        enemySpriteMap.put(BRINGER_OF_DEATH, bringerImg);       
+        
         // Load Demon Boss
         BufferedImage[][] demonBossImg = new BufferedImage[6][DEMON_BOSS_SPRITE_COLUMNS];
         BufferedImage demonBossSheet = LoadSave.GetSpriteAtlas(LoadSave.DEMON_BOSS_SPRITE);
@@ -152,7 +164,7 @@ public class EnemyManager {
         loadDemonBossAnimation(demonBossImg, demonBossSheet, MATI, 4);
         enemySpriteMap.put(DEMON_BOSS, demonBossImg);
         
-     // --- TAMBAHKAN KODE LOAD BLUE GOLEM DI BAWAH INI ---
+        // --- TAMBAHKAN KODE LOAD BLUE GOLEM DI BAWAH INI ---
         BufferedImage[][] blueGolemImg = new BufferedImage[6][BLUE_GOLEM_SPRITE_COLUMNS];
         BufferedImage blueGolemSheet = LoadSave.GetSpriteAtlas(LoadSave.BLUE_GOLEM_SPRITE);
         loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, IDLE, 3);
@@ -177,6 +189,18 @@ public class EnemyManager {
                 sourceRow * BLUE_GOLEM_HEIGHT_DEFAULT, 
                 BLUE_GOLEM_WIDTH_DEFAULT, 
                 BLUE_GOLEM_HEIGHT_DEFAULT
+            );
+        }
+    }
+    
+    private void loadBringerAnimation(BufferedImage[][] imgArr, BufferedImage sheet, int state, int row) {
+        for (int i = 0; i < imgArr[state].length; i++) {
+            // Menggunakan konstanta ukuran spesifik milik Bringer of Death
+            imgArr[state][i] = sheet.getSubimage(
+                i * BRINGER_WIDTH_DEFAULT, 
+                row * BRINGER_HEIGHT_DEFAULT,
+                BRINGER_WIDTH_DEFAULT, 
+                BRINGER_HEIGHT_DEFAULT
             );
         }
     }

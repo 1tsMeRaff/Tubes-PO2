@@ -24,7 +24,10 @@ public abstract class Enemy extends Entity {
 	protected float walkSpeed = 1.16f * GameCore.SCALE;
 	protected int walkDir = LEFT;
 	protected int tileY;
-	protected float attackDistance = GameCore.TILES_SIZE;
+//	protected float attackDistance = GameCore.TILES_SIZE;
+	// Di Enemy.java
+	// Contoh perbaikannya:
+	protected int attackDistance = (int) (GameCore.SCALE * 30);
 	protected int maxHealth;
 	protected int currentHealth;
 	
@@ -289,15 +292,3 @@ public abstract class Enemy extends Entity {
         return currentHealth;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

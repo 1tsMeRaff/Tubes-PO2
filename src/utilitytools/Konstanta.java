@@ -98,6 +98,10 @@ public class Konstanta {
 		public static final int JUMP = 3;
 		public static final int HURT = 4;
 		public static final int MATI = 5;
+		
+		// Tambahkan state baru untuk genap 8 moveset (0-7)
+		public static final int BRINGER_SPELL = 6;
+		public static final int BRINGER_SPECIAL = 7;
 
 		public static final int SLIME_WIDTH_DEFAULT = 80;
 		public static final int SLIME_HEIGHT_DEFAULT = 80;
@@ -138,6 +142,11 @@ public class Konstanta {
 	    public static final int BLUE_GOLEM_DRAWOFFSET_X = (int) (28 * GameCore.SCALE);
 	    public static final int BLUE_GOLEM_DRAWOFFSET_Y = (int) (9 * GameCore.SCALE);
 
+	    // Kanvas original sprite
+	    public static final int BRINGER_WIDTH_DEFAULT = 140;
+	    public static final int BRINGER_HEIGHT_DEFAULT = 93;
+	    public static final int BRINGER_SPRITE_COLUMNS = 8;  
+
 		public static int GetSpriteAmount(int enemy_type, int enemy_state) {
 			switch(enemy_type) {
 			case SLIME:
@@ -164,6 +173,17 @@ public class Konstanta {
 	            case ATTACK: return 11;
 	            case HURT: return 4;
 	            case MATI: return 12;
+	            }	           	            
+			case BRINGER_OF_DEATH:
+	            switch(enemy_state) {
+	                case IDLE: return 8; 
+	                case WALK: return 8;
+	                case ATTACK: return 8;
+	                case HURT: return 8;
+	                case MATI: return 8;
+	                case JUMP: return 8; 
+	                case BRINGER_SPELL: return 8;
+	                case BRINGER_SPECIAL: return 8;
 	            }
 			}
 			return 0;
@@ -174,6 +194,7 @@ public class Konstanta {
 			case SLIME: return 10;
 			case DEMON_BOSS: return 80;
 			case BLUE_GOLEM: return 150;
+			case BRINGER_OF_DEATH: return 200;
 			default: return 1;
 			}
 		}
@@ -183,6 +204,7 @@ public class Konstanta {
 			case SLIME: return 10;
 			case DEMON_BOSS: return 25;
 			case BLUE_GOLEM: return 40;
+			case BRINGER_OF_DEATH: return 50;
 			default: return 0;
 			}
 		}
