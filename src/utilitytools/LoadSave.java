@@ -134,7 +134,7 @@ public class LoadSave {
 				
 				for (int col = 0; col < numbers.length; col++) {
 					int value = Integer.parseInt(numbers[col].trim());
-					if (value == 800 || value == 801) {
+					if (value == 800 || value == 801 || value == 802) {
 						row[col] = -1;
 					} else {
 						row[col] = value;

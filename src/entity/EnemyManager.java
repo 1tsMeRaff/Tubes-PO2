@@ -49,7 +49,6 @@ public class EnemyManager {
             if (e.isActive()) {
                 BufferedImage[][] atlas = enemySpriteMap.get(e.getEnemyType());
                 if (atlas != null) {
-                    // Tiap musuh bertanggung jawab menggambar dirinya sendiri
                     e.draw(g2, xLvlOffset, atlas); 
                 }
             }
@@ -156,11 +155,11 @@ public class EnemyManager {
      // --- TAMBAHKAN KODE LOAD BLUE GOLEM DI BAWAH INI ---
         BufferedImage[][] blueGolemImg = new BufferedImage[6][BLUE_GOLEM_SPRITE_COLUMNS];
         BufferedImage blueGolemSheet = LoadSave.GetSpriteAtlas(LoadSave.BLUE_GOLEM_SPRITE);
-        loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, IDLE, 0);
-        loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, WALK, 1);
-        loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, ATTACK, 2);
-        loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, HURT, 3);
-        loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, MATI, 4);
+        loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, IDLE, 3);
+        loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, WALK, 4);
+        loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, ATTACK, 0);
+        loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, HURT, 2);
+        loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, MATI, 1);
         enemySpriteMap.put(BLUE_GOLEM, blueGolemImg);
     }
     

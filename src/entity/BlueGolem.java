@@ -16,23 +16,38 @@ public class BlueGolem extends Boss {
     private Rectangle2D.Float attackBox;
     private int attackCooldown = 0;
     private boolean isActive = false;
-
     private boolean hp50Triggered = false;
+
+    // --- PENGATURAN SKALA UKURAN ---
+    private float golemScale = 1.8f; 
+
+    private int scaledWidth = (int) (BLUE_GOLEM_WIDTH * golemScale);
+    private int scaledHeight = (int) (BLUE_GOLEM_HEIGHT * golemScale);
+    private int scaledHitboxW = (int) (BLUE_GOLEM_HITBOX_WIDTH * golemScale);
+    private int scaledHitboxH = (int) (BLUE_GOLEM_HITBOX_HEIGHT * golemScale);
+    private int scaledOffsetX = (int) (BLUE_GOLEM_DRAWOFFSET_X * golemScale);
+    private int scaledOffsetY = (int) (BLUE_GOLEM_DRAWOFFSET_Y * golemScale);
 
     public BlueGolem(float x, float y) {
         super(x, y, BLUE_GOLEM_WIDTH, BLUE_GOLEM_HEIGHT, BLUE_GOLEM);
         
-        // Inisialisasi Hitbox (sesuaikan ukurannya nanti jika kurang pas)
-        initHitBox(x, y, BLUE_GOLEM_HITBOX_WIDTH, BLUE_GOLEM_HITBOX_HEIGHT);
+        // PERBAIKAN Y-AXIS: Mengkompensasi selisih tinggi skala agar tidak tenggelam di tanah
+        float adjustedY = y - (scaledHitboxH - BLUE_GOLEM_HITBOX_HEIGHT);
+        initHitBox(x, adjustedY, scaledHitboxW, scaledHitboxH);
         initAttackBox();
 
-        walkSpeed = 0.55f * GameCore.SCALE; // Golem biasanya bergerak lebih lambat
+        walkSpeed = 0.55f * GameCore.SCALE;
         attackDistance = GameCore.TILES_SIZE * 1.5f;
         aniSpeed = 5;
     }
 
     private void initAttackBox() {
-        attackBox = new Rectangle2D.Float(x, y, (int) (60 * GameCore.SCALE), (int) (50 * GameCore.SCALE));
+        attackBox = new Rectangle2D.Float(x, y, (int) (20 * GameCore.SCALE * golemScale), (int) (50 * GameCore.SCALE * golemScale));
+    }
+    
+    protected void drawAttackBox(Graphics g) {
+        g.setColor(Color.red);
+        g.drawRect((int) attackBox.x, (int) attackBox.y, (int) attackBox.width, (int) attackBox.height);
     }
 
     private void updateAttackBox() {
@@ -70,7 +85,7 @@ public class BlueGolem extends Boss {
             if (isPlayerCloseEnoughForAttack(player)) {
                 if (attackCooldown <= 0) {
                     newState(ATTACK);
-                    attackCooldown = 120; // Cooldown serangan lebih lama dari Demon Boss
+                    attackCooldown = 120;
                 } else {
                     newState(IDLE);
                 }
@@ -82,7 +97,6 @@ public class BlueGolem extends Boss {
             if (aniIndex == 0) {
                 attackChecked = false;
             }
-            // Sesuaikan frame keberapa pukulan golem mengenai player (misal frame ke-6)
             if (aniIndex == 6 && !attackChecked) {
                 checkHitEnemy(attackBox, player);
             }
@@ -104,12 +118,15 @@ public class BlueGolem extends Boss {
     public void draw(Graphics g, int xLvlOffset, BufferedImage[][] spriteAtlas) {
         BufferedImage frame = spriteAtlas[enemyState][aniIndex];
         if (frame != null) {
-            g.drawImage(frame, drawX(), drawY(), BLUE_GOLEM_WIDTH * flipW(), BLUE_GOLEM_HEIGHT, null);
+            g.drawImage(frame, drawX(), drawY(), scaledWidth * flipW(), scaledHeight, null);
         }
+
+        drawHitbox(g); 
+        drawAttackBox(g);
     }
 
     @Override
-    public int getExpReward() { return 150; } // EXP lebih besar
+    public int getExpReward() { return 150; } 
 
     @Override
     protected void handleHurtEffects(PlayStates playStates) {
@@ -122,7 +139,7 @@ public class BlueGolem extends Boss {
 
     @Override
     protected void handleDeathEffects(PlayStates playStates) {
-        playStates.triggerHeavyHit(50, 150, 10); // Efek mati bergetar kuat
+        playStates.triggerHeavyHit(50, 150, 10);
     }
 
     private boolean isPlayerCloseEnoughForAttack(Player player) {
@@ -132,24 +149,24 @@ public class BlueGolem extends Boss {
     }
 
     public int flipX() {
-        if (walkDir == RIGHT) {
-            return BLUE_GOLEM_WIDTH;
+        if (walkDir == LEFT) {
+            return (scaledOffsetX * 2) + scaledHitboxW;
         }
         return 0;
     }
 
     public int flipW() {
-        if (walkDir == RIGHT ) {
-            return -1;
+        if (walkDir == LEFT) {
+            return -1; 
         }
         return 1;
     }
 
     public int drawX() {
-        return (int) (hitBox.x - BLUE_GOLEM_DRAWOFFSET_X + flipX());
+        return (int) (hitBox.x - scaledOffsetX + flipX());
     }
 
     public int drawY() {
-        return (int) (hitBox.y - BLUE_GOLEM_DRAWOFFSET_Y);
+        return (int) (hitBox.y - scaledOffsetY);
     }
 }

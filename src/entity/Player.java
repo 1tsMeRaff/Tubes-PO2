@@ -10,7 +10,6 @@ import gameStates.PlayStates;
 import main.GameCore;
 import utilitytools.LoadSave;
 import objects.GameContainer;
-import objects.Potion;
 
 import static utilitytools.Konstanta.KonstantaPlayerRight.*;
 import static utilitytools.HelpMethods.*;
@@ -394,11 +393,6 @@ public class Player extends Entity {
         // drawAttackBox(g, xLvlOffset);
         // drawHitbox(g);
         drawUI(g);
-    }
-
-    private void drawAttackBox(Graphics g, int xLvlOffset) {
-        g.setColor(Color.red);
-        g.drawRect((int) (AttackBox.x) - xLvlOffset, (int) AttackBox.y, (int) (AttackBox.width), (int) (AttackBox.height));
     }
     
     private void drawUI(Graphics g) {
