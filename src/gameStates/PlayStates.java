@@ -307,6 +307,10 @@ public class PlayStates extends States implements StateMethods {
             }
             return;
         }
+        if (e.getKeyCode() == KeyEvent.VK_F5) {
+            utilitytools.SaveLoadManager.saveGame(this);
+            return;
+        }
         if (inventoryOpen) return; 
         if (paused) return;
         
@@ -364,6 +368,20 @@ public class PlayStates extends States implements StateMethods {
     
     public boolean isBossEncountered() {
         return isBossEncountered;
+    }
+    
+    public WorldManager getWorldManager() { return worldManager; }
+
+    public void loadWorldByIndex(int index) {
+        worldManager.setWorldIndex(index);
+        int[][] currentMapData = worldManager.getCurrentMap().getWorldData();
+        
+        player.loadmapData(currentMapData);
+        objectManager = new ObjectManager(this);
+        objectManager.loadObjectsFromMap(currentMapData);
+        enemyManager = new EnemyManager(this); 
+        
+        calcLvlOffset();
     }
 
     public void setPaused(boolean paused) { this.paused = paused; }

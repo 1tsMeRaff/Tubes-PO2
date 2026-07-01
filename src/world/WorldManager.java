@@ -16,7 +16,6 @@ public class WorldManager {
 
     public WorldManager(GameCore gc) {
         this.gc = gc;
-        // Load tileset default (Jungle) saat pertama kali game dibuka
         importOutsideSprites(LoadSave.WORLD_SPRITE);
         worlds = new ArrayList<>();
         buildAllWorlds();
@@ -26,12 +25,11 @@ public class WorldManager {
         worlds.add(new World(LoadSave.GetTilesData("/map_tutorial_fix.txt")));
     }
 
-    // --- REVISI: Sekarang menerima nama file gambar tileset agar dinamis ---
     public void loadSpecificWorld(String filePath, String tilesetName) {
         worlds.clear();
         worlds.add(new World(LoadSave.GetTilesData(filePath)));
         worldIndex = 0;
-        importOutsideSprites(tilesetName); // Potong ulang grafis sesuai gambar baru!
+        importOutsideSprites(tilesetName);
     }
 
     private void importOutsideSprites(String tilesetName) {
@@ -98,4 +96,7 @@ public class WorldManager {
     public World getCurrentMap() {
         return worlds.get(worldIndex);
     }
+    
+    public int getWorldIndex() { return worldIndex; }
+    public void setWorldIndex(int index) { this.worldIndex = index; }
 }
