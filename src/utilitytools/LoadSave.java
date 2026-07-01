@@ -23,7 +23,6 @@ public class LoadSave {
 
 	public static final String PLAYER_SPRITE = "player_right.png";
 	public static final String WORLD_SPRITE = "map_jungle_fix.png";
-//	public static final String MAP_TUTORIAL = "map_tutorial.png";
 	public static final String MAP_1_DATA = "map_1_data.png";
 	public static final String MENU_BUTTONS = "map_panel.png";
 	public static final String MENU_BACKGROUND = "bg_feline.png";
@@ -39,34 +38,32 @@ public class LoadSave {
 	public static final String SKULLWOLF_SPRITE = "skullwolf.png";
 	
 	
-//	public static final String MENU_BACKGROUND = "MediavelFree.png";
 	public static final String MENU_BACKGROUND_IMG = "mainn_menu.jpeg";
-//	public static final String PLAY_BACKGROUND_IMG = "Background_0.png";
 	public static final String PLAY_BACKGROUND_IMG = "Background_jungle2.png";
+  public static final String CASTLE_BACKGROUND_IMG = "castle_map.png";
 	public static final String CLOUDS_01 = "awan_01.png";
 	public static final String CLOUDS_02 = "awan_02.png";
 	
 	public static final String STATUS_BAR = "statusbar.png";
 	public static final String MENU_PANEL = "menu_panel.png";
-	// --- ASET UNTUK INVENTORY ---
+	
 	public static final String INVENTORY_BG = "inventory_skill_karakter_panel.png";
-	// --- ASET BARU UNTUK PAUSE MENU ---
-    public static final String PAUSE_TITLE = "pause.png";
-    public static final String PAUSE_MUSIC_TEXT = "music.png";
-    public static final String PAUSE_SE_TEXT = "SE.png";
-    public static final String PAUSE_VOL_TEXT = "volume.png";
-    
-    // Tombol-tombol
-    public static final String PAUSE_PAW_BTN = "paw_button.png";
-    public static final String PAUSE_RESUME_BTN = "resume_button.png";
-    public static final String PAUSE_RESTART_BTN = "restart_button.png";
-    public static final String PAUSE_MENU_BTN = "menu_button.png";
-    
-    // (Opsional) Jika kamu mau pakai rantainya sebagai hiasan di belakang bel
-    public static final String PAUSE_CHAIN = "rantai.png";
+  
+	public static final String PAUSE_TITLE = "pause.png";
+	public static final String PAUSE_MUSIC_TEXT = "music.png";
+	public static final String PAUSE_SE_TEXT = "SE.png";
+	public static final String PAUSE_VOL_TEXT = "volume.png";
+	
+	// Tombol-tombol
+	public static final String PAUSE_PAW_BTN = "paw_button.png";
+	public static final String PAUSE_RESUME_BTN = "resume_button.png";
+	public static final String PAUSE_RESTART_BTN = "restart_button.png";
+	public static final String PAUSE_MENU_BTN = "menu_button.png";
+	
+	public static final String PAUSE_CHAIN = "rantai.png";
+	public static final String MAP_KASTIL_TXT = "/map_tileset.txt";
 
 	public static BufferedImage GetSpriteAtlas(String fileName) {
-		
 		BufferedImage image = null;
 		InputStream is = LoadSave.class.getResourceAsStream("/"+ fileName);
 		if (is == null) {
@@ -226,7 +223,7 @@ public class LoadSave {
 				for (int col = 0; col < numbers.length; col++) {
 					int value = Integer.parseInt(numbers[col].trim());
 					
-					if (value == 801) {
+					if (value == 801) { // 801 Adalah ID Demon Boss
 						int xPos = col * GameCore.TILES_SIZE;
 						int yPos = row * GameCore.TILES_SIZE;
 						int groundRow = findGroundRow(row, col, tilesData);
@@ -313,13 +310,11 @@ public class LoadSave {
 	            for (int col = 0; col < numbers.length; col++) {
 	                int value = Integer.parseInt(numbers[col].trim());
 
-	                // ID 803 untuk Bringer of Death
 	                if (value == 803) { 
 	                    int xPos = col * GameCore.TILES_SIZE;
 	                    int yPos = row * GameCore.TILES_SIZE;
 	                    int groundRow = findGroundRow(row, col, tilesData);
 	                    
-	                    // Kita menggunakan tinggi default (atau offset) agar kaki bos tidak melayang
 	                    if (groundRow != -1) {
 	                        yPos = (groundRow * GameCore.TILES_SIZE) - (int)(93 * GameCore.SCALE * 1.5f);
 	                    }
@@ -355,7 +350,6 @@ public class LoadSave {
 	            for (int col = 0; col < numbers.length; col++) {
 	                int value = Integer.parseInt(numbers[col].trim());
 
-	                // ID 804 khusus untuk penanda tile Skullwolf di map
 	                if (value == 804) {
 	                    int xPos = col * GameCore.TILES_SIZE;
 	                    int yPos = row * GameCore.TILES_SIZE;

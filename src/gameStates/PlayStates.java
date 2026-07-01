@@ -3,6 +3,7 @@ package gameStates;
 import entity.DemonBoss;
 import entity.EnemyManager;
 import entity.Player;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
@@ -37,13 +38,11 @@ public class PlayStates extends States implements StateMethods {
     private InventoryOverlay inventoryOverlay;  
     private boolean inventoryOpen = false;
 
-    // Variabel Kamera
     public int xLvlOffset;
     private int leftBorder = (int) (0.2 * GameCore.GAME_WIDTH);
     private int rightBorder = (int) (0.8 * GameCore.GAME_WIDTH);
     private int maxLvlOffsetX;
     
-    // Efek hit boss
     private int hitStopDuration = 0;
     private int shakeDuration = 0;
     private int shakeIntensity = 0;
@@ -81,10 +80,36 @@ public class PlayStates extends States implements StateMethods {
         gameOverOverlay = new GameOverOverlay(this); 
         inventoryOverlay = new InventoryOverlay(this);
     }
+
+    public void loadSelectedLevel(String mapFilePath, String tilesetName) {
+        worldManager.loadSpecificWorld(mapFilePath, tilesetName);
+        int[][] newMapData = worldManager.getCurrentMap().getWorldData();
+        
+        player.loadmapData(newMapData);
+        objectManager = new ObjectManager(this); 
+        objectManager.loadObjectsFromMap(newMapData);
+        enemyManager = new EnemyManager(this); 
+        
+        calcLvlOffset();
+        
+        // PASTIKAN PEMAIN JATUH DARI ATAS AGAR TIDAK NYANGKUT
+        resetAll(200, 400); 
+
+     // --- LOGIKA BACKGROUND BARU ---
+        if(tilesetName.equals("main_tileset.png")) {
+            // SEBELUMNYA backgroundImg = null; (Sekarang kita isi dengan gambar Kastil!)
+            backgroundImg = LoadSave.GetSpriteAtlas(LoadSave.CASTLE_BACKGROUND_IMG);
+        } else {
+            backgroundImg = LoadSave.GetSpriteAtlas(LoadSave.PLAY_BACKGROUND_IMG);
+        }
+    }
     
     private void calcLvlOffset() {
         int mapWidth = worldManager.getCurrentMap().getWorldData()[0].length;
         maxLvlOffsetX = (mapWidth - GameCore.TILES_IN_WIDTH) * GameCore.TILES_SIZE;
+        if (maxLvlOffsetX < 0) {
+            maxLvlOffsetX = 0; 
+        }
     }
 
     private void checkCloseToBorder() {
@@ -100,19 +125,14 @@ public class PlayStates extends States implements StateMethods {
 
         if (xLvlOffset > maxLvlOffsetX) {
             xLvlOffset = maxLvlOffsetX;
-        } else if (xLvlOffset < 0) {
+        }
+        if (xLvlOffset < 0) {
             xLvlOffset = 0;
         }
     }
     
     private void drawClouds(Graphics g) {
-        for (int i = 0; i < 3 ; i++) {
-//            g.drawImage(clouds_01, i * CLOUDS_01_WIDTH - (int)(xLvlOffset * 0.3), (int) (204 * GameCore.SCALE), CLOUDS_01_WIDTH, CLOUDS_01_HEIGHT, null);
-        }
-        
-        for (int i = 0; i < clouds_02Pos.length; i++) {
-//            g.drawImage(clouds_02, CLOUDS_02_WIDTH * 4 * i - (int)(xLvlOffset * 0.7), clouds_02Pos[i], CLOUDS_02_WIDTH, CLOUDS_02_HEIGHT, null);
-        }
+        // Dikosongkan sementara
     }
     
     public void triggerHeavyHit(int freezeFrames, int shakeFrames, int intensity) {
@@ -128,9 +148,9 @@ public class PlayStates extends States implements StateMethods {
         } else if (lvlCompleted) {
             levelCompletedOverlay.update();
         } else if (gameOver) {
-        	
+            
         } else if (inventoryOpen) {
-        	
+            
         } else {
             if (hitStopDuration > 0) {
                 hitStopDuration--;
@@ -144,10 +164,8 @@ public class PlayStates extends States implements StateMethods {
             objectManager.update();
             player.update();
             enemyManager.update(worldManager.getCurrentMap().getWorldData(), player);
-//            checkBossTrigger(100, 50);
             checkCloseToBorder();
             
-            // Cek Transisi Level & Memicu Suara Menang
             int endOfMapX = (worldManager.getCurrentMap().getWorldData()[0].length * GameCore.TILES_SIZE) - 50;
             if (player.getHitbox().x >= endOfMapX) {
                 setLevelCompleted(true);
@@ -169,20 +187,22 @@ public class PlayStates extends States implements StateMethods {
 
         g2.translate(shakeX, shakeY);
 
-//        g.drawImage(backgroundImg, -xLvlOffset, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
-        float geserX = 0.25f;
-        int bgX = (int)(-xLvlOffset * geserX) % GameCore.GAME_WIDTH;
-        g.drawImage(backgroundImg, bgX, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
-        g.drawImage(backgroundImg, bgX + GameCore.GAME_WIDTH, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
+        // --- MENGGAMBAR BACKGROUND DINAMIS ---
+        if (backgroundImg != null) {
+            float geserX = 0.25f;
+            int bgX = (int)(-xLvlOffset * geserX) % GameCore.GAME_WIDTH;
+            g.drawImage(backgroundImg, bgX, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
+            g.drawImage(backgroundImg, bgX + GameCore.GAME_WIDTH, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT, null);
+            drawClouds(g);
+        } else {
+            // Jika masuk Kastil, background jadi warna Biru Dongker Gelap
+            g.setColor(new Color(15, 15, 25));
+            g.fillRect(0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT);
+        }
         
-        drawClouds(g);
         worldManager.draw(g, xLvlOffset);
         objectManager.draw(g, xLvlOffset);
         player.render(g, xLvlOffset);
-        
-//        if (isBossEncountered) {
-//            enemyManager.drawBossUI(g);
-//        }
         enemyManager.draw(g, xLvlOffset);
 
         g2.translate(-shakeX, -shakeY);
@@ -197,55 +217,32 @@ public class PlayStates extends States implements StateMethods {
             inventoryOverlay.draw(g);
         }
     }
-    
-//    private void checkBossTrigger(int targetX, int tolerance) {
-//        if (isBossEncountered) return;
-//
-//        // Pemain hanya perlu melewati garis X tertentu
-//        float playerCenterX = player.getHitbox().x + (player.getHitbox().width / 2);
-//        
-//        // Jika posisi X pemain sudah melewati targetX - tolerance
-//        if (playerCenterX > targetX - tolerance) {
-//            isBossEncountered = true;
-//        }
-//    }
-
 
     public void loadNextLevel() {
         worldManager.loadNextWorld();
         int[][] newMapData = worldManager.getCurrentMap().getWorldData();
-        
         float newX = 200;
         float newY = 200;
-
         resetAll(newX, newY); 
         player.loadmapData(newMapData); 
-        
         objectManager.loadObjectsFromMap(newMapData);
         calcLvlOffset();
-        
         gc.getAudioPlayer().playSong(audio.AudioPlayer.LEVEL_2);
     }
 
-    // FUNGSI JEMBATAN UNTUK INVENTORY OVERLAY
     public void equipPlayerItem(int itemIndex, String slotType) {
         player.equipItem(itemIndex, slotType);
     }
 
-    @Override
-    public void mouseClicked(MouseEvent e) {
-    	
-    }
+    @Override public void mouseClicked(MouseEvent e) {}
 
     @Override
     public void mousePressed(MouseEvent e) {
         if (gameOver) return; 
-
         if (inventoryOpen) {
             inventoryOverlay.mousePressed(e);
             return;
         }
-
         if (paused) {
             pauseOverlay.mousePressed(e);
         } else if (lvlCompleted) {
@@ -270,12 +267,10 @@ public class PlayStates extends States implements StateMethods {
     @Override
     public void mouseMoved(MouseEvent e) {
         if (gameOver) return;
-
         if (inventoryOpen) {
             inventoryOverlay.mouseMoved(e);
             return;
         }
-
         if (paused) {
             pauseOverlay.mouseMoved(e);
         } else if (lvlCompleted) {
@@ -297,17 +292,14 @@ public class PlayStates extends States implements StateMethods {
             return;
         }
         if (lvlCompleted) return;
-        
         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
             paused = !paused;
             return;
         }
-        
         if (e.getKeyCode() == KeyEvent.VK_F11) {
             gc.getGameFrame().toggleFullScreen();
             return;
         }
-        
         if (e.getKeyCode() == KeyEvent.VK_F) {
             inventoryOpen = !inventoryOpen;
             if (inventoryOpen) {
@@ -315,9 +307,7 @@ public class PlayStates extends States implements StateMethods {
             }
             return;
         }
-
         if (inventoryOpen) return; 
-
         if (paused) return;
         
         switch(e.getKeyCode()) {

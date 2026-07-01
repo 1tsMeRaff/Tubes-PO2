@@ -16,7 +16,8 @@ public class WorldManager {
 
     public WorldManager(GameCore gc) {
         this.gc = gc;
-        importOutsideSprites();
+        // Load tileset default (Jungle) saat pertama kali game dibuka
+        importOutsideSprites(LoadSave.WORLD_SPRITE);
         worlds = new ArrayList<>();
         buildAllWorlds();
     }
@@ -25,8 +26,16 @@ public class WorldManager {
         worlds.add(new World(LoadSave.GetTilesData("/map_tutorial_fix.txt")));
     }
 
-    private void importOutsideSprites() {
-        BufferedImage image = LoadSave.GetSpriteAtlas(LoadSave.WORLD_SPRITE);
+    // --- REVISI: Sekarang menerima nama file gambar tileset agar dinamis ---
+    public void loadSpecificWorld(String filePath, String tilesetName) {
+        worlds.clear();
+        worlds.add(new World(LoadSave.GetTilesData(filePath)));
+        worldIndex = 0;
+        importOutsideSprites(tilesetName); // Potong ulang grafis sesuai gambar baru!
+    }
+
+    private void importOutsideSprites(String tilesetName) {
+        BufferedImage image = LoadSave.GetSpriteAtlas(tilesetName);
 
         int tileWidth = 16;
         int tileHeight = 16;
@@ -59,14 +68,11 @@ public class WorldManager {
                 int tiledValue = worldData[j][i];
 
                 if (tiledValue != -1) {
-                    
-                    int spriteIndex = tiledValue;
-
-                    if (isValidTile(spriteIndex)) {
+                    if (isValidTile(tiledValue)) {
                         int xPos = (int) (i * tileSize - xLvlOffset);
                         int yPos = j * tileSize;
                         
-                        g.drawImage(mapSprite[spriteIndex], xPos, yPos, tileSize, tileSize, null);
+                        g.drawImage(mapSprite[tiledValue], xPos, yPos, tileSize, tileSize, null);
                     }
                 }
             }
@@ -74,10 +80,7 @@ public class WorldManager {
     }
 
     private boolean isValidTile(int index) {
-        if (index < 0 || index >= mapSprite.length) {
-            return false;
-        }
-        return true;
+        return index >= 0 && index < mapSprite.length;
     }
 
     public void update() {
@@ -87,7 +90,7 @@ public class WorldManager {
         worldIndex++;
         if (worldIndex >= worlds.size()) {
             worldIndex = 0;
-            System.out.println("Game Tamat! Kembali ke Map 1.");
+            System.out.println("Game Tamat! Kembali ke Menu.");
             gameStates.GameStates.state = gameStates.GameStates.MENU;
         }
     }
