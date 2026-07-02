@@ -50,21 +50,14 @@ public class Slime extends Enemy {
 		AttackBox = new Rectangle2D.Float(x, y, (int) (30 * GameCore.SCALE), (int) (15 * GameCore.SCALE));
 		attackBoxOffSetX = (int) (GameCore.SCALE * 25);
 	}
-
-//	public void update(int[][] tilesData, Player player) {
-//		updateEffects(tilesData);
-//		updateBehaviour(tilesData, player);
-//		updateAnimationTick();
-//		updateAttackBox();
-//	}
 	
 	private void updateAttackBox() {
-	    AttackBox.y = hitBox.y;
-	    if (walkDir == LEFT) {
-	        AttackBox.x = hitBox.x - AttackBox.width;
-	    } else { // RIGHT
-	        AttackBox.x = hitBox.x + hitBox.width;
-	    }
+		AttackBox.y = hitBox.y;
+		if (walkDir == LEFT) {
+			AttackBox.x = hitBox.x - AttackBox.width - attackBoxOffSetX; 
+		} else { // RIGHT
+			AttackBox.x = hitBox.x + hitBox.width + attackBoxOffSetX;
+		}
 	}
 	
 	private void updateBehaviour(int[][] tilesData, Player player) {
@@ -86,14 +79,15 @@ public class Slime extends Enemy {
 				move(tilesData);
 				break;
 			case ATTACK:
-				if(aniIndex == 0) {
-					attackChecked = false;
-				}
-				
-				if(aniIndex == 3 && !attackChecked) {
-					checkHitEnemy(AttackBox ,player);
-				}
-				break;
+			    if (aniIndex == 0) {
+			        attackChecked = false;
+			    }
+			    
+			    if (aniIndex == 3 && !attackChecked) {
+			        updateAttackBox(); 
+			        checkHitEnemy(AttackBox, player);
+			    }
+			    break;
 			case HURT:
 				break;
 			}

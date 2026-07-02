@@ -89,6 +89,9 @@ public class Konstanta {
 	public static class EnemyConstants{
 		public static final int SLIME = 0;
 		public static final int DEMON_BOSS = 1;
+		public static final int BLUE_GOLEM = 2;
+		public static final int BRINGER_OF_DEATH = 3;
+		public static final int SKULLWOLF = 4;
 		
 		public static final int IDLE = 0;
 		public static final int WALK = 1;
@@ -96,13 +99,20 @@ public class Konstanta {
 		public static final int JUMP = 3;
 		public static final int HURT = 4;
 		public static final int MATI = 5;
+		
+		// Tambahkan state baru untuk genap 8 moveset (0-7)
+		public static final int BRINGER_SPELL = 6;
+		public static final int BRINGER_SPECIAL = 7;
 
 		public static final int SLIME_WIDTH_DEFAULT = 80;
 		public static final int SLIME_HEIGHT_DEFAULT = 80;
+		
 		public static final int SLIME_WIDTH = (int) (SLIME_WIDTH_DEFAULT * GameCore.SCALE);
 		public static final int SLIME_HEIGHT = (int) (SLIME_HEIGHT_DEFAULT * GameCore.SCALE);
+		
 		public static final int SLIME_HITBOX_WIDTH = (int) (16 * GameCore.SCALE);
 		public static final int SLIME_HITBOX_HEIGHT = (int) (9 * GameCore.SCALE);
+		
 		public static final int SLIME_DRAWOFFSET_X = (int) (16 * GameCore.SCALE);
 		public static final int SLIME_DRAWOFFSET_Y = (int) (52 * GameCore.SCALE);
 
@@ -118,6 +128,39 @@ public class Konstanta {
 		
 		public static final int DEMON_BOSS_DRAWOFFSET_X = (int) (120 * GameCore.SCALE);
 		public static final int DEMON_BOSS_DRAWOFFSET_Y = (int) (85 * GameCore.SCALE);
+		
+		// --- KONSTANTA BLUE GOLEM ---
+	    public static final int BLUE_GOLEM_WIDTH_DEFAULT = 90;
+	    public static final int BLUE_GOLEM_HEIGHT_DEFAULT = 64;
+	    public static final int BLUE_GOLEM_SPRITE_COLUMNS = 12;
+
+	    public static final int BLUE_GOLEM_WIDTH = (int) (BLUE_GOLEM_WIDTH_DEFAULT * GameCore.SCALE);
+	    public static final int BLUE_GOLEM_HEIGHT = (int) (BLUE_GOLEM_HEIGHT_DEFAULT * GameCore.SCALE);
+
+	    // Sesuaikan nilai hitbox dan offset ini setelah testing agar pas dengan visual
+	    public static final int BLUE_GOLEM_HITBOX_WIDTH = (int) (40 * GameCore.SCALE);
+	    public static final int BLUE_GOLEM_HITBOX_HEIGHT = (int) (55 * GameCore.SCALE);
+	    public static final int BLUE_GOLEM_DRAWOFFSET_X = (int) (28 * GameCore.SCALE);
+	    public static final int BLUE_GOLEM_DRAWOFFSET_Y = (int) (9 * GameCore.SCALE);
+
+	    // Kanvas original sprite
+	    public static final int BRINGER_WIDTH_DEFAULT = 140;
+	    public static final int BRINGER_HEIGHT_DEFAULT = 93;
+	    public static final int BRINGER_SPRITE_COLUMNS = 8;
+	    
+	 // Definisi Konstanta Skullwolf
+	    public static final int SKULLWOLF_WIDTH_DEFAULT = 64;
+	    public static final int SKULLWOLF_HEIGHT_DEFAULT = 64;
+	    public static final int SKULLWOLF_WIDTH = (int) (SKULLWOLF_WIDTH_DEFAULT * GameCore.SCALE);
+	    public static final int SKULLWOLF_HEIGHT = (int) (SKULLWOLF_HEIGHT_DEFAULT * GameCore.SCALE);
+
+	    // Ukuran hitbox (disesuaikan agar pas di tengah canvas)
+	    public static final int SKULLWOLF_HITBOX_WIDTH = (int) (30 * GameCore.SCALE);
+	    public static final int SKULLWOLF_HITBOX_HEIGHT = (int) (30 * GameCore.SCALE);
+
+	    // Offset render (Jarak koordinat ujung gambar dengan hitbox)
+	    public static final int SKULLWOLF_DRAWOFFSET_X = (int) (17 * GameCore.SCALE);
+	    public static final int SKULLWOLF_DRAWOFFSET_Y = (int) (34 * GameCore.SCALE);
 
 		public static int GetSpriteAmount(int enemy_type, int enemy_state) {
 			switch(enemy_type) {
@@ -138,6 +181,34 @@ public class Konstanta {
 				case HURT: return 5;
 				case MATI: return 22;
 				}
+			case BLUE_GOLEM:
+	            switch(enemy_state) {
+	            case IDLE: return 8;
+	            case WALK: return 10;   
+	            case ATTACK: return 11;
+	            case HURT: return 4;
+	            case MATI: return 12;
+	            }	           	            
+			case BRINGER_OF_DEATH:
+	            switch(enemy_state) {
+	                case IDLE: return 8; 
+	                case WALK: return 8;
+	                case ATTACK: return 8;
+	                case HURT: return 8;
+	                case MATI: return 8;
+	                case JUMP: return 8; 
+	                case BRINGER_SPELL: return 8;
+	                case BRINGER_SPECIAL: return 8;
+	            }
+			case SKULLWOLF:
+		        // Karena hanya ada 4 baris (sprite), kita memukul rata semuanya ke 7 frame
+		        switch(enemy_state) {
+		            case IDLE: return 6;
+		            case WALK: return 5;
+		            case ATTACK: return 5;
+		            case HURT: return 4; 
+		            case MATI: return 7;
+		        }
 			}
 			return 0;
 		}
@@ -146,6 +217,9 @@ public class Konstanta {
 			switch(enemy_type) {
 			case SLIME: return 10;
 			case DEMON_BOSS: return 80;
+			case BLUE_GOLEM: return 150;
+			case BRINGER_OF_DEATH: return 200;
+			case SKULLWOLF: return 40;
 			default: return 1;
 			}
 		}
@@ -154,6 +228,9 @@ public class Konstanta {
 			switch(enemy_type) {
 			case SLIME: return 10;
 			case DEMON_BOSS: return 25;
+			case BLUE_GOLEM: return 40;
+			case BRINGER_OF_DEATH: return 50;
+			case SKULLWOLF: return 15;
 			default: return 0;
 			}
 		}

@@ -27,7 +27,7 @@ public class DemonBoss extends Boss {
         initAttackBox();
 //      walkSpeed = 0.22f * GameCore.SCALE;
         walkSpeed = 0.73f * GameCore.SCALE;
-        attackDistance = GameCore.TILES_SIZE * 2f;
+        attackDistance = (int) (GameCore.TILES_SIZE * 2f);
 //      aniSpeed = 12;
         aniSpeed = 4;
     }
@@ -53,13 +53,6 @@ public class DemonBoss extends Boss {
 	private void initAttackBox() {
 		attackBox = new Rectangle2D.Float(x, y, (int) (70 * GameCore.SCALE), (int) (55 * GameCore.SCALE));
 	}
-
-//	public void update(int[][] tilesData, Player player) {
-//		updateEffects(tilesData);
-//		updateBehaviour(tilesData, player);
-//		updateAnimationTick();
-//		updateAttackBox();
-//	}	
 
 	private void updateAttackBox() {
 		attackBox.y = hitBox.y + (10 * GameCore.SCALE);

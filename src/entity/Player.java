@@ -10,7 +10,6 @@ import gameStates.PlayStates;
 import main.GameCore;
 import utilitytools.LoadSave;
 import objects.GameContainer;
-import objects.Potion;
 
 import static utilitytools.Konstanta.KonstantaPlayerRight.*;
 import static utilitytools.HelpMethods.*;
@@ -181,11 +180,7 @@ public class Player extends Entity {
     private void checkChasm() {
         if (hitBox.y + hitBox.height >= main.GameCore.GAME_HEIGHT - 5) {
             if (currentHealth > 0) {
-                
-   //damage yang di terima
-                changeHealth(-20); 
-                
-         
+                changeHealth(-20);
                 hitBox.x = lastSafeX;
                 hitBox.y = lastSafeY - 15; 
                 inAir = true; 
@@ -230,23 +225,21 @@ public class Player extends Entity {
         if (inventory.size() < maxInventorySize) {
             inventory.add(objType);
             System.out.println("Item masuk tas. Tipe ID: " + objType);
-            return true; // Berhasil masuk tas
+            return true;
         } else {
             System.out.println("Penyimpanan Penuh! Tidak bisa mengambil barang.");
-            return false; // Tas penuh, gagal mengambil
+            return false;
         }
     }
 
-    // melepaskan armor dan mengembalikannya ke tas
     public void unequipItem(int equipSlotIndex) {
         if (inventory.size() >= maxInventorySize) {
             System.out.println("Tas penuh, tidak bisa melepas perlengkapan!");
-            return; // Batalkan jika tas penuh
+            return;
         }
         
         int itemToReturn = -1;
         
-        // Cek slot mana yang mau dilepas (0 sampai 5)
         switch (equipSlotIndex) {
             case 0: itemToReturn = equippedHelmet; equippedHelmet = -1; break;
             case 1: itemToReturn = equippedArmor; equippedArmor = -1; break;
@@ -257,13 +250,12 @@ public class Player extends Entity {
         }
         
         if (itemToReturn != -1) {
-            inventory.add(itemToReturn); // Masukkan lagi ke tas
-            calculateDefense(); // Hitung ulang pertahanan 
+            inventory.add(itemToReturn);
+            calculateDefense();
             System.out.println("Perlengkapan dilepas!");
         }
     }
     
-    // Memisahkan logika potion (useItem) dan equipment (equipItem) yang sebelumnya menyatu
     public void useItem(int itemIndex) {
         if (itemIndex < inventory.size()) {
             int potionType = inventory.get(itemIndex);
@@ -383,7 +375,7 @@ public class Player extends Entity {
 
     public void render(Graphics g, int xLvlOffset) {
         if (isInvincible && invincibilityTick % 10 < 5) {
-        	// efek berkedip
+        	
         } else {
             g.drawImage(animasi[playerAction][aniIndex],
                     (int) (hitBox.x - xDrawOffSet) - xLvlOffset + flipX,
@@ -394,11 +386,6 @@ public class Player extends Entity {
         // drawAttackBox(g, xLvlOffset);
         // drawHitbox(g);
         drawUI(g);
-    }
-
-    private void drawAttackBox(Graphics g, int xLvlOffset) {
-        g.setColor(Color.red);
-        g.drawRect((int) (AttackBox.x) - xLvlOffset, (int) AttackBox.y, (int) (AttackBox.width), (int) (AttackBox.height));
     }
     
     private void drawUI(Graphics g) {
@@ -816,4 +803,16 @@ public class Player extends Entity {
     public int getMaxHealth() { return maxHealth; }
     public int getCurrentMana() { return currentMana; }
     public int getMaxMana() { return maxMana; }
+    
+    public void setLevel(int level) { this.level = level; }
+    public void setExp(int exp) { this.exp = exp; }
+    public void setMaxExp(int maxExp) { this.maxExp = maxExp; }
+    public void setCurrentHealth(int health) { this.currentHealth = health; }
+    public void setCurrentMana(int mana) { this.currentMana = mana; }
+    public void setEquippedHelmet(int id) { this.equippedHelmet = id; }
+    public void setEquippedArmor(int id) { this.equippedArmor = id; }
+    public void setEquippedGloves(int id) { this.equippedGloves = id; }
+    public void setEquippedShoes(int id) { this.equippedShoes = id; }
+    public void setEquippedAcc1(int id) { this.equippedAcc1 = id; }
+    public void setEquippedAcc2(int id) { this.equippedAcc2 = id; }
 }
