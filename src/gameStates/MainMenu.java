@@ -165,5 +165,4 @@ public class MainMenu extends States implements StateMethods {
     @Override public void mouseClicked(MouseEvent e) {}
     @Override public void keyPressed(KeyEvent e) { if (e.getKeyCode() == KeyEvent.VK_F11) gc.getGameFrame().toggleFullScreen(); }
     @Override public void keyReleased(KeyEvent e) {}
-    @Override public void triggerHeavyHit(int freezeFrames, int shakeFrames, int intensity) {}
 }

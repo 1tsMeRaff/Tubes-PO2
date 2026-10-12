@@ -8,6 +8,11 @@ import java.awt.RenderingHints;
 
 public class VolumeButton extends PauseButton {
     
+    private static final BasicStroke STROKE_TRACK = new BasicStroke(3f);
+    private static final BasicStroke STROKE_KNOB = new BasicStroke(2f);
+    private static final Color COLOR_GOLD = new Color(240, 190, 90);
+    private static final Color COLOR_GOLD_PRESSED = new Color(200, 150, 50);
+
     private int buttonX, minX, maxX;
     private int sliderWidth;
     
@@ -49,7 +54,7 @@ public class VolumeButton extends PauseButton {
 
         // 1. Gambar Jalur Slider (Background)
         g2.setColor(Color.WHITE);
-        g2.setStroke(new BasicStroke(3f));
+        g2.setStroke(STROKE_TRACK);
         g2.drawRect(x, trackY, sliderWidth, trackHeight);
 
         // 2. Gambar Isi Volume (Warna Emas)
@@ -59,22 +64,22 @@ public class VolumeButton extends PauseButton {
         }
         int fillWidth = (int) (sliderWidth * volumeRatio);
         
-        g2.setColor(new Color(240, 190, 90)); 
+        g2.setColor(COLOR_GOLD); 
         g2.fillRect(x + 2, trackY + 2, Math.max(0, fillWidth - 4), trackHeight - 3);
 
         // 3. Gambar Knob (Pegangan)
         int knobY = y + (height / 2) - (knobHeight / 2);
 
-        Color knobColor = mouseOver ? new Color(240, 190, 90) : Color.WHITE;
+        Color knobColor = mouseOver ? COLOR_GOLD : Color.WHITE;
         if (mousePressed) {
-            knobColor = new Color(200, 150, 50); 
+            knobColor = COLOR_GOLD_PRESSED; 
         }
         
         g2.setColor(knobColor);
         g2.fillRect(buttonX, knobY, knobWidth, knobHeight);
         
         g2.setColor(Color.BLACK);
-        g2.setStroke(new BasicStroke(2f));
+        g2.setStroke(STROKE_KNOB);
         g2.drawRect(buttonX, knobY, knobWidth, knobHeight);
 
         g2.dispose();

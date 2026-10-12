@@ -12,6 +12,7 @@ public class GameCore implements Runnable {
 	private GameFrame gameFrame;
 	private GamePanel gamePanel;
 	private Thread gameThread;
+	private volatile boolean running = false;
 	private final int FPS_SET = 60;
 	private final int UPS_SET = 60;
 	
@@ -47,8 +48,16 @@ public class GameCore implements Runnable {
 	}
 
 	private void startGameLoop() {
+		running = true;
 		gameThread = new Thread(this);
 		gameThread.start();
+	}
+
+	public void stopGame() {
+		running = false;
+		if (audioPlayer != null) {
+			audioPlayer.destroy();
+		}
 	}
 
 	public void update() {
@@ -63,6 +72,7 @@ public class GameCore implements Runnable {
 				gameOptions.update(); // [TAMBAHAN] Memanggil update Options
 				break;
 			case QUIT:
+				stopGame();
 				System.exit(0);
 				break;
 			default:
@@ -102,7 +112,7 @@ public class GameCore implements Runnable {
 	    int updates = 0;
 	    int frames = 0;
 
-	    while (gameThread != null) {
+	    while (running) {
 	        long currentTime = System.nanoTime();
 	        
 	        deltaU += (currentTime - previousTime) / TIME_PER_UPDATE;
@@ -126,6 +136,19 @@ public class GameCore implements Runnable {
 	            System.out.println("FPS: " + frames + " | UPS: " + updates);
 	            frames = 0;
 	            updates = 0;
+	        }
+
+	        try {
+	            double timeToNext = Math.min((1.0 - deltaU) * (TIME_PER_UPDATE / 1000000.0),
+	                                         (1.0 - deltaF) * (TIME_PER_FRAME / 1000000.0));
+	            if (timeToNext > 1.5) {
+	                Thread.sleep((long) (timeToNext - 1));
+	            } else {
+	                Thread.yield();
+	            }
+	        } catch (InterruptedException e) {
+	            Thread.currentThread().interrupt();
+	            break;
 	        }
 	    }
 	}

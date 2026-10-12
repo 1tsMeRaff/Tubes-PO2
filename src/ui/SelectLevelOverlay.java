@@ -18,6 +18,17 @@ public class SelectLevelOverlay {
     private Rectangle btnLevel1, btnLevel2, btnLevel3, btnBack;
     private boolean isHoveringL1, isHoveringL2, isHoveringL3, isHoveringBack;
 
+    private static final Color BG_OVERLAY = new Color(0, 0, 0, 150);
+    private static final Color PANEL_FILL = new Color(50, 30, 15);
+    private static final Color PANEL_BORDER = new Color(139, 69, 19);
+    private static final Color BTN_L1_COLOR = new Color(34, 139, 34);
+    private static final Color BTN_L2_COLOR = new Color(100, 100, 100);
+    private static final Color BTN_L3_COLOR = new Color(105, 105, 105);
+    private static final Color BTN_BACK_COLOR = new Color(200, 50, 50);
+
+    private final Font titleFont = new Font("Arial", Font.BOLD, (int)(25 * GameCore.SCALE));
+    private final Font buttonFont = new Font("Arial", Font.BOLD, (int)(18 * GameCore.SCALE));
+
     public SelectLevelOverlay(MainMenu menu) {
         this.menu = menu;
         initLayout();
@@ -46,22 +57,22 @@ public class SelectLevelOverlay {
 
     public void draw(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
-        g2.setColor(new Color(0, 0, 0, 150));
+        g2.setColor(BG_OVERLAY);
         g2.fillRect(0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT);
 
-        g2.setColor(new Color(50, 30, 15)); 
+        g2.setColor(PANEL_FILL); 
         g2.fillRoundRect(panelX, panelY, panelW, panelH, 30, 30);
-        g2.setColor(new Color(139, 69, 19)); 
+        g2.setColor(PANEL_BORDER); 
         g2.drawRoundRect(panelX, panelY, panelW, panelH, 30, 30);
 
         g2.setColor(Color.WHITE);
-        g2.setFont(new Font("Arial", Font.BOLD, (int)(25 * GameCore.SCALE)));
+        g2.setFont(titleFont);
         g2.drawString("PILIH LEVEL", panelX + panelW/2 - (int)(75 * GameCore.SCALE), panelY + (int)(70 * GameCore.SCALE));
 
-        drawCustomButton(g2, btnLevel1, "1", isHoveringL1, new Color(34, 139, 34)); 
-        drawCustomButton(g2, btnLevel2, "2", isHoveringL2, new Color(100, 100, 100)); 
-        drawCustomButton(g2, btnLevel3, "3", isHoveringL3, new Color(105, 105, 105)); 
-        drawCustomButton(g2, btnBack, "Back", isHoveringBack, new Color(200, 50, 50));
+        drawCustomButton(g2, btnLevel1, "1", isHoveringL1, BTN_L1_COLOR); 
+        drawCustomButton(g2, btnLevel2, "2", isHoveringL2, BTN_L2_COLOR); 
+        drawCustomButton(g2, btnLevel3, "3", isHoveringL3, BTN_L3_COLOR); 
+        drawCustomButton(g2, btnBack, "Back", isHoveringBack, BTN_BACK_COLOR);
     }
 
     private void drawCustomButton(Graphics2D g2, Rectangle bounds, String text, boolean isHovering, Color baseColor) {
@@ -72,7 +83,7 @@ public class SelectLevelOverlay {
         g2.setColor(Color.WHITE); 
         g2.drawRoundRect(bounds.x, bounds.y, bounds.width, bounds.height, 15, 15);
         
-        g2.setFont(new Font("Arial", Font.BOLD, (int)(18 * GameCore.SCALE)));
+        g2.setFont(buttonFont);
         g2.drawString(text, bounds.x + (bounds.width/3), bounds.y + (bounds.height/2) + (int)(6 * GameCore.SCALE));
     }
 

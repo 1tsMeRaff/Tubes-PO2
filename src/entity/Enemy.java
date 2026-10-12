@@ -9,10 +9,10 @@ import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
+import core.interfaces.Damageable;
 import gameStates.PlayStates;
 
-
-public abstract class Enemy extends Entity {
+public abstract class Enemy extends Entity implements Damageable {
 	protected int aniIndex, enemyState;
 	public int enemyType;
 	protected int aniTick;
@@ -283,5 +283,10 @@ public abstract class Enemy extends Entity {
 	
 	public int getCurrentHealth() {
         return currentHealth;
+    }
+
+	@Override
+	public boolean isAlive() {
+        return currentHealth > 0 && active;
     }
 }

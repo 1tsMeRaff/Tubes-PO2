@@ -185,4 +185,9 @@ public class DemonBoss extends Boss {
         hp40Triggered = false;
         hp10Triggered = false;
     }
+
+	@Override
+	public String getBossTitle() {
+		return "DEMON BOSS";
+	}
 }

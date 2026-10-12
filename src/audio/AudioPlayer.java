@@ -12,7 +12,9 @@ import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-public class AudioPlayer {
+import core.interfaces.IAudioService;
+
+public class AudioPlayer implements IAudioService {
 
 	public static int MENU_1 = 0;
 	public static int LEVEL_1 = 1;
@@ -191,6 +193,24 @@ public class AudioPlayer {
 					gain = Math.max(gainControl.getMinimum(), Math.min(gainControl.getMaximum(), gain));
 					
 					gainControl.setValue(gain);
+				}
+			}
+		}
+	}
+
+	public void destroy() {
+		stopSong();
+		if (songs != null) {
+			for (Clip c : songs) {
+				if (c != null && c.isOpen()) {
+					c.close();
+				}
+			}
+		}
+		if (effects != null) {
+			for (Clip c : effects) {
+				if (c != null && c.isOpen()) {
+					c.close();
 				}
 			}
 		}

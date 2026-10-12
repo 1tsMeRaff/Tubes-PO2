@@ -24,6 +24,16 @@ public class InventoryOverlay {
     private int popupX, popupY;
     private java.awt.Rectangle btnGunakan, btnBatal;
 
+    private static final Color BG_OVERLAY = new Color(0, 0, 0, 150);
+    private static final Color TEXT_COLOR = new Color(230, 230, 230);
+    private static final Color POPUP_BG = new Color(50, 30, 20, 240);
+    private static final Color POPUP_BORDER = new Color(240, 190, 90);
+    private static final Color POPUP_LINE = new Color(150, 100, 50);
+    private static final java.awt.BasicStroke POPUP_STROKE = new java.awt.BasicStroke(2);
+
+    private final Font statsFont = new Font("Monospaced", Font.BOLD, (int)(14 * GameCore.SCALE * 0.80f));
+    private final Font popupFont = new Font("Monospaced", Font.BOLD, (int)(11 * GameCore.SCALE * 0.80f));
+
     public InventoryOverlay(PlayStates playing) {
         this.playing = playing;
         loadImages();
@@ -46,16 +56,16 @@ public class InventoryOverlay {
 
     public void draw(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
-        g2.setColor(new Color(0, 0, 0, 150));
+        g2.setColor(BG_OVERLAY);
         g2.fillRect(0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT);
 
         if (bgInventory != null) {
             g2.drawImage(bgInventory, panelX, panelY, panelW, panelH, null);
             
             // --- 1. MENGGAMBAR TEKS ANGKA STATUS ---
-            g2.setColor(new Color(230, 230, 230)); 
+            g2.setColor(TEXT_COLOR); 
             float customScale = 0.80f;
-            g2.setFont(new Font("Monospaced", Font.BOLD, (int)(14 * GameCore.SCALE * customScale)));
+            g2.setFont(statsFont);
 
             int textX = panelX + (int)(225 * GameCore.SCALE * customScale);
             int startY = panelY + (int)(125 * GameCore.SCALE * customScale);
@@ -133,19 +143,19 @@ public class InventoryOverlay {
                 int popH = (int)(40 * GameCore.SCALE * customScale);
                 int btnH = popH / 2;
                 
-                g2.setColor(new Color(50, 30, 20, 240)); 
+                g2.setColor(POPUP_BG); 
                 g2.fillRect(popupX, popupY, popW, popH);
-                g2.setColor(new Color(240, 190, 90)); 
-                g2.setStroke(new java.awt.BasicStroke(2));
+                g2.setColor(POPUP_BORDER); 
+                g2.setStroke(POPUP_STROKE);
                 g2.drawRect(popupX, popupY, popW, popH);
-                g2.setColor(new Color(150, 100, 50));
+                g2.setColor(POPUP_LINE);
                 g2.drawLine(popupX, popupY + btnH, popupX + popW, popupY + btnH);
                 
                 btnGunakan = new java.awt.Rectangle(popupX, popupY, popW, btnH);
                 btnBatal = new java.awt.Rectangle(popupX, popupY + btnH, popW, btnH);
                 
                 g2.setColor(Color.WHITE);
-                g2.setFont(new Font("Monospaced", Font.BOLD, (int)(11 * GameCore.SCALE * customScale)));
+                g2.setFont(popupFont);
                 java.awt.FontMetrics fmPop = g2.getFontMetrics();
                 
                 String txt1 = "Gunakan";

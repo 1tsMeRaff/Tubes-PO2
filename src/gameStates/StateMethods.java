@@ -4,10 +4,15 @@ import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
-public interface StateMethods {
+import core.interfaces.Renderable;
+import core.interfaces.Updatable;
+
+public interface StateMethods extends Updatable, Renderable {
 	
+	@Override
 	public void update();
 	
+	@Override
 	public void draw(Graphics g);
 	
 	public void mouseClicked(MouseEvent e);
@@ -21,7 +26,5 @@ public interface StateMethods {
 	public void keyPressed(KeyEvent e);
 	
 	public void keyReleased(KeyEvent e);
-
-	void triggerHeavyHit(int freezeFrames, int shakeFrames, int intensity);
 
 }

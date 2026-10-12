@@ -10,6 +10,8 @@ import main.GameCore;
 
 public class GameOverOverlay {
 
+	private static final Color OVERLAY_BG = new Color(0, 0, 0, 200);
+
 	private PlayStates playStates;
 
 	public GameOverOverlay(PlayStates playStates) {
@@ -18,7 +20,7 @@ public class GameOverOverlay {
 
 	public void draw(Graphics g) {
 		// Bikin layar jadi gelap transparan
-		g.setColor(new Color(0, 0, 0, 200));
+		g.setColor(OVERLAY_BG);
 		g.fillRect(0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT);
 
 		// Tulisan Game Over sederhana

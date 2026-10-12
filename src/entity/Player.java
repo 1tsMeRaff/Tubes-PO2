@@ -11,15 +11,16 @@ import main.GameCore;
 import utilitytools.LoadSave;
 import objects.GameContainer;
 
+import core.interfaces.Damageable;
+import ui.PlayerHUD;
+
 import static utilitytools.Konstanta.KonstantaPlayerRight.*;
 import static utilitytools.HelpMethods.*;
 
-public class Player extends Entity {
+public class Player extends Entity implements Damageable {
 
-    private int level = 1;
-    private int exp = 0;
-    private int maxExp = 100;
-    private float dps = 5.0f; 
+    private final PlayerStats stats = new PlayerStats();
+    private final PlayerHUD playerHUD = new PlayerHUD(); 
 
     // Animasi & Render
     private BufferedImage[][] animasi;
@@ -62,6 +63,7 @@ public class Player extends Entity {
     private boolean isExecutingChargeAttack = false;
     private boolean attackCheck;
     private Rectangle2D.Float AttackBox;
+    private final Rectangle2D.Float scratchHitbox = new Rectangle2D.Float();
     
     // I-Frames & Knockback
     private boolean isInvincible = false;
@@ -72,37 +74,11 @@ public class Player extends Entity {
     private float knockbackFriction = 0.15f * GameCore.SCALE;
     private boolean isKnockedDown = false;
 
-    // UI Status Bar (Health & Mana)
-    private BufferedImage statusBarImg;
-    private int statusBarWidth = (int) (164 * GameCore.SCALE);
-    private int statusBarHeight = (int) (36 * GameCore.SCALE);
-    private int statusBarX = (int) (10 * GameCore.SCALE);
-    private int statusBarY = (int) (10 * GameCore.SCALE);
-    
-    private int maxHealth = 100;
-    private int currentHealth = maxHealth;
-    private int healthBarWidth = (int) (106 * GameCore.SCALE);
-    private int healthBarHeight = (int) (7 * GameCore.SCALE);
-    private int healthBarXStart = (int) (53 * GameCore.SCALE);
-    private int healthBarYStart = (int) (9 * GameCore.SCALE);
-    private int healthWidth = healthBarWidth;
-    
-    private int maxMana = 100;
-    private int currentMana = maxMana;
-    private int manaBarWidth = (int) (106 * GameCore.SCALE);
-    private int manaBarHeight = (int) (7 * GameCore.SCALE);
-    private int manaBarXStart = (int) (53 * GameCore.SCALE);
-    private int manaBarYStart = (int) (23 * GameCore.SCALE);
-    private int manaWidth = manaBarWidth;
-
     // Inventory
     public ArrayList<Integer> inventory = new ArrayList<>();
     public final int maxInventorySize = 24;
-    
 
-    // Sistem Defense & Equipment
-    private int baseDefense = 5;
-    private int totalDefense = baseDefense;
+    // Sistem Equipment
     private int equippedHelmet = -1; 
     private int equippedArmor = -1;  
     private int equippedGloves = -1; 
@@ -146,9 +122,7 @@ public class Player extends Entity {
             }
         }
         
-        updateHealthBar();
-        updateManaBar();
-        if (currentHealth <= 0) {
+        if (stats.getCurrentHealth() <= 0) {
             playStates.setGameOver(true);
             return;
         }
@@ -179,7 +153,7 @@ public class Player extends Entity {
 
     private void checkChasm() {
         if (hitBox.y + hitBox.height >= main.GameCore.GAME_HEIGHT - 5) {
-            if (currentHealth > 0) {
+            if (stats.getCurrentHealth() > 0) {
                 changeHealth(-20);
                 hitBox.x = lastSafeX;
                 hitBox.y = lastSafeY - 15; 
@@ -190,22 +164,16 @@ public class Player extends Entity {
             }
         }
     }
-    private void updateHealthBar() {
-        healthWidth = (int) ((currentHealth / (float) maxHealth) * healthBarWidth);
-    }
-
-    private void updateManaBar() {
-        manaWidth = (int) ((currentMana / (float) maxMana) * manaBarWidth);
-    }
 
     public void calculateDefense() {
-        totalDefense = baseDefense;
-        totalDefense += getEquipmentDefenseValue(equippedHelmet);
-        totalDefense += getEquipmentDefenseValue(equippedArmor);
-        totalDefense += getEquipmentDefenseValue(equippedGloves);
-        totalDefense += getEquipmentDefenseValue(equippedShoes);
-        totalDefense += getEquipmentDefenseValue(equippedAcc1);
-        totalDefense += getEquipmentDefenseValue(equippedAcc2);
+        int equipDef = 0;
+        equipDef += getEquipmentDefenseValue(equippedHelmet);
+        equipDef += getEquipmentDefenseValue(equippedArmor);
+        equipDef += getEquipmentDefenseValue(equippedGloves);
+        equipDef += getEquipmentDefenseValue(equippedShoes);
+        equipDef += getEquipmentDefenseValue(equippedAcc1);
+        equipDef += getEquipmentDefenseValue(equippedAcc2);
+        stats.recalculateDefense(equipDef);
     }
 
     private int getEquipmentDefenseValue(int itemType) {
@@ -273,10 +241,10 @@ public class Player extends Entity {
             
             if (isRed) {
                 changeHealth(value);
-                System.out.println("Berhasil minum Ramuan Merah! Darah sekarang: " + currentHealth);
+                System.out.println("Berhasil minum Ramuan Merah! Darah sekarang: " + stats.getCurrentHealth());
             } else {
                 changeMana(value);
-                System.out.println("Berhasil minum Ramuan Biru! Mana sekarang: " + currentMana);
+                System.out.println("Berhasil minum Ramuan Biru! Mana sekarang: " + stats.getCurrentMana());
             }
             inventory.remove(itemIndex);
         } else {
@@ -305,27 +273,24 @@ public class Player extends Entity {
     }
 
     public void changeHealth(int value) {
-        if (value < 0) {
-            if (isInvincible) return;
-            int incomingDamage = Math.abs(value);
-            int finalDamage = Math.max(1, incomingDamage - totalDefense);
-            currentHealth -= finalDamage;
+        boolean damaged = stats.changeHealth(value, isInvincible);
+        if (damaged) {
             isInvincible = true;
-        } else {
-            currentHealth += value;
-        }
-        
-        if (currentHealth <= 0) {
-            currentHealth = 0;
-        } else if (currentHealth >= maxHealth) {
-            currentHealth = maxHealth;
         }
     }
 
+    @Override
+    public void hurt(int amount) {
+        changeHealth(-amount);
+    }
+
+    @Override
+    public boolean isAlive() {
+        return stats.getCurrentHealth() > 0;
+    }
+
     public void changeMana(int value) {
-        currentMana += value;
-        if (currentMana < 0) currentMana = 0;
-        else if (currentMana > maxMana) currentMana = maxMana;
+        stats.changeMana(value);
     }
 
     private void checkPotionTouched() {
@@ -339,7 +304,7 @@ public class Player extends Entity {
         
         if (aniIndex == hitFrame) {
             attackCheck = true;
-            int damageToDeal = isExecutingChargeAttack ? (int)(dps * 2.5) : (int)dps;
+            int damageToDeal = isExecutingChargeAttack ? (int)(stats.getDps() * 2.5) : (int)stats.getDps();
             
 
             int randomAttack = 4 + new java.util.Random().nextInt(3);
@@ -389,18 +354,7 @@ public class Player extends Entity {
     }
     
     private void drawUI(Graphics g) {
-        g.drawImage(statusBarImg, statusBarX, statusBarY, statusBarWidth, statusBarHeight, null);
-
-        int healthBarX = statusBarX + healthBarXStart;
-        int healthBarY = statusBarY + healthBarYStart;
-        int manaBarX = statusBarX + manaBarXStart;
-        int manaBarY = statusBarY + manaBarYStart;
-
-        g.setColor(Color.red);
-        g.fillRect(healthBarX, healthBarY, healthWidth, healthBarHeight);
-
-        g.setColor(Color.blue);
-        g.fillRect(manaBarX, manaBarY, manaWidth, manaBarHeight);
+        playerHUD.draw(g, stats.getCurrentHealth(), stats.getMaxHealth(), stats.getCurrentMana(), stats.getMaxMana());
     }
 
     private void updateAnimationTick() {
@@ -574,8 +528,8 @@ public class Player extends Entity {
             }
 
             if (!utilitytools.HelpMethods.IsEntityOnFloor(hitBox, mapData)) {
-                Rectangle2D.Float boxUnderneath = new Rectangle2D.Float(hitBox.x, hitBox.y + 1, hitBox.width, hitBox.height);
-                if (playStates.getObjectManager().getIntersectingContainer(boxUnderneath) == null) {
+                scratchHitbox.setRect(hitBox.x, hitBox.y + 1, hitBox.width, hitBox.height);
+                if (playStates.getObjectManager().getIntersectingContainer(scratchHitbox) == null) {
                     inAir = true;
                 }
             }
@@ -587,8 +541,8 @@ public class Player extends Entity {
                 airSpeed = maxFallSpeed;
             }
             
-            Rectangle2D.Float nextYHitbox = new Rectangle2D.Float(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height);
-            GameContainer gcY = playStates.getObjectManager().getIntersectingContainer(nextYHitbox);
+            scratchHitbox.setRect(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height);
+            GameContainer gcY = playStates.getObjectManager().getIntersectingContainer(scratchHitbox);
             
             if (utilitytools.HelpMethods.canMoveHere(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height, mapData) && gcY == null) {
                 hitBox.y += airSpeed;
@@ -704,7 +658,6 @@ public class Player extends Entity {
                 animasi[j][i] = image.getSubimage(i * 80, j * 64, 80, 64);
             }
         }
-        statusBarImg = LoadSave.GetSpriteAtlas(LoadSave.STATUS_BAR);
     }
 
     public void loadmapData(int[][] mapData) {
@@ -729,7 +682,7 @@ public class Player extends Entity {
         attacking = false;
         isKnockedDown = false;
         playerAction = IDLE_ACTIVE;
-        currentHealth = maxHealth;
+        stats.setCurrentHealth(stats.getMaxHealth());
         this.x = newX;
         this.y = newY;
         hitBox.x = newX;
@@ -737,36 +690,11 @@ public class Player extends Entity {
         if (mapData != null && !IsEntityOnFloor(hitBox, mapData)) {
             inAir = true;
         }
-        if (currentHealth <= 0) {
-            currentHealth = 0;
-        } else if (currentHealth >= maxHealth) {
-            currentHealth = maxHealth;
-        }
     }
 
     public void gainExp(int amount) {
-        exp += amount;
-        System.out.println("Mendapatkan " + amount + " EXP!");
-        
-        while (exp >= maxExp) {
-            levelUp();
-        }
-    }
-
-    private void levelUp() {
-        level++;
-        exp -= maxExp;               
-        maxExp = (int)(maxExp * 1.5); 
-        
-        maxHealth += 20;
-        currentHealth = maxHealth;   
-        maxMana += 10;
-        currentMana = maxMana;
-        baseDefense += 2;            
-        dps += 1.5f;                 
-        calculateDefense();          
-        
-        System.out.println("Level Up! Sekarang Level " + level);
+        stats.gainExp(amount);
+        calculateDefense();
     }
 
     // GETTER & SETTER
@@ -792,23 +720,27 @@ public class Player extends Entity {
     public int getEquippedShoes() { return equippedShoes; }
     public int getEquippedAcc1() { return equippedAcc1; }
     public int getEquippedAcc2() { return equippedAcc2; }
-    public int getTotalDefense() { return totalDefense; }
+    public int getTotalDefense() { return stats.getTotalDefense(); }
 
-    // Tambahan Getter untuk UI Status
-    public int getLevel() { return level; }
-    public int getExp() { return exp; }
-    public int getMaxExp() { return maxExp; }
-    public float getDps() { return dps; }
-    public int getCurrentHealth() { return currentHealth; }
-    public int getMaxHealth() { return maxHealth; }
-    public int getCurrentMana() { return currentMana; }
-    public int getMaxMana() { return maxMana; }
+    // Sub-komponen Getters (SRP Architecture)
+    public PlayerStats getStats() { return stats; }
+    public PlayerHUD getPlayerHUD() { return playerHUD; }
+
+    // Tambahan Getter untuk UI Status & Backward Compatibility
+    public int getLevel() { return stats.getLevel(); }
+    public int getExp() { return stats.getExp(); }
+    public int getMaxExp() { return stats.getMaxExp(); }
+    public float getDps() { return stats.getDps(); }
+    public int getCurrentHealth() { return stats.getCurrentHealth(); }
+    public int getMaxHealth() { return stats.getMaxHealth(); }
+    public int getCurrentMana() { return stats.getCurrentMana(); }
+    public int getMaxMana() { return stats.getMaxMana(); }
     
-    public void setLevel(int level) { this.level = level; }
-    public void setExp(int exp) { this.exp = exp; }
-    public void setMaxExp(int maxExp) { this.maxExp = maxExp; }
-    public void setCurrentHealth(int health) { this.currentHealth = health; }
-    public void setCurrentMana(int mana) { this.currentMana = mana; }
+    public void setLevel(int level) { stats.setLevel(level); }
+    public void setExp(int exp) { stats.setExp(exp); }
+    public void setMaxExp(int maxExp) { stats.setMaxExp(maxExp); }
+    public void setCurrentHealth(int health) { stats.setCurrentHealth(health); }
+    public void setCurrentMana(int mana) { stats.setCurrentMana(mana); }
     public void setEquippedHelmet(int id) { this.equippedHelmet = id; }
     public void setEquippedArmor(int id) { this.equippedArmor = id; }
     public void setEquippedGloves(int id) { this.equippedGloves = id; }

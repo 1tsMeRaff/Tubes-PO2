@@ -36,11 +36,11 @@ public class Mouse implements MouseListener, MouseMotionListener {
 		case PLAYING:
 			gamePanel.getGame().getPlay().mouseMoved(e);
 			break;
-		default:
-			break;
 		case OPTIONS:
 	        gamePanel.getGame().getGameOptions().mouseMoved(e);
 	        break;
+		default:
+			break;
 		}
 	}
 

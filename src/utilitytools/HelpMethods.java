@@ -5,6 +5,10 @@ import main.GameCore;
 
 public class HelpMethods {
 
+    private HelpMethods() {
+        throw new AssertionError("Non-instantiable utility class");
+    }
+
     public static boolean isSolidTile(int tileID) {
         return tileID != -1;
     }

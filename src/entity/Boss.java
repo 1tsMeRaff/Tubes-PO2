@@ -28,4 +28,6 @@ public abstract class Boss extends Enemy {
     public boolean isDead() {
         return currentHealth <= 0;
     }
+
+    public abstract String getBossTitle();
 }

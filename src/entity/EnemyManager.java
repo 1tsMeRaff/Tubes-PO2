@@ -58,34 +58,37 @@ public class EnemyManager {
         drawBossUI(g);
     }
     
+    private static final java.awt.Color BOSS_HP_BG = new java.awt.Color(50, 50, 50, 200);
+    private static final java.awt.Color BOSS_HP_BAR = new java.awt.Color(200, 50, 50);
+    private final java.awt.Font bossFont = new java.awt.Font("Arial", java.awt.Font.BOLD, (int)(16 * GameCore.SCALE));
+
     private void drawBossUI(Graphics g) {
         for (Enemy e : enemies) {
-            if ((e.getEnemyType() == DEMON_BOSS || e.getEnemyType() == BLUE_GOLEM) && e.isActive()) {
+            if (e instanceof Boss && e.isActive()) {
+                Boss boss = (Boss) e;
                 int maxWidth = (int) (400 * GameCore.SCALE);
                 int height = (int) (20 * GameCore.SCALE);
                 int xPos = (GameCore.GAME_WIDTH / 2) - (maxWidth / 2);
                 int yPos = (int) (GameCore.GAME_HEIGHT - (40 * GameCore.SCALE));
 
-                float distance = Math.abs(playStates.getPlayer().getHitbox().x - e.getHitBox().x);
-                float healthPercentage = (float) e.getCurrentHealth() / e.getMaxHealth();
+                float distance = Math.abs(playStates.getPlayer().getHitbox().x - boss.getHitBox().x);
+                float healthPercentage = (float) boss.getCurrentHealth() / boss.getMaxHealth();
                 int currentWidth = (int) (maxWidth * healthPercentage);
 
                 if (currentWidth < 0) currentWidth = 0;
 
                 if (distance < GameCore.GAME_WIDTH) {
-                    g.setColor(new java.awt.Color(50, 50, 50, 200));
+                    g.setColor(BOSS_HP_BG);
                     g.fillRect(xPos, yPos, maxWidth, height);
 
-                    g.setColor(new java.awt.Color(200, 50, 50));
+                    g.setColor(BOSS_HP_BAR);
                     g.fillRect(xPos, yPos, currentWidth, height);
 
                     g.setColor(java.awt.Color.WHITE);
                     g.drawRect(xPos, yPos, maxWidth, height);
 
-                    g.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, (int)(16 * GameCore.SCALE)));
-                    
-                    String bossName = (e.getEnemyType() == DEMON_BOSS) ? "DEMON BOSS" : "BLUE GOLEM";
-                    g.drawString(bossName, xPos, yPos - (int)(5 * GameCore.SCALE));
+                    g.setFont(bossFont);
+                    g.drawString(boss.getBossTitle(), xPos, yPos - (int)(5 * GameCore.SCALE));
 
                     break;
                 }

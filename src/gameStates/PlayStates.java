@@ -174,6 +174,8 @@ public class PlayStates extends States implements StateMethods {
         }
     }
 
+    private static final Color CASTLE_BG_COLOR = new Color(15, 15, 25);
+
     @Override
     public void draw(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
@@ -196,7 +198,7 @@ public class PlayStates extends States implements StateMethods {
             drawClouds(g);
         } else {
             // Jika masuk Kastil, background jadi warna Biru Dongker Gelap
-            g.setColor(new Color(15, 15, 25));
+            g.setColor(CASTLE_BG_COLOR);
             g.fillRect(0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT);
         }
         

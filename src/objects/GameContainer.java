@@ -32,4 +32,16 @@ public class GameContainer extends GameObject {
             updateAnimationTick();
         }
     }
+
+    @Override
+    protected void onAnimationLoopEnd() {
+        doAnimation = false;
+        active = false;
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
+        doAnimation = false;
+    }
 }

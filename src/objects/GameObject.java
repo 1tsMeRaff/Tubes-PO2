@@ -27,25 +27,20 @@ public class GameObject {
             aniIndex++;
             if (aniIndex >= ObjectConstants.GetSpriteAmount(objType)) {
                 aniIndex = 0;
-                // Jika objek hancur (box/barrel), hentikan animasi dan nonaktifkan
-                if (objType == ObjectConstants.BARREL || objType == ObjectConstants.BOX) {
-                    doAnimation = false;
-                    active = false;
-                }
+                onAnimationLoopEnd();
             }
         }
+    }
+
+    protected void onAnimationLoopEnd() {
+        // Default behavior: keep animating (looping)
     }
 
     public void reset() {
         aniIndex = 0;
         aniTick = 0;
         active = true;
-        
-        if (objType == ObjectConstants.BARREL || objType == ObjectConstants.BOX) {
-            doAnimation = false;
-        } else {
-            doAnimation = true;
-        }
+        doAnimation = true;
     }
 
     protected void initHitbox(int width, int height) {

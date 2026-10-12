@@ -16,3 +16,5 @@ Thumbs.db
 target/
 ANALISIS_PROYEK.md
 *.md
+!AGENTS.md
+!.agents/**

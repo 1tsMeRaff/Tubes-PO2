@@ -224,4 +224,9 @@ public class BringerOfDeath extends Boss {
     public int drawY() {
         return (int) (hitBox.y - SCALED_OFFSET_Y);
     }
+
+    @Override
+    public String getBossTitle() {
+        return "BRINGER OF DEATH";
+    }
 }

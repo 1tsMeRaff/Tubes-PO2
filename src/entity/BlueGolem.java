@@ -184,4 +184,9 @@ public class BlueGolem extends Boss {
     public int drawY() {
         return (int) (hitBox.y - scaledOffsetY);
     }
+
+    @Override
+    public String getBossTitle() {
+        return "BLUE GOLEM";
+    }
 }

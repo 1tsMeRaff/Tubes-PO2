@@ -64,28 +64,43 @@ public class LoadSave {
 	public static final String MAP_KASTIL_TXT = "/map_tileset.txt";
 	public static final String MAP_JUNGLE_TXT = "/jungle_map.txt";
 
+	private static final String[] RESOURCE_SUBDIRS = {
+		"",
+		"audio/",
+		"backgrounds/",
+		"maps/",
+		"sprites/characters/",
+		"sprites/enemies/",
+		"sprites/equipment/",
+		"sprites/objects/",
+		"tilesets/",
+		"ui/"
+	};
+
+	public static InputStream getResourceStream(String name) {
+		if (name == null) return null;
+		String clean = name.startsWith("/") ? name.substring(1) : name;
+		for (String dir : RESOURCE_SUBDIRS) {
+			InputStream is = LoadSave.class.getResourceAsStream("/" + dir + clean);
+			if (is != null) {
+				return is;
+			}
+		}
+		return null;
+	}
+
 	public static BufferedImage GetSpriteAtlas(String fileName) {
-		BufferedImage image = null;
-		InputStream is = LoadSave.class.getResourceAsStream("/"+ fileName);
+		InputStream is = getResourceStream(fileName);
 		if (is == null) {
 			return createPlaceholder(fileName);
 		}
-		try {
-			image = ImageIO.read(is);
+		try (InputStream stream = is) {
+			BufferedImage image = ImageIO.read(stream);
+			return image != null ? image : createPlaceholder(fileName);
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
-		finally {
-			try {
-				is.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		if (image == null) {
 			return createPlaceholder(fileName);
 		}
-		return image;
 	}
 
 	private static BufferedImage createPlaceholder(String fileName) {
@@ -121,9 +136,12 @@ public class LoadSave {
 	public static int[][] GetTilesData(String filePath) {
 		ArrayList<int[]> rowList = new ArrayList<>();
 		
-		try {
-			InputStream is = GameCore.class.getResourceAsStream(filePath);
-			BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		try (InputStream is = getResourceStream(filePath)) {
+			if (is == null) {
+				System.err.println("Gagal menemukan map: " + filePath);
+				return new int[0][0];
+			}
+			BufferedReader br = new BufferedReader(new InputStreamReader(is, java.nio.charset.StandardCharsets.UTF_8));
 			String line;
 			
 			while ((line = br.readLine()) != null) {
@@ -162,9 +180,9 @@ public class LoadSave {
 		ArrayList<Slime> list = new ArrayList<>();
 		int[][] tilesData = GetTilesData(filePath);
 		
-		try {
-			InputStream is = GameCore.class.getResourceAsStream(filePath);
-			BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		try (InputStream is = getResourceStream(filePath)) {
+			if (is == null) return list;
+			BufferedReader br = new BufferedReader(new InputStreamReader(is, java.nio.charset.StandardCharsets.UTF_8));
 			
 			String line;
 			int row = 0;
@@ -206,9 +224,9 @@ public class LoadSave {
 		ArrayList<DemonBoss> list = new ArrayList<>();
 		int[][] tilesData = GetTilesData(filePath);
 		
-		try {
-			InputStream is = GameCore.class.getResourceAsStream(filePath);
-			BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		try (InputStream is = getResourceStream(filePath)) {
+			if (is == null) return list;
+			BufferedReader br = new BufferedReader(new InputStreamReader(is, java.nio.charset.StandardCharsets.UTF_8));
 			
 			String line;
 			int row = 0;
@@ -250,9 +268,9 @@ public class LoadSave {
 	    ArrayList<BlueGolem> list = new ArrayList<>();
 	    int[][] tilesData = GetTilesData(filePath);
 
-	    try {
-	        InputStream is = GameCore.class.getResourceAsStream(filePath);
-	        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+	    try (InputStream is = getResourceStream(filePath)) {
+	        if (is == null) return list;
+	        BufferedReader br = new BufferedReader(new InputStreamReader(is, java.nio.charset.StandardCharsets.UTF_8));
 
 	        String line;
 	        int row = 0;
@@ -294,9 +312,9 @@ public class LoadSave {
 	    ArrayList<BringerOfDeath> list = new ArrayList<>();
 	    int[][] tilesData = GetTilesData(filePath);
 
-	    try {
-	        InputStream is = GameCore.class.getResourceAsStream(filePath);
-	        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+	    try (InputStream is = getResourceStream(filePath)) {
+	        if (is == null) return list;
+	        BufferedReader br = new BufferedReader(new InputStreamReader(is, java.nio.charset.StandardCharsets.UTF_8));
 
 	        String line;
 	        int row = 0;
@@ -336,9 +354,9 @@ public class LoadSave {
 	    ArrayList<Skullwolf> list = new ArrayList<>();
 	    int[][] tilesData = GetTilesData(filePath);
 
-	    try {
-	        InputStream is = GameCore.class.getResourceAsStream(filePath);
-	        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+	    try (InputStream is = getResourceStream(filePath)) {
+	        if (is == null) return list;
+	        BufferedReader br = new BufferedReader(new InputStreamReader(is, java.nio.charset.StandardCharsets.UTF_8));
 	        String line;
 	        int row = 0;
 
