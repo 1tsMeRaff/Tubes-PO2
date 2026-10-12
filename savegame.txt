@@ -1,0 +1,15 @@
+level=1
+exp=0
+maxExp=100
+currentHealth=100
+currentMana=100
+x=896.9195
+y=343.99
+equippedHelmet=-1
+equippedArmor=-1
+equippedGloves=-1
+equippedShoes=-1
+equippedAcc1=-1
+equippedAcc2=-1
+inventory=10,1
+worldIndex=0

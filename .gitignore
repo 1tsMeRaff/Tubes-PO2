@@ -14,3 +14,7 @@ Thumbs.db
 
 # Build files
 target/
+ANALISIS_PROYEK.md
+*.md
+!AGENTS.md
+!.agents/**

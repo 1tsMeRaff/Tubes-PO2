@@ -43,8 +43,15 @@ public class GamePanel extends JPanel {
 	
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		
-		gc.render(g);
+
+		java.awt.Graphics2D g2 = (java.awt.Graphics2D) g;
+
+		float scaleX = (float) getWidth() / GAME_WIDTH;
+		float scaleY = (float) getHeight() / GAME_HEIGHT;
+
+		g2.scale(scaleX, scaleY);
+
+		gc.render(g2);
 	}
 	
 	public GameCore getGame() {

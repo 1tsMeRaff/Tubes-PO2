@@ -11,17 +11,25 @@ import static utilitytools.Konstanta.UI.Frames.*;
 
 public class MainMenuButton {
 	
+	private static final Color COLOR_BASE = new Color(34, 34, 36);
+	private static final Color COLOR_HOVER = new Color(60, 72, 90);
+	private static final Color COLOR_PRESSED = new Color(90, 76, 52);
+	private static final Color COLOR_BORDER = new Color(210, 210, 210);
+	private static final Color COLOR_TEXT = new Color(230, 230, 230);
+
 	private int posX, posY, rowIndex, index;
 	private int xOffSetCenter = B_WIDTH / 2;
 	private boolean mouseOver, mousePressed;
 	private GameStates states;
 	private Rectangle bounds;
+	private final Font buttonFont;
 	
 	public MainMenuButton(int posX, int posY, int rowIndex, GameStates states) {
 		this.posX = posX;
 		this.posY = posY;
 		this.rowIndex = rowIndex;
 		this.states = states;
+		this.buttonFont = new Font("SansSerif", Font.BOLD, (int) (20 * main.GameCore.SCALE));
 		initBounds();
 	}
 
@@ -35,23 +43,15 @@ public class MainMenuButton {
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		int x = posX - xOffSetCenter;
 		int y = posY;
-		Color base = new Color(34, 34, 36);
-		Color hover = new Color(60, 72, 90);
-		Color pressed = new Color(90, 76, 52);
-		Color fill = base;
-		if (index == 1) {
-			fill = hover;
-		} else if (index == 2) {
-			fill = pressed;
-		}
+		Color fill = (index == 1) ? COLOR_HOVER : (index == 2) ? COLOR_PRESSED : COLOR_BASE;
 		int arc = Math.max(10, B_HEIGHT / 2);
 		g2.setColor(fill);
 		g2.fillRoundRect(x, y, B_WIDTH, B_HEIGHT, arc, arc);
-		g2.setColor(new Color(210, 210, 210));
+		g2.setColor(COLOR_BORDER);
 		g2.drawRoundRect(x, y, B_WIDTH, B_HEIGHT, arc, arc);
 
-		g2.setFont(new Font("SansSerif", Font.BOLD, (int) (20 * main.GameCore.SCALE)));
-		g2.setColor(new Color(230, 230, 230));
+		g2.setFont(buttonFont);
+		g2.setColor(COLOR_TEXT);
 		String label = getLabel();
 		int textW = g2.getFontMetrics().stringWidth(label);
 		int textH = g2.getFontMetrics().getHeight();

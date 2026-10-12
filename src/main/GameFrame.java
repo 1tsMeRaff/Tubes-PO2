@@ -2,11 +2,12 @@ package main;
 
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
-
 import javax.swing.JFrame;
 
 public class GameFrame {
 	private JFrame jFrame;
+	private boolean isFullScreen = false;
+
 	public GameFrame(GamePanel gamePanel) {
 		
 		jFrame = new JFrame();
@@ -14,7 +15,7 @@ public class GameFrame {
 		jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		jFrame.add(gamePanel);
 		jFrame.setResizable(false);
-		jFrame.setTitle("Feline Souls : Witch Curse");;
+		jFrame.setTitle("Feline Souls : Witch Curse");
 		
 		jFrame.pack();
 		
@@ -31,10 +32,26 @@ public class GameFrame {
 			
 			@Override
 			public void windowGainedFocus(WindowEvent e) {
-				// TODO Auto-generated method stub
-				
+				// Kosongkan sesuai aslinya
 			}
 		});
 	}
 
+	public void toggleFullScreen() {
+		isFullScreen = !isFullScreen;
+		
+		jFrame.dispose();
+		
+		jFrame.setUndecorated(isFullScreen);
+		
+		if (isFullScreen) {
+			jFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		} else {
+			jFrame.setExtendedState(JFrame.NORMAL);
+			jFrame.pack();
+			jFrame.setLocationRelativeTo(null);
+		}
+		
+		jFrame.setVisible(true);
+	}
 }

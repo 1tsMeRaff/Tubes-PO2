@@ -1,31 +1,51 @@
 package entity;
 
-import static utilitytools.Konstanta.EnemyConstants.*;
-
-import java.awt.geom.Rectangle2D.Float;
-
+import main.GameCore;
 import static utilitytools.HelpMethods.*;
 import static utilitytools.Konstanta.Directions.*;
+import static utilitytools.Konstanta.EnemyConstants.*;
 
-import main.GameCore;
+import java.awt.Graphics;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 
+import core.interfaces.Damageable;
+import gameStates.PlayStates;
 
-public abstract class Enemy extends Entity {
-	protected int aniIndex, enemyState, enemyType;
-	protected int aniTick, aniSpeed = 25;
+public abstract class Enemy extends Entity implements Damageable {
+	protected int aniIndex, enemyState;
+	public int enemyType;
+	protected int aniTick;
+	protected int aniSpeed = 7;
 	protected boolean firstUpdate = true;
 	protected boolean inAir = false;
 	protected float fallSpeed;
-	protected float gravity = 0.04f * GameCore.SCALE;
-	protected float walkSpeed = 0.35f * GameCore.SCALE;
+	protected float gravity = 0.444f * GameCore.SCALE;
+	protected float walkSpeed = 1.16f * GameCore.SCALE;
 	protected int walkDir = LEFT;
 	protected int tileY;
+	protected int attackDistance = (int) (GameCore.SCALE * 30);
+	protected int maxHealth;
+	protected int currentHealth;
+	
+	protected boolean active = true;
+	protected boolean attackChecked;
+	
+	protected boolean isInvincible = false;
+	protected int invincibilityTick = 0;
+	protected final int INVINCIBILITY_DURATION = 20;
+
+	protected float knockbackSpeed = 0;
+	protected int knockbackDir = 1;
+	protected float knockbackFriction = 0.15f * GameCore.SCALE;
 
 	public Enemy(float x, float y, int width, int height, int enemyType) {
-		super(x, y, width, height);
-		this.enemyType = enemyType;
-		initHitBox(x, y, width, height);
-		
+	    super(x, y, width, height);
+	    this.enemyType = enemyType;
+	    initHitBox(x, y, width, height);
+	    maxHealth = utilitytools.Konstanta.EnemyConstants.getMaxHealth(enemyType);
+	    currentHealth = maxHealth;
+	    this.tileY = (int) (y / GameCore.TILES_SIZE);
 	}
 	
 	protected void firstUpdateCheck(int[][] tilesData) {
@@ -43,6 +63,15 @@ public abstract class Enemy extends Entity {
 			inAir = false;
 			hitBox.y = GetEntityPosUnderRoofOrAboveFloor(hitBox, fallSpeed);
 			tileY = (int) (hitBox.y /GameCore.TILES_SIZE);
+			fallSpeed = 0;
+		}
+	}
+
+	protected void checkOnFloor(int[][] tilesData) {
+		if (!inAir && !IsEntityOnFloor(hitBox, tilesData)) {
+			inAir = true;
+			fallSpeed = 0;
+			firstUpdate = false;
 		}
 	}
 	
@@ -63,11 +92,41 @@ public abstract class Enemy extends Entity {
 		changeWalkDir();
 	}
 	
+	protected void turnToPlayer(Player player) {
+		if(player.hitBox.x  > hitBox.x) {
+			walkDir = RIGHT;
+		}else {
+			walkDir = LEFT;
+		}
+	}
+	
+	protected void updateEffects(int[][] tilesData) {
+	    if (isInvincible) {
+	        invincibilityTick++;
+	        if (invincibilityTick >= INVINCIBILITY_DURATION) {
+	            isInvincible = false;
+	            invincibilityTick = 0;
+	        }
+	    }
+	    
+	    if (knockbackSpeed > 0) {
+	        float xSpeed = knockbackSpeed * knockbackDir;
+	        if(utilitytools.HelpMethods.canMoveHere(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height, tilesData)) {
+	            hitBox.x += xSpeed;
+	        } else {
+	        	hitBox.x = utilitytools.HelpMethods.GetEntityPosNextToWall(hitBox, xSpeed);
+	            knockbackSpeed = 0;
+	        }
+	        knockbackSpeed -= knockbackFriction;
+	        if (knockbackSpeed < 0) knockbackSpeed = 0;
+	    }
+	}
+	
 	protected boolean canSeePlayer(int[][] tilesData, Player player) {
 		int playerTileY = (int) (player.getHitBox().y / GameCore.TILES_SIZE);
 		if(playerTileY == tileY) {
 			if(isPlayerInRange(player)) {
-				if(isSightClear(tilesData, hitBox, player.hitBox, tileY)) {
+				if(IsSightClear(tilesData, hitBox, player.hitBox, tileY)) {
 					return true;
 				}
 			}
@@ -75,20 +134,69 @@ public abstract class Enemy extends Entity {
 		return false;
 	}
 	
-	private boolean isSightClear(int[][] tilesData, Float hitBox, Float hitBox2, int tileY2) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	
 
-	private boolean isPlayerInRange(Player player) {
-		
-		return false;
+	protected boolean isPlayerInRange(Player player) {
+		int absValue = (int) Math.abs(player.hitBox.x - hitBox.getX());
+		return absValue <= attackDistance * 5;
+	}
+	
+	protected boolean isPlayerCloseForAttack(Player player) {
+		int absValue = (int) Math.abs(player.hitBox.x - hitBox.getX());
+		return absValue <= attackDistance;
 	}
 
 	protected void newState(int enemyState) {
 		this.enemyState = enemyState;
 		aniTick = 0;
 		aniIndex = 0;
+	}
+	
+	public void hurt(int value, int kbDir, boolean applyKnockback) {
+	    if (isInvincible) return;
+
+	    currentHealth -= value;
+	    isInvincible = true;
+	    
+	    if (applyKnockback) {
+	        knockbackDir = kbDir;
+	        knockbackSpeed = 2.0f * GameCore.SCALE;
+	        if (!inAir) {
+	            inAir = true;
+	            fallSpeed = -1.5f * GameCore.SCALE;
+	        }
+	    }
+
+	    if(currentHealth <= 0) {
+	        newState(MATI);
+	    } else {
+	        newState(HURT);
+	    }
+	}
+
+	public void hurt(int value, int kbDir) {
+	    hurt(value, kbDir, true);
+	}
+
+	public void hurt(int value) {
+	    hurt(value, 1, false); 
+	}
+	
+	protected void checkHitEnemy(Rectangle2D.Float AttackBox, Player player) {
+	    if(AttackBox.intersects(player.getHitbox())) {
+	        player.changeHealth(-getEnemyAtt(enemyType));
+	        
+	        int kbDir = (player.getHitbox().x > hitBox.x) ? 1 : -1;
+	        boolean fromBoss = (this.enemyType == DEMON_BOSS);
+	        
+	        player.applyKnockback(kbDir, fromBoss);
+	        if (fromBoss) {
+	            player.getPlayStates().triggerHeavyHit(12, 18, 7);
+	        } else {
+	            player.getPlayStates().triggerHeavyHit(0, 4, 2);
+	        }
+	    }
+	    attackChecked = true;
 	}
 	
 	protected void updateAnimationTick() {
@@ -98,9 +206,14 @@ public abstract class Enemy extends Entity {
 			aniIndex++;
 			if(aniIndex >= GetSpriteAmount(enemyType, enemyState)) {
 				aniIndex = 0;
+				
+				switch(enemyState) {
+				case ATTACK, HURT -> enemyState = IDLE;
+				case MATI -> active = false;
+				}
 			}
 		}
-	}
+	} 
 
 	protected void changeWalkDir() {
 		if(walkDir == LEFT) {
@@ -108,6 +221,47 @@ public abstract class Enemy extends Entity {
 		}else {
 			walkDir = LEFT;
 		}
+	}
+	
+    public abstract void update(int[][] tilesData, Player player);
+    public abstract void draw(Graphics g, int xLvlOffset, BufferedImage[][] spriteAtlas);
+    public abstract int getExpReward();
+
+    protected void handleHurtEffects(PlayStates playStates) {}
+    protected void handleDeathEffects(PlayStates playStates) {}
+
+    public void hit(int damage, Player player, PlayStates playStates) {
+        if (!active || isInvincible) return;
+
+        int kbDir = (player != null && player.getHitbox().x < hitBox.x) ? 1 : -1;
+        boolean isCharge = (player != null) && player.isChargeAttack();
+
+        hurt(damage, kbDir, isCharge);
+
+        if (currentHealth <= 0) {
+            if (player != null) player.gainExp(getExpReward());
+            handleDeathEffects(playStates);
+        } else {
+            handleHurtEffects(playStates);
+        }
+    }
+	
+    public int getEnemyType() {
+		return enemyType;
+	}
+
+	public int getMaxHealth() {
+		return maxHealth;
+	}
+	
+	public void resetEnemy() {
+		hitBox.x = x;
+		hitBox.y = y;
+		firstUpdate = true;
+		currentHealth = maxHealth;
+		newState(IDLE);
+		active = true;
+		fallSpeed = 0;
 		
 	}
 
@@ -119,16 +273,20 @@ public abstract class Enemy extends Entity {
 		return enemyState;
 	}
 
+	public boolean isActive() {
+		return active;
+	}
+	
+	public int getAniTick() {
+	    return aniTick;
+	}
+	
+	public int getCurrentHealth() {
+        return currentHealth;
+    }
+
+	@Override
+	public boolean isAlive() {
+        return currentHealth > 0 && active;
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-

@@ -4,10 +4,15 @@ import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
-public interface StateMethods {
+import core.interfaces.Renderable;
+import core.interfaces.Updatable;
+
+public interface StateMethods extends Updatable, Renderable {
 	
+	@Override
 	public void update();
 	
+	@Override
 	public void draw(Graphics g);
 	
 	public void mouseClicked(MouseEvent e);

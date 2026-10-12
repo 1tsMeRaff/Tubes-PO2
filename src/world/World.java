@@ -18,5 +18,11 @@ public class World {
 	public int[][] getWorldData(){
 		return tilesData;
 	}
-	
+
+	public int getTileAt(int col, int row) {
+		if (row < 0 || row >= tilesData.length || col < 0 || col >= tilesData[0].length) {
+			return 0;
+		}
+		return tilesData[row][col];
+	}
 }
