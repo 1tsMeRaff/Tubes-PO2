@@ -105,10 +105,10 @@ public class SelectLevelOverlay {
         int my = e.getY();
 
         if (btnLevel1.contains(mx, my)) {
-            menu.startSelectedLevel("/map_tutorial_fix.txt", LoadSave.WORLD_SPRITE); 
+            menu.startSelectedLevel("/map_tutorial_fix.txt", "outside_sprites.png"); 
         } 
         else if (btnLevel2.contains(mx, my)) {
-            menu.startSelectedLevel("/map_tutorial_fix.txt", LoadSave.WORLD_SPRITE); 
+            menu.startSelectedLevel("/jungle_map.txt", "map_jungle_fix.png"); 
         }
         else if (btnLevel3.contains(mx, my)) {
             menu.startSelectedLevel("/main_tileset.txt", "main_tileset.png"); 

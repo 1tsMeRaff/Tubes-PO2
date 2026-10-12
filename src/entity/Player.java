@@ -21,6 +21,8 @@ public class Player extends Entity implements Damageable {
 
     private final PlayerStats stats = new PlayerStats();
     private final PlayerHUD playerHUD = new PlayerHUD(); 
+    private final PlayerPhysics physics = new PlayerPhysics(this);
+    private final PlayerCombat combat = new PlayerCombat(this); 
 
     // Animasi & Render
     private BufferedImage[][] animasi;
@@ -276,6 +278,16 @@ public class Player extends Entity implements Damageable {
         boolean damaged = stats.changeHealth(value, isInvincible);
         if (damaged) {
             isInvincible = true;
+            if (playStates != null) {
+                if (playStates.getFloatingTextPool() != null) {
+                    playStates.getFloatingTextPool().spawnDamageTaken(hitBox.x + hitBox.width / 2, hitBox.y, -value);
+                }
+                if (playStates.getParticlePool() != null) {
+                    playStates.getParticlePool().spawnBlood(hitBox.x + hitBox.width / 2, hitBox.y + hitBox.height / 2);
+                }
+            }
+        } else if (value > 0 && playStates != null && playStates.getFloatingTextPool() != null) {
+            playStates.getFloatingTextPool().spawnHeal(hitBox.x + hitBox.width / 2, hitBox.y, value);
         }
     }
 
@@ -483,6 +495,9 @@ public class Player extends Entity implements Damageable {
 
         if (dashing) {
             dashTick++;
+            if (dashTick % 3 == 0 && playStates != null && playStates.getParticlePool() != null) {
+                playStates.getParticlePool().spawnDust(hitBox.x + (flipW == 1 ? 0 : hitBox.width), hitBox.y + hitBox.height);
+            }
             if (dashTick >= dashDuration) {
                 dashing = false;
             }
@@ -593,6 +608,9 @@ public class Player extends Entity implements Damageable {
                 canDoubleJump = false;
                 jump = false;
                 playStates.getGameCore().getAudioPlayer().playEffect(audio.AudioPlayer.JUMP);
+                if (playStates.getParticlePool() != null) {
+                    playStates.getParticlePool().spawnDust(hitBox.x + hitBox.width / 2, hitBox.y + hitBox.height);
+                }
             }
             return;
         }
@@ -600,9 +618,15 @@ public class Player extends Entity implements Damageable {
         airSpeed = jumpSpeed;
         jump = false;
         playStates.getGameCore().getAudioPlayer().playEffect(audio.AudioPlayer.JUMP);
+        if (playStates.getParticlePool() != null) {
+            playStates.getParticlePool().spawnDust(hitBox.x + hitBox.width / 2, hitBox.y + hitBox.height);
+        }
     }
 
     private void resetInAir() {
+        if (inAir && playStates != null && playStates.getParticlePool() != null) {
+            playStates.getParticlePool().spawnDust(hitBox.x + hitBox.width / 2, hitBox.y + hitBox.height);
+        }
         inAir = false;
         airSpeed = 0;
         canDoubleJump = true;
@@ -747,4 +771,17 @@ public class Player extends Entity implements Damageable {
     public void setEquippedShoes(int id) { this.equippedShoes = id; }
     public void setEquippedAcc1(int id) { this.equippedAcc1 = id; }
     public void setEquippedAcc2(int id) { this.equippedAcc2 = id; }
+
+    // Subcomponents & Accessors (Pillar 3 SRP Modernization)
+    public PlayerPhysics getPhysics() { return physics; }
+    public PlayerCombat getCombat() { return combat; }
+    public float getPlayerScale() { return playerScale; }
+    public int getWidth() { return width; }
+    public int getHeight() { return height; }
+    public void setMoving(boolean moving) { this.moving = moving; }
+    public void setFlipX(int flipX) { this.flipX = flipX; }
+    public void setFlipW(int flipW) { this.flipW = flipW; }
+    public void setPlayerAction(int action) { this.playerAction = action; }
+    public void setAniIndex(int index) { this.aniIndex = index; }
+    public void setAttacking(boolean attacking) { this.attacking = attacking; }
 }

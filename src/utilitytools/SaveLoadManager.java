@@ -47,6 +47,9 @@ public class SaveLoadManager {
                 writer.write(invStr.toString()); writer.newLine();
 
                 writer.write("worldIndex=" + playStates.getWorldManager().getWorldIndex()); writer.newLine();
+                if (playStates.getGameCore() != null && playStates.getGameCore().getAudioPlayer() != null) {
+                    writer.write("volume=" + playStates.getGameCore().getAudioPlayer().getVolume()); writer.newLine();
+                }
             }
 
             try {
@@ -113,6 +116,12 @@ public class SaveLoadManager {
                             
                         case "worldIndex": 
                             wIndex = Integer.parseInt(value); 
+                            break;
+                            
+                        case "volume":
+                            if (gc != null && gc.getAudioPlayer() != null) {
+                                gc.getAudioPlayer().setVolume(Float.parseFloat(value));
+                            }
                             break;
                     }
                 } catch (NumberFormatException nfe) {

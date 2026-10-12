@@ -1,105 +1,62 @@
 package inputs;
 
-import gameStates.GameStates;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import main.GamePanel;
 
 public class Mouse implements MouseListener, MouseMotionListener {
-	
-	private GamePanel gamePanel;
-	
+
+	private final InputDispatcher dispatcher;
+
 	public Mouse(GamePanel gamePanel) {
-		this.gamePanel = gamePanel;
-		
+		this.dispatcher = new InputDispatcher(gamePanel != null ? gamePanel.getGame() : null);
+	}
+
+	public Mouse(InputDispatcher dispatcher) {
+		this.dispatcher = dispatcher;
 	}
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		switch(GameStates.state) {
-		case PLAYING:
-			gamePanel.getGame().getPlay().mouseDragged(e);
-			break;
-		default:
-			break;
+		if (dispatcher != null) {
+			dispatcher.dispatchMouseDragged(e);
 		}
-		
 	}
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
-		switch(GameStates.state) {
-		case MENU:
-			gamePanel.getGame().getMenu().mouseMoved(e);
-			break;
-		case PLAYING:
-			gamePanel.getGame().getPlay().mouseMoved(e);
-			break;
-		case OPTIONS:
-	        gamePanel.getGame().getGameOptions().mouseMoved(e);
-	        break;
-		default:
-			break;
+		if (dispatcher != null) {
+			dispatcher.dispatchMouseMoved(e);
 		}
 	}
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		switch(GameStates.state) {
-		case PLAYING:
-			gamePanel.getGame().getPlay().mouseClicked(e);
-			break;
-		default:
-			break;
+		if (dispatcher != null) {
+			dispatcher.dispatchMouseClicked(e);
 		}
 	}
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		switch(GameStates.state) {
-		case MENU:
-			gamePanel.getGame().getMenu().mousePressed(e);
-			break;
-		case PLAYING:
-			gamePanel.getGame().getPlay().mousePressed(e);
-			break;
-		default:
-			break;
-		case OPTIONS:
-	        gamePanel.getGame().getGameOptions().mousePressed(e);
-	        break;
+		if (dispatcher != null) {
+			dispatcher.dispatchMousePressed(e);
 		}
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		switch(GameStates.state) {
-		case MENU:
-			gamePanel.getGame().getMenu().mouseReleased(e);
-			break;
-		case PLAYING:
-			gamePanel.getGame().getPlay().mouseReleased(e);
-			break;
-		default:
-			break;
-		case OPTIONS:
-	        gamePanel.getGame().getGameOptions().mouseReleased(e);
-	        break;
+		if (dispatcher != null) {
+			dispatcher.dispatchMouseReleased(e);
 		}
-		
 	}
 
 	@Override
 	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
 	}
-
 }

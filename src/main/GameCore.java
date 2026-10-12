@@ -7,7 +7,7 @@ import gameStates.PlayStates;
 import gameStates.GameOptions; // [TAMBAHAN] Import GameOptions
 import java.awt.Graphics;
 
-public class GameCore implements Runnable {
+public class GameCore implements Runnable, inputs.StateProvider {
 	
 	private GameFrame gameFrame;
 	private GamePanel gamePanel;
@@ -93,6 +93,19 @@ public class GameCore implements Runnable {
 				break;
 			default:
 				break;
+		}
+	}
+
+	public gameStates.StateMethods getActiveState() {
+		switch(GameStates.state) {
+			case MENU:
+				return menu;
+			case PLAYING:
+				return play;
+			case OPTIONS:
+				return gameOptions;
+			default:
+				return null;
 		}
 	}
 	

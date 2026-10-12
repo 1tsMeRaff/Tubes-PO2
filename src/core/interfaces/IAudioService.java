@@ -12,6 +12,7 @@ public interface IAudioService {
     void setLevelSong(int lvlIndex);
     void lvlCompleted();
     void setVolume(float volume);
+    float getVolume();
     void toggleSongMute();
     void toggleEffectMute();
     void destroy();

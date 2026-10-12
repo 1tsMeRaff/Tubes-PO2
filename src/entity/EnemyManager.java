@@ -26,11 +26,19 @@ public class EnemyManager {
 
     private void addEnemies() {
         enemies.clear();
-        enemies.addAll(LoadSave.GetSlimes("/map_tutorial_fix.txt"));
-        enemies.addAll(LoadSave.GetDemonBosses("/map_tutorial_fix.txt"));
-        enemies.addAll(LoadSave.GetBlueGolems("/map_tutorial_fix.txt"));
-        enemies.addAll(LoadSave.GetBringers("/map_tutorial_fix.txt"));
-        enemies.addAll(LoadSave.GetSkullwolves("/map_tutorial_fix.txt"));
+        if (playStates != null && playStates.getWorldManager() != null && playStates.getWorldManager().getCurrentMap() != null) {
+            loadEnemies(playStates.getWorldManager().getCurrentMap().getEnemies());
+        }
+    }
+
+    public void loadEnemies(ArrayList<Enemy> newEnemies) {
+        enemies.clear();
+        if (newEnemies != null) {
+            for (Enemy e : newEnemies) {
+                e.resetEnemy();
+                enemies.add(e);
+            }
+        }
     }
 
     public void update(int[][] tilesData, Player player) {
@@ -99,8 +107,12 @@ public class EnemyManager {
     public void checkEnemyHit(Rectangle2D.Float attackBox, int damage, Player player) {
         for (Enemy e : enemies) {
             if (e.isActive() && attackBox.intersects(e.getHitBox())) {
-                
                 e.hit(damage, player, playStates);
+
+                float hitX = e.getHitBox().x + (e.getHitBox().width / 2.0f);
+                float hitY = e.getHitBox().y + (e.getHitBox().height / 2.0f);
+                playStates.getParticlePool().spawnHitSparks(hitX, hitY, 10);
+                playStates.getFloatingTextPool().spawnDamageDealt(hitX, e.getHitBox().y - 5, damage);
 
                 if (e.getEnemyType() == DEMON_BOSS) {
                     DemonBoss demonBoss = (DemonBoss) e;

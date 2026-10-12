@@ -184,7 +184,15 @@ public abstract class Enemy extends Entity implements Damageable {
 	
 	protected void checkHitEnemy(Rectangle2D.Float AttackBox, Player player) {
 	    if(AttackBox.intersects(player.getHitbox())) {
-	        player.changeHealth(-getEnemyAtt(enemyType));
+	        int damage = getEnemyAtt(enemyType);
+	        player.changeHealth(-damage);
+	        
+	        float pX = player.getHitbox().x + (player.getHitbox().width / 2.0f);
+	        float pY = player.getHitbox().y + (player.getHitbox().height / 2.0f);
+	        if (player.getPlayStates() != null) {
+	            player.getPlayStates().getParticlePool().spawnBlood(pX, pY, 6);
+	            player.getPlayStates().getFloatingTextPool().spawnDamageTaken(pX, player.getHitbox().y - 5, damage);
+	        }
 	        
 	        int kbDir = (player.getHitbox().x > hitBox.x) ? 1 : -1;
 	        boolean fromBoss = (this.enemyType == DEMON_BOSS);
