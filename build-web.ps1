@@ -1,6 +1,6 @@
-# build-web.ps1 - Local Build & Web Packaging Automation for Tubes-PO2
+# build-web.ps1 - Local Build & Web Packaging Automation for Feline Souls : Witch Curse
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host "⚔️  TUBES-PO2 : WEB DISTRIBUTION & PACKAGING AUTOMATION" -ForegroundColor Yellow
+Write-Host "🐾  FELINE SOULS : WITCH CURSE - WEB PACKAGING AUTOMATION" -ForegroundColor Yellow
 Write-Host "==========================================================" -ForegroundColor Cyan
 
 # 1. Pastikan folder output ada

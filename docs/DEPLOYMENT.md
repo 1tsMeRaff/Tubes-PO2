@@ -1,6 +1,6 @@
 # Panduan Deployment GitHub Pages (github.io)
 
-Dokumen ini menjelaskan alur kerja (*pipeline*) deployment otomatis game **Tubes-PO2** ke **GitHub Pages** (`https://1tsmeraff.github.io/Tubes-PO2/`).
+Dokumen ini menjelaskan alur kerja (*pipeline*) deployment otomatis game **Feline Souls : Witch Curse** ke **GitHub Pages** (`https://1tsmeraff.github.io/Tubes-PO2/`).
 
 ---
 
