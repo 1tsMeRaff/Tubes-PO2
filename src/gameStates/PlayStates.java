@@ -36,6 +36,7 @@ public class PlayStates extends States implements StateMethods {
 
     private final ParticlePool particlePool = new ParticlePool();
     private final FloatingTextPool floatingTextPool = new FloatingTextPool();
+    private final effects.CurseProjectilePool cursePool = new effects.CurseProjectilePool();
     private float smoothLvlOffsetX = 0f;
 
     private boolean paused = false;
@@ -174,6 +175,7 @@ public class PlayStates extends States implements StateMethods {
             objectManager.update();
             player.update();
             enemyManager.update(worldManager.getCurrentMap().getWorldData(), player);
+            cursePool.update(this, player);
             particlePool.update();
             floatingTextPool.update();
             checkCloseToBorder();
@@ -218,6 +220,7 @@ public class PlayStates extends States implements StateMethods {
         objectManager.draw(g, xLvlOffset);
         player.render(g, xLvlOffset);
         enemyManager.draw(g, xLvlOffset);
+        cursePool.draw(g, xLvlOffset);
         particlePool.draw(g, xLvlOffset);
         floatingTextPool.draw(g, xLvlOffset);
 
@@ -274,8 +277,10 @@ public class PlayStates extends States implements StateMethods {
             pauseOverlay.mousePressed(e);
         } else if (lvlCompleted) {
             levelCompletedOverlay.mousePressed(e);
-        } else if(e.getButton() == MouseEvent.BUTTON1) {
+        } else if (e.getButton() == MouseEvent.BUTTON1) {
             player.setCharging(true);
+        } else if (e.getButton() == MouseEvent.BUTTON3) {
+            player.castWitchCurse();
         }
     }
 
@@ -417,6 +422,12 @@ public class PlayStates extends States implements StateMethods {
             case KeyEvent.VK_X:
                 player.setCharging(true);
                 break;
+
+            // Witch Curse Soul Ability: U (Arcade upper row) or H
+            case KeyEvent.VK_U:
+            case KeyEvent.VK_H:
+                player.castWitchCurse();
+                break;
         }
     }
 
@@ -470,6 +481,7 @@ public class PlayStates extends States implements StateMethods {
         inventoryOpen = false;
         particlePool.clear();
         floatingTextPool.clear();
+        cursePool.reset();
         smoothLvlOffsetX = targetX - (GameCore.GAME_WIDTH * 0.45f);
         if (smoothLvlOffsetX < 0) smoothLvlOffsetX = 0;
         xLvlOffset = Math.round(smoothLvlOffsetX);
@@ -528,8 +540,14 @@ public class PlayStates extends States implements StateMethods {
     public void setLevelCompleted(boolean levelCompleted) { this.lvlCompleted = levelCompleted; }
     public boolean isPaused() { return paused; }
     public Player getPlayer() { return player; }
+    public EnemyManager getEnemyManager() { return enemyManager; }
     public ObjectManager getObjectManager() { return objectManager; }
     public GameCore getGameCore() { return gc; }
     public ParticlePool getParticlePool() { return particlePool; }
     public FloatingTextPool getFloatingTextPool() { return floatingTextPool; }
+    public effects.CurseProjectilePool getCursePool() { return cursePool; }
+    public void shakeScreen(int frames, int intensity) {
+        this.shakeDuration = Math.max(this.shakeDuration, frames);
+        this.shakeIntensity = Math.max(this.shakeIntensity, intensity);
+    }
 }

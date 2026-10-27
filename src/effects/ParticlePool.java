@@ -18,6 +18,8 @@ public class ParticlePool {
     private static final Color SPARK_COLOR_2 = new Color(255, 140, 40);
     private static final Color DUST_COLOR = new Color(180, 175, 170, 180);
     private static final Color BLOOD_COLOR = new Color(200, 30, 30);
+    private static final Color SOUL_COLOR_1 = new Color(190, 80, 255);
+    private static final Color SOUL_COLOR_2 = new Color(110, 210, 255);
 
     public ParticlePool() {
         this(DEFAULT_CAPACITY);
@@ -82,6 +84,28 @@ public class ParticlePool {
             float vy = -1.0f - (rand.nextFloat() * 3.0f);
             spawn(x, y, vx, vy, 4.0f + rand.nextInt(2), BLOOD_COLOR, 18 + rand.nextInt(8), 0.35f);
         }
+    }
+
+    public void spawnSoulMagic(float x, float y) {
+        spawnSoulMagic(x, y, 12);
+    }
+
+    public void spawnSoulMagic(float x, float y, int count) {
+        for (int i = 0; i < count; i++) {
+            float angle = (float) (rand.nextDouble() * Math.PI * 2);
+            float speed = 2.5f + (rand.nextFloat() * 4.5f);
+            float vx = (float) Math.cos(angle) * speed;
+            float vy = (float) Math.sin(angle) * speed - 0.5f;
+            Color c = rand.nextBoolean() ? SOUL_COLOR_1 : SOUL_COLOR_2;
+            spawn(x, y, vx, vy, 4.0f + rand.nextInt(3), c, 16 + rand.nextInt(10), 0.15f);
+        }
+    }
+
+    public void spawnSoulTrail(float x, float y) {
+        float vx = (rand.nextFloat() - 0.5f) * 1.5f;
+        float vy = (rand.nextFloat() - 0.5f) * 1.5f;
+        Color c = rand.nextBoolean() ? SOUL_COLOR_1 : SOUL_COLOR_2;
+        spawn(x, y, vx, vy, 3.5f, c, 12, 0.05f);
     }
 
     public void update() {
