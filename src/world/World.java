@@ -37,6 +37,26 @@ public class World {
 		return tilesData;
 	}
 
+	/**
+	 * Returns a deep defensive copy of the tile matrix to protect internal state.
+	 */
+	public int[][] getClonedWorldData() {
+		if (tilesData == null) return new int[0][0];
+		int[][] clone = new int[tilesData.length][];
+		for (int i = 0; i < tilesData.length; i++) {
+			clone[i] = tilesData[i].clone();
+		}
+		return clone;
+	}
+
+	public int getWidthInTiles() {
+		return (tilesData != null && tilesData.length > 0) ? tilesData[0].length : 0;
+	}
+
+	public int getHeightInTiles() {
+		return (tilesData != null) ? tilesData.length : 0;
+	}
+
 	public int getTileAt(int col, int row) {
 		if (row < 0 || row >= tilesData.length || col < 0 || col >= tilesData[0].length) {
 			return 0;

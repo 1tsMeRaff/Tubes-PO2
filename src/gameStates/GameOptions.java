@@ -20,6 +20,14 @@ public class GameOptions extends States implements StateMethods {
     private Rectangle backBtn;
     private boolean backHover, backPressed;
 
+    private static final Color COLOR_DARK_BACKUP = new Color(30, 30, 30);
+    private static final Color COLOR_BTN_PRESSED = new Color(150, 50, 50);
+    private static final Color COLOR_BTN_HOVER = new Color(255, 215, 0);
+
+    private final Font titleFont = new Font("Arial", Font.BOLD, (int)(36 * GameCore.SCALE));
+    private final Font subtitleFont = new Font("Arial", Font.PLAIN, (int)(16 * GameCore.SCALE));
+    private final Font buttonFont = new Font("Arial", Font.BOLD, (int)(24 * GameCore.SCALE));
+
     public GameOptions(GameCore gc) {
         super(gc);
         loadBackground();
@@ -55,19 +63,19 @@ public class GameOptions extends States implements StateMethods {
         if (backgroundImage != null) {
             g.drawImage(backgroundImage, bgX, bgY, bgW, bgH, null);
         } else {
-            g.setColor(new Color(30, 30, 30)); // Warna gelap cadangan
+            g.setColor(COLOR_DARK_BACKUP); // Warna gelap cadangan
             g.fillRect(0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT);
         }
 
         // 2. Teks Judul Layar
         g.setColor(Color.WHITE);
-        g.setFont(new Font("Arial", Font.BOLD, (int)(36 * GameCore.SCALE)));
+        g.setFont(titleFont);
         String title = "OPTIONS MENU";
         int titleWidth = g.getFontMetrics().stringWidth(title);
         g.drawString(title, GameCore.GAME_WIDTH / 2 - titleWidth / 2, (int)(100 * GameCore.SCALE));
 
         // 3. Teks Keterangan (Sementara)
-        g.setFont(new Font("Arial", Font.PLAIN, (int)(16 * GameCore.SCALE)));
+        g.setFont(subtitleFont);
         String subtitle = "Pengaturan Audio & Kontrol dalam tahap pengembangan.";
         int subWidth = g.getFontMetrics().stringWidth(subtitle);
         g.drawString(subtitle, GameCore.GAME_WIDTH / 2 - subWidth / 2, (int)(150 * GameCore.SCALE));
@@ -79,14 +87,14 @@ public class GameOptions extends States implements StateMethods {
     private void drawTransparentButton(Graphics g, Rectangle bounds, String text, boolean isHover, boolean isPressed) {
         // Efek warna saat ditekan/di-hover
         if (isPressed) {
-            g.setColor(new Color(150, 50, 50));  // Merah gelap
+            g.setColor(COLOR_BTN_PRESSED);  // Merah gelap
         } else if (isHover) {
-            g.setColor(new Color(255, 215, 0));  // Emas
+            g.setColor(COLOR_BTN_HOVER);    // Emas
         } else {
-            g.setColor(Color.LIGHT_GRAY);        // Normal
+            g.setColor(Color.LIGHT_GRAY);   // Normal
         }
 
-        g.setFont(new Font("Arial", Font.BOLD, (int)(24 * GameCore.SCALE)));
+        g.setFont(buttonFont);
         int stringWidth = g.getFontMetrics().stringWidth(text);
         int stringHeight = g.getFontMetrics().getHeight();
         

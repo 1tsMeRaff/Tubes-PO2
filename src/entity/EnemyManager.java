@@ -4,8 +4,6 @@ import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import gameStates.PlayStates;
 import main.GameCore;
 import utilitytools.LoadSave;
@@ -15,7 +13,8 @@ public class EnemyManager {
 
     private PlayStates playStates;
     
-    private Map<Integer, BufferedImage[][]> enemySpriteMap = new HashMap<>();
+    public static final int TOTAL_ENEMY_TYPES = 5;
+    private final BufferedImage[][][] enemySprites = new BufferedImage[TOTAL_ENEMY_TYPES][][];
     private ArrayList<Enemy> enemies = new ArrayList<>();
 
     public EnemyManager(PlayStates playStates) {
@@ -55,9 +54,12 @@ public class EnemyManager {
         
         for (Enemy e : enemies) {
             if (e.isActive()) {
-                BufferedImage[][] atlas = enemySpriteMap.get(e.getEnemyType());
-                if (atlas != null) {
-                    e.draw(g2, xLvlOffset, atlas); 
+                int type = e.getEnemyType();
+                if (type >= 0 && type < enemySprites.length) {
+                    BufferedImage[][] atlas = enemySprites[type];
+                    if (atlas != null) {
+                        e.draw(g2, xLvlOffset, atlas); 
+                    }
                 }
             }
         } 
@@ -147,7 +149,7 @@ public class EnemyManager {
                         SLIME_WIDTH_DEFAULT, SLIME_HEIGHT_DEFAULT);
             }
         }
-        enemySpriteMap.put(SLIME, slimeImg);
+        enemySprites[SLIME] = slimeImg;
         
         BufferedImage[][] skullwolfImg = new BufferedImage[4][7];
         BufferedImage tempSkullwolf = LoadSave.GetSpriteAtlas(LoadSave.SKULLWOLF_SPRITE);
@@ -161,7 +163,7 @@ public class EnemyManager {
                 );
             }
         }
-        enemySpriteMap.put(SKULLWOLF, skullwolfImg);
+        enemySprites[SKULLWOLF] = skullwolfImg;
         
         BufferedImage[][] bringerImg = new BufferedImage[8][BRINGER_SPRITE_COLUMNS]; 
         BufferedImage bringerSheet = LoadSave.GetSpriteAtlas("Bringer_of_Death.png");
@@ -171,7 +173,7 @@ public class EnemyManager {
         loadBringerAnimation(bringerImg, bringerSheet, ATTACK, 2);
         loadBringerAnimation(bringerImg, bringerSheet, HURT, 3);
         loadBringerAnimation(bringerImg, bringerSheet, MATI, 4);
-        enemySpriteMap.put(BRINGER_OF_DEATH, bringerImg);       
+        enemySprites[BRINGER_OF_DEATH] = bringerImg;       
         
         BufferedImage[][] demonBossImg = new BufferedImage[6][DEMON_BOSS_SPRITE_COLUMNS];
         BufferedImage demonBossSheet = LoadSave.GetSpriteAtlas(LoadSave.DEMON_BOSS_SPRITE);
@@ -180,7 +182,7 @@ public class EnemyManager {
         loadDemonBossAnimation(demonBossImg, demonBossSheet, ATTACK, 2);
         loadDemonBossAnimation(demonBossImg, demonBossSheet, HURT, 3);
         loadDemonBossAnimation(demonBossImg, demonBossSheet, MATI, 4);
-        enemySpriteMap.put(DEMON_BOSS, demonBossImg);
+        enemySprites[DEMON_BOSS] = demonBossImg;
         
         BufferedImage[][] blueGolemImg = new BufferedImage[6][BLUE_GOLEM_SPRITE_COLUMNS];
         BufferedImage blueGolemSheet = LoadSave.GetSpriteAtlas(LoadSave.BLUE_GOLEM_SPRITE);
@@ -189,7 +191,7 @@ public class EnemyManager {
         loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, ATTACK, 0);
         loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, HURT, 2);
         loadBlueGolemAnimation(blueGolemImg, blueGolemSheet, MATI, 1);
-        enemySpriteMap.put(BLUE_GOLEM, blueGolemImg);
+        enemySprites[BLUE_GOLEM] = blueGolemImg;
     }
     
     private void loadDemonBossAnimation(BufferedImage[][] targetArray, BufferedImage sheet, int targetState, int sourceRow) {

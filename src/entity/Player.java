@@ -23,6 +23,7 @@ public class Player extends Entity implements Damageable {
     private final PlayerHUD playerHUD = new PlayerHUD(); 
     private final PlayerPhysics physics = new PlayerPhysics(this);
     private final PlayerCombat combat = new PlayerCombat(this); 
+    private final PlayerInventory playerInventory = new PlayerInventory(this);
 
     // Animasi & Render
     private BufferedImage[][] animasi;
@@ -76,17 +77,9 @@ public class Player extends Entity implements Damageable {
     private float knockbackFriction = 0.15f * GameCore.SCALE;
     private boolean isKnockedDown = false;
 
-    // Inventory
-    public ArrayList<Integer> inventory = new ArrayList<>();
-    public final int maxInventorySize = 24;
-
-    // Sistem Equipment
-    private int equippedHelmet = -1; 
-    private int equippedArmor = -1;  
-    private int equippedGloves = -1; 
-    private int equippedShoes = -1;  
-    private int equippedAcc1 = -1;   
-    private int equippedAcc2 = -1;   
+    // Inventory & Equipment (SRP Delegation to PlayerInventory)
+    public ArrayList<Integer> inventory = playerInventory.getItems();
+    public final int maxInventorySize = PlayerInventory.MAX_INVENTORY_SIZE;
 
     private int flipX = 0;
     private int flipW = 1;
@@ -168,62 +161,15 @@ public class Player extends Entity implements Damageable {
     }
 
     public void calculateDefense() {
-        int equipDef = 0;
-        equipDef += getEquipmentDefenseValue(equippedHelmet);
-        equipDef += getEquipmentDefenseValue(equippedArmor);
-        equipDef += getEquipmentDefenseValue(equippedGloves);
-        equipDef += getEquipmentDefenseValue(equippedShoes);
-        equipDef += getEquipmentDefenseValue(equippedAcc1);
-        equipDef += getEquipmentDefenseValue(equippedAcc2);
-        stats.recalculateDefense(equipDef);
-    }
-
-    private int getEquipmentDefenseValue(int itemType) {
-        if (itemType == -1) return 0;
-        switch (itemType) {
-            case utilitytools.Konstanta.ObjectConstants.HELMET: return 5;
-            case utilitytools.Konstanta.ObjectConstants.ARMOR: return 15;
-            case utilitytools.Konstanta.ObjectConstants.GLOVES: return 3;
-            case utilitytools.Konstanta.ObjectConstants.SHOES: return 4;
-            case utilitytools.Konstanta.ObjectConstants.RING: return 2;
-            case utilitytools.Konstanta.ObjectConstants.SACK: return 4;
-            default: return 0;
-        }
+        stats.recalculateDefense(playerInventory.calculateDefenseBonus());
     }
 
     public boolean addItemToInventory(int objType) {
-        if (inventory.size() < maxInventorySize) {
-            inventory.add(objType);
-            System.out.println("Item masuk tas. Tipe ID: " + objType);
-            return true;
-        } else {
-            System.out.println("Penyimpanan Penuh! Tidak bisa mengambil barang.");
-            return false;
-        }
+        return playerInventory.addItem(objType);
     }
 
     public void unequipItem(int equipSlotIndex) {
-        if (inventory.size() >= maxInventorySize) {
-            System.out.println("Tas penuh, tidak bisa melepas perlengkapan!");
-            return;
-        }
-        
-        int itemToReturn = -1;
-        
-        switch (equipSlotIndex) {
-            case 0: itemToReturn = equippedHelmet; equippedHelmet = -1; break;
-            case 1: itemToReturn = equippedArmor; equippedArmor = -1; break;
-            case 2: itemToReturn = equippedShoes; equippedShoes = -1; break;
-            case 3: itemToReturn = equippedAcc1; equippedAcc1 = -1; break;
-            case 4: itemToReturn = equippedAcc2; equippedAcc2 = -1; break;
-            case 5: itemToReturn = equippedGloves; equippedGloves = -1; break;
-        }
-        
-        if (itemToReturn != -1) {
-            inventory.add(itemToReturn);
-            calculateDefense();
-            System.out.println("Perlengkapan dilepas!");
-        }
+        playerInventory.unequipItem(equipSlotIndex);
     }
     
     public void useItem(int itemIndex) {
@@ -255,23 +201,7 @@ public class Player extends Entity implements Damageable {
     }
 
     public void equipItem(int itemIndex, String equipmentType) {
-        if (itemIndex < inventory.size()) {
-            int itemToEquip = inventory.get(itemIndex);
-            int oldItem = -1;
-            
-            switch (equipmentType.toLowerCase()) {
-                case "head": oldItem = equippedHelmet; equippedHelmet = itemToEquip; break;
-                case "body": oldItem = equippedArmor; equippedArmor = itemToEquip; break;
-                case "hands": oldItem = equippedGloves; equippedGloves = itemToEquip; break;
-                case "shoes": oldItem = equippedShoes; equippedShoes = itemToEquip; break;
-                case "accessory1": oldItem = equippedAcc1; equippedAcc1 = itemToEquip; break;
-                case "accessory2": oldItem = equippedAcc2; equippedAcc2 = itemToEquip; break;
-            }
-            
-            inventory.remove(itemIndex);
-            if (oldItem != -1) inventory.add(oldItem);
-            calculateDefense();
-        }
+        playerInventory.equipItem(itemIndex, equipmentType);
     }
 
     public void changeHealth(int value) {
@@ -737,18 +667,19 @@ public class Player extends Entity implements Damageable {
     public void setJump(boolean jump) { this.jump = jump; }
     public java.awt.geom.Rectangle2D.Float getHitbox() { return hitBox; }
 
-    // Equipment Getter untuk UI Inventory
-    public int getEquippedHelmet() { return equippedHelmet; }
-    public int getEquippedArmor() { return equippedArmor; }
-    public int getEquippedGloves() { return equippedGloves; }
-    public int getEquippedShoes() { return equippedShoes; }
-    public int getEquippedAcc1() { return equippedAcc1; }
-    public int getEquippedAcc2() { return equippedAcc2; }
+    // Equipment Getter untuk UI Inventory & Persistence (Delegated to PlayerInventory)
+    public int getEquippedHelmet() { return playerInventory.getEquippedHelmet(); }
+    public int getEquippedArmor() { return playerInventory.getEquippedArmor(); }
+    public int getEquippedGloves() { return playerInventory.getEquippedGloves(); }
+    public int getEquippedShoes() { return playerInventory.getEquippedShoes(); }
+    public int getEquippedAcc1() { return playerInventory.getEquippedAcc1(); }
+    public int getEquippedAcc2() { return playerInventory.getEquippedAcc2(); }
     public int getTotalDefense() { return stats.getTotalDefense(); }
 
     // Sub-komponen Getters (SRP Architecture)
     public PlayerStats getStats() { return stats; }
     public PlayerHUD getPlayerHUD() { return playerHUD; }
+    public PlayerInventory getPlayerInventory() { return playerInventory; }
 
     // Tambahan Getter untuk UI Status & Backward Compatibility
     public int getLevel() { return stats.getLevel(); }
@@ -765,12 +696,12 @@ public class Player extends Entity implements Damageable {
     public void setMaxExp(int maxExp) { stats.setMaxExp(maxExp); }
     public void setCurrentHealth(int health) { stats.setCurrentHealth(health); }
     public void setCurrentMana(int mana) { stats.setCurrentMana(mana); }
-    public void setEquippedHelmet(int id) { this.equippedHelmet = id; }
-    public void setEquippedArmor(int id) { this.equippedArmor = id; }
-    public void setEquippedGloves(int id) { this.equippedGloves = id; }
-    public void setEquippedShoes(int id) { this.equippedShoes = id; }
-    public void setEquippedAcc1(int id) { this.equippedAcc1 = id; }
-    public void setEquippedAcc2(int id) { this.equippedAcc2 = id; }
+    public void setEquippedHelmet(int id) { playerInventory.setEquippedHelmet(id); }
+    public void setEquippedArmor(int id) { playerInventory.setEquippedArmor(id); }
+    public void setEquippedGloves(int id) { playerInventory.setEquippedGloves(id); }
+    public void setEquippedShoes(int id) { playerInventory.setEquippedShoes(id); }
+    public void setEquippedAcc1(int id) { playerInventory.setEquippedAcc1(id); }
+    public void setEquippedAcc2(int id) { playerInventory.setEquippedAcc2(id); }
 
     // Subcomponents & Accessors (Pillar 3 SRP Modernization)
     public PlayerPhysics getPhysics() { return physics; }

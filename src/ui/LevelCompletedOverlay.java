@@ -17,6 +17,7 @@ public class LevelCompletedOverlay {
 	private PlayStates playStates;
 	private UrmButton menu, next;
 	private BufferedImage img;
+	private static final Color COLOR_DIM_BG = new Color(0, 0, 0, 200);
 	private int bgX, bgY, bgW, bgH;
 
 	public LevelCompletedOverlay(PlayStates playStates) {
@@ -52,7 +53,7 @@ public class LevelCompletedOverlay {
 	}
 
 	public void draw(Graphics g) {
-		g.setColor(new Color(0, 0, 0, 200));
+		g.setColor(COLOR_DIM_BG);
 		g.fillRect(0, 0, GameCore.GAME_WIDTH, GameCore.GAME_HEIGHT);
 
 		// Menggunakan gambar background yang disiapkan Arya

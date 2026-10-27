@@ -28,6 +28,7 @@ public class ObjectManager {
     private ArrayList<DroppedEquipment> droppedEquipments = new ArrayList<>();
 
     public static double BOSS_ARMOR_DROP_CHANCE = 0.75; // 75% Drop Boss
+    private final Font signFont = new Font("Monospaced", Font.BOLD, (int)(10 * GameCore.SCALE));
 
     public ObjectManager(PlayStates playStates) {
         this.playStates = playStates;
@@ -198,7 +199,7 @@ public class ObjectManager {
             int drawY = (int) (s.getHitbox().y - s.getyDrawOffset());
 
             g.drawImage(signImg, drawX, drawY, SIGN_WIDTH, SIGN_HEIGHT, null);
-            g.setFont(new Font("Monospaced", Font.BOLD, (int)(10 * GameCore.SCALE)));
+            g.setFont(signFont);
             FontMetrics fm = g.getFontMetrics();
 
             if (s.getMiddleText() != null && !s.getMiddleText().isEmpty()) {
