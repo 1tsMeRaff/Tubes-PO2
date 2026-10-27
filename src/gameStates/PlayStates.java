@@ -318,44 +318,142 @@ public class PlayStates extends States implements StateMethods {
             gameOverOverlay.keyPressed(e);
             return;
         }
-        if (lvlCompleted) return;
-        if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-            paused = !paused;
+
+        int code = e.getKeyCode();
+
+        // 1. Level completed navigation via keyboard
+        if (lvlCompleted) {
+            if (code == KeyEvent.VK_ENTER || code == KeyEvent.VK_SPACE) {
+                loadNextLevel();
+            } else if (code == KeyEvent.VK_ESCAPE) {
+                resetAll(200, 200);
+                gameStates.GameStates.state = gameStates.GameStates.MENU;
+                gc.getAudioPlayer().playSong(audio.AudioPlayer.MENU_1);
+            }
             return;
         }
-        if (e.getKeyCode() == KeyEvent.VK_F11) {
+
+        // 2. Fullscreen Toggle
+        if (code == KeyEvent.VK_F11) {
             gc.getGameFrame().toggleFullScreen();
             return;
         }
-        if (e.getKeyCode() == KeyEvent.VK_F) {
+
+        // 3. Quick Save
+        if (code == KeyEvent.VK_F5) {
+            utilitytools.SaveLoadManager.saveGame(this);
+            return;
+        }
+
+        // 4. Inventory Toggle (I = Universal RPG standard, Tab = Overlay standard, E = Interaction, F = Legacy)
+        if (code == KeyEvent.VK_I || code == KeyEvent.VK_TAB || code == KeyEvent.VK_E || code == KeyEvent.VK_F) {
+            if (paused) return;
             inventoryOpen = !inventoryOpen;
             if (inventoryOpen) {
+                player.resetDirBooleans();
                 inventoryOverlay.resetMenu();
             }
             return;
         }
-        if (e.getKeyCode() == KeyEvent.VK_F5) {
-            utilitytools.SaveLoadManager.saveGame(this);
+
+        // 5. ESC priority: Close Inventory first if open, else toggle Pause
+        if (code == KeyEvent.VK_ESCAPE) {
+            if (inventoryOpen) {
+                inventoryOpen = false;
+                return;
+            }
+            paused = !paused;
+            if (paused) {
+                player.resetDirBooleans();
+            }
             return;
         }
-        if (inventoryOpen) return; 
-        if (paused) return;
-        
-        switch(e.getKeyCode()) {
-            case KeyEvent.VK_A: player.setLeft(true); break;
-            case KeyEvent.VK_D: player.setRight(true); break;
-            case KeyEvent.VK_SPACE: player.setJump(true); break;
-            case KeyEvent.VK_Q: player.setDash(true); break;
+
+        // 6. Pause alias 'P'
+        if (code == KeyEvent.VK_P) {
+            if (inventoryOpen) return;
+            paused = !paused;
+            if (paused) {
+                player.resetDirBooleans();
+            }
+            return;
+        }
+
+        // Block gameplay inputs if menus are open
+        if (inventoryOpen || paused) return;
+
+        // 7. Gameplay Controls
+        switch (code) {
+            // Movement Left: A or Left Arrow
+            case KeyEvent.VK_A:
+            case KeyEvent.VK_LEFT:
+                player.setLeft(true);
+                break;
+
+            // Movement Right: D or Right Arrow
+            case KeyEvent.VK_D:
+            case KeyEvent.VK_RIGHT:
+                player.setRight(true);
+                break;
+
+            // Jump / Double Jump: Space, W, Up Arrow, or K (Arcade)
+            case KeyEvent.VK_SPACE:
+            case KeyEvent.VK_W:
+            case KeyEvent.VK_UP:
+            case KeyEvent.VK_K:
+                player.setJump(true);
+                break;
+
+            // Dash: Shift (Universal), L (Arcade), Q (Legacy), C (Retro)
+            case KeyEvent.VK_SHIFT:
+            case KeyEvent.VK_L:
+            case KeyEvent.VK_Q:
+            case KeyEvent.VK_C:
+                player.setDash(true);
+                break;
+
+            // Attack / Charge: J (Arcade) or X (Retro PC)
+            case KeyEvent.VK_J:
+            case KeyEvent.VK_X:
+                player.setCharging(true);
+                break;
         }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        if (paused || lvlCompleted || gameOver || inventoryOpen) return;
-        switch(e.getKeyCode()) {
-            case KeyEvent.VK_A: player.setLeft(false); break;
-            case KeyEvent.VK_D: player.setRight(false); break;
-            case KeyEvent.VK_SPACE: player.setJump(false); break;
+        if (paused || lvlCompleted || gameOver || inventoryOpen) {
+            player.resetDirBooleans();
+            return;
+        }
+
+        int code = e.getKeyCode();
+        switch (code) {
+            // Movement Left Release
+            case KeyEvent.VK_A:
+            case KeyEvent.VK_LEFT:
+                player.setLeft(false);
+                break;
+
+            // Movement Right Release
+            case KeyEvent.VK_D:
+            case KeyEvent.VK_RIGHT:
+                player.setRight(false);
+                break;
+
+            // Jump Release
+            case KeyEvent.VK_SPACE:
+            case KeyEvent.VK_W:
+            case KeyEvent.VK_UP:
+            case KeyEvent.VK_K:
+                player.setJump(false);
+                break;
+
+            // Attack Release (Triggers Slash or Heavy Charge Attack)
+            case KeyEvent.VK_J:
+            case KeyEvent.VK_X:
+                player.releaseAttack();
+                break;
         }
     }
     

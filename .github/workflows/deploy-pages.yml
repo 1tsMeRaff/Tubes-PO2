@@ -50,6 +50,7 @@ jobs:
           java -Djava.awt.headless=true -cp "bin:resources" entity.PlayerInventoryTest
           java -Djava.awt.headless=true -cp "bin:resources" entity.PlayerStatsTest
           java -Djava.awt.headless=true -cp "bin:resources" inputs.InputDispatcherTest
+          java -Djava.awt.headless=true -cp "bin:resources" inputs.KeybindingsWiringTest
           java -Djava.awt.headless=true -cp "bin:resources" utilitytools.HelpMethodsTest
           java -Djava.awt.headless=true -cp "bin:resources" utilitytools.ResourceLoaderTest
           java -Djava.awt.headless=true -cp "bin:resources" world.CampaignProgressionTest
