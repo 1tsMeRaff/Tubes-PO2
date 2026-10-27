@@ -131,6 +131,7 @@ public class KeybindingsWiringTest {
 
     private static boolean testAttackKeybindings() {
         Player player = new Player(100, 100, 64, 40, null);
+        player.setInAir(false);
 
         // Attack keys: J (Arcade) and X (Retro PC)
         int[] attackKeys = {KeyEvent.VK_J, KeyEvent.VK_X};

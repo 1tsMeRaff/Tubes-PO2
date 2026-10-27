@@ -268,7 +268,10 @@ public class PlayStates extends States implements StateMethods {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        if (gameOver) return; 
+        if (gameOver) {
+            gameOverOverlay.mousePressed(e);
+            return;
+        }
         if (inventoryOpen) {
             inventoryOverlay.mousePressed(e);
             return;
@@ -286,7 +289,10 @@ public class PlayStates extends States implements StateMethods {
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (gameOver) return;
+        if (gameOver) {
+            gameOverOverlay.mouseReleased(e);
+            return;
+        }
         if (paused) {
             pauseOverlay.mouseReleased(e);
         } else if (lvlCompleted) {
@@ -298,7 +304,10 @@ public class PlayStates extends States implements StateMethods {
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        if (gameOver) return;
+        if (gameOver) {
+            gameOverOverlay.mouseMoved(e);
+            return;
+        }
         if (inventoryOpen) {
             inventoryOverlay.mouseMoved(e);
             return;

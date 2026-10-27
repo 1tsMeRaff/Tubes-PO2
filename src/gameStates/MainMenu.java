@@ -172,8 +172,9 @@ public class MainMenu extends States implements StateMethods {
             gc.getGameFrame().toggleFullScreen(); 
             return;
         }
-        if (e.getKeyCode() == KeyEvent.VK_ESCAPE && isLevelSelectActive) {
-            setLevelSelectActive(false);
+        if (isLevelSelectActive) {
+            selectLevelOverlay.keyPressed(e);
+            return;
         }
     }
     @Override public void keyReleased(KeyEvent e) {}

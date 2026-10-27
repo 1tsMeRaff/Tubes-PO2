@@ -245,7 +245,9 @@ public class Player extends Entity implements Damageable {
     }
 
     private void checkPotionTouched() {
-        playStates.checkPotionTouched(hitBox);
+        if (playStates != null) {
+            playStates.checkPotionTouched(hitBox);
+        }
     }
 
     private void checkAttack() {
@@ -257,15 +259,14 @@ public class Player extends Entity implements Damageable {
             attackCheck = true;
             int damageToDeal = isExecutingChargeAttack ? (int)(stats.getDps() * 2.5) : (int)stats.getDps();
             
-
-            int randomAttack = 4 + new java.util.Random().nextInt(3);
-            playStates.getGameCore().getAudioPlayer().playEffect(randomAttack);
-            
-
-
-
-            playStates.checkHitEnemy(AttackBox, damageToDeal);
-            playStates.checkObjectHit(AttackBox);
+            if (playStates != null) {
+                if (playStates.getGameCore() != null && playStates.getGameCore().getAudioPlayer() != null) {
+                    int randomAttack = 4 + new java.util.Random().nextInt(3);
+                    playStates.getGameCore().getAudioPlayer().playEffect(randomAttack);
+                }
+                playStates.checkHitEnemy(AttackBox, damageToDeal);
+                playStates.checkObjectHit(AttackBox);
+            }
         }
     }
 
@@ -466,7 +467,9 @@ public class Player extends Entity implements Damageable {
         attacking = true;
         chargeTick = 0;
         
-        playStates.getGameCore().getAudioPlayer().playEffect(audio.AudioPlayer.SLASH_SOUND);
+        if (playStates != null && playStates.getGameCore() != null && playStates.getGameCore().getAudioPlayer() != null) {
+            playStates.getGameCore().getAudioPlayer().playEffect(audio.AudioPlayer.SLASH_SOUND);
+        }
     }
 
     private void updatePos() {
@@ -528,7 +531,7 @@ public class Player extends Entity implements Damageable {
 
             if (!utilitytools.HelpMethods.IsEntityOnFloor(hitBox, mapData)) {
                 scratchHitbox.setRect(hitBox.x, hitBox.y + 1, hitBox.width, hitBox.height);
-                if (playStates.getObjectManager().getIntersectingContainer(scratchHitbox) == null) {
+                if (playStates == null || playStates.getObjectManager() == null || playStates.getObjectManager().getIntersectingContainer(scratchHitbox) == null) {
                     inAir = true;
                 }
             }
@@ -541,7 +544,8 @@ public class Player extends Entity implements Damageable {
             }
             
             scratchHitbox.setRect(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height);
-            GameContainer gcY = playStates.getObjectManager().getIntersectingContainer(scratchHitbox);
+            GameContainer gcY = (playStates != null && playStates.getObjectManager() != null) 
+                    ? playStates.getObjectManager().getIntersectingContainer(scratchHitbox) : null;
             
             if (utilitytools.HelpMethods.canMoveHere(hitBox.x, hitBox.y + airSpeed, hitBox.width, hitBox.height, mapData) && gcY == null) {
                 hitBox.y += airSpeed;
@@ -591,8 +595,10 @@ public class Player extends Entity implements Damageable {
                 airSpeed = jumpSpeed;
                 canDoubleJump = false;
                 jump = false;
-                playStates.getGameCore().getAudioPlayer().playEffect(audio.AudioPlayer.JUMP);
-                if (playStates.getParticlePool() != null) {
+                if (playStates != null && playStates.getGameCore() != null && playStates.getGameCore().getAudioPlayer() != null) {
+                    playStates.getGameCore().getAudioPlayer().playEffect(audio.AudioPlayer.JUMP);
+                }
+                if (playStates != null && playStates.getParticlePool() != null) {
                     playStates.getParticlePool().spawnDust(hitBox.x + hitBox.width / 2, hitBox.y + hitBox.height);
                 }
             }
@@ -601,8 +607,10 @@ public class Player extends Entity implements Damageable {
         inAir = true;
         airSpeed = jumpSpeed;
         jump = false;
-        playStates.getGameCore().getAudioPlayer().playEffect(audio.AudioPlayer.JUMP);
-        if (playStates.getParticlePool() != null) {
+        if (playStates != null && playStates.getGameCore() != null && playStates.getGameCore().getAudioPlayer() != null) {
+            playStates.getGameCore().getAudioPlayer().playEffect(audio.AudioPlayer.JUMP);
+        }
+        if (playStates != null && playStates.getParticlePool() != null) {
             playStates.getParticlePool().spawnDust(hitBox.x + hitBox.width / 2, hitBox.y + hitBox.height);
         }
     }
@@ -635,8 +643,9 @@ public class Player extends Entity implements Damageable {
     }
 
     private void updateXPos(float xSpeed) {
-        Rectangle2D.Float nextXHitbox = new Rectangle2D.Float(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height);
-        GameContainer gcX = playStates.getObjectManager().getIntersectingContainer(nextXHitbox);
+        scratchHitbox.setRect(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height);
+        GameContainer gcX = (playStates != null && playStates.getObjectManager() != null) 
+                ? playStates.getObjectManager().getIntersectingContainer(scratchHitbox) : null;
         if (canMoveHere(hitBox.x + xSpeed, hitBox.y, hitBox.width, hitBox.height, mapData) && gcX == null) {
             hitBox.x += xSpeed;
         } else {
@@ -743,6 +752,8 @@ public class Player extends Entity implements Damageable {
     public void setDown(boolean down) { this.down = down; }
     public void setJump(boolean jump) { this.jump = jump; }
     public boolean isJump() { return jump; }
+    public boolean isInAir() { return inAir; }
+    public void setInAir(boolean inAir) { this.inAir = inAir; }
     public java.awt.geom.Rectangle2D.Float getHitbox() { return hitBox; }
 
     // Equipment Getter untuk UI Inventory & Persistence (Delegated to PlayerInventory)
