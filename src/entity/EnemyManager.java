@@ -138,6 +138,37 @@ public class EnemyManager {
             }
         }
     }
+
+    public boolean checkCurseHit(Rectangle2D.Float curseBox, int damage, int dir, Player player) {
+        boolean hitAny = false;
+        for (Enemy e : enemies) {
+            if (e.isActive() && curseBox.intersects(e.getHitBox())) {
+                e.hit(damage, player, playStates);
+                hitAny = true;
+
+                float hitX = e.getHitBox().x + (e.getHitBox().width / 2.0f);
+                float hitY = e.getHitBox().y + (e.getHitBox().height / 2.0f);
+                playStates.getParticlePool().spawnSoulMagic(hitX, hitY, 14);
+                playStates.getFloatingTextPool().spawnCurseDamage(hitX, e.getHitBox().y - 10, damage);
+                playStates.shakeScreen(4, 3);
+
+                if (e.getEnemyType() == DEMON_BOSS) {
+                    DemonBoss demonBoss = (DemonBoss) e;
+                    if (demonBoss.getCurrentHealth() <= 0 || demonBoss.isDead()) {
+                        playStates.getPlayer().gainExp(100);
+                        playStates.getObjectManager().spawnEquipment(
+                            (int) demonBoss.getHitBox().x, 
+                            (int) demonBoss.getHitBox().y
+                        );
+                        playStates.triggerHeavyHit(45, 120, 8); 
+                    } else if (demonBoss.checkHpThresholdEffect()) {
+                        playStates.triggerHeavyHit(20, 25, 12); 
+                    }
+                }
+            }
+        }
+        return hitAny;
+    }
     
     private void loadEnemyImages() {
         // Load Slime

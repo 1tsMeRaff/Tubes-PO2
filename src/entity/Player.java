@@ -77,6 +77,12 @@ public class Player extends Entity implements Damageable {
     private float knockbackFriction = 0.15f * GameCore.SCALE;
     private boolean isKnockedDown = false;
 
+    // Witch Curse & Feline Soul Mechanics
+    private boolean isGroundSlamming = false;
+    private int curseCooldownTick = 0;
+    public static final int CURSE_COOLDOWN = 30;
+    public static final int CURSE_MANA_COST = 25;
+
     // Inventory & Equipment (SRP Delegation to PlayerInventory)
     public ArrayList<Integer> inventory = playerInventory.getItems();
     public final int maxInventorySize = PlayerInventory.MAX_INVENTORY_SIZE;
@@ -140,6 +146,9 @@ public class Player extends Entity implements Damageable {
                 canDash = true;
                 dashCooldownTick = 0;
             }
+        }
+        if (curseCooldownTick > 0) {
+            curseCooldownTick--;
         }
         setAnimation();
         updateAnimationTick();
@@ -389,8 +398,12 @@ public class Player extends Entity implements Damageable {
     public void setCharging(boolean charging) {
         if (inAir) {
             if (charging && !attacking && !dashing) {
-                this.isExecutingChargeAttack = false;
-                this.attacking = true;
+                if (down) {
+                    executeGroundSlam();
+                } else {
+                    this.isExecutingChargeAttack = false;
+                    this.attacking = true;
+                }
             }
             return;
         }
@@ -399,6 +412,47 @@ public class Player extends Entity implements Damageable {
         if (charging) {
             chargeTick = 0;
         }
+    }
+
+    public void executeGroundSlam() {
+        if (!inAir) return;
+        this.isGroundSlamming = true;
+        this.attacking = true;
+        this.airSpeed = 11.5f * main.GameCore.SCALE;
+        if (playStates != null && playStates.getParticlePool() != null) {
+            playStates.getParticlePool().spawnSoulTrail(hitBox.x + (hitBox.width / 2.0f), hitBox.y);
+        }
+    }
+
+    public boolean castWitchCurse() {
+        if (curseCooldownTick > 0) return false;
+
+        if (stats.getCurrentMana() < CURSE_MANA_COST) {
+            if (playStates != null && playStates.getFloatingTextPool() != null) {
+                playStates.getFloatingTextPool().spawn(hitBox.x + (hitBox.width / 2.0f), hitBox.y - 12, "No Mana!", effects.FloatingTextPool.MANA_TEXT);
+            }
+            return false;
+        }
+
+        stats.changeMana(-CURSE_MANA_COST);
+        curseCooldownTick = CURSE_COOLDOWN;
+
+        int curseDamage = (int) (stats.getDps() * 2.5f) + (stats.getLevel() * 6);
+        int dir = (flipW == 1) ? 1 : -1;
+        float startX = hitBox.x + (dir == 1 ? hitBox.width : -20);
+        float startY = hitBox.y + (hitBox.height / 3.0f);
+
+        if (playStates != null && playStates.getCursePool() != null) {
+            playStates.getCursePool().spawn(startX, startY, dir, curseDamage);
+            playStates.getParticlePool().spawnSoulMagic(startX, startY, 12);
+            playStates.shakeScreen(3, 2);
+        }
+
+        if (playStates != null && playStates.getGameCore() != null && playStates.getGameCore().getAudioPlayer() != null) {
+            playStates.getGameCore().getAudioPlayer().playEffect(audio.AudioPlayer.ATTACK_THREE);
+        }
+
+        return true;
     }
 
     public void releaseAttack() {
@@ -557,6 +611,24 @@ public class Player extends Entity implements Damageable {
         if (inAir && playStates != null && playStates.getParticlePool() != null) {
             playStates.getParticlePool().spawnDust(hitBox.x + hitBox.width / 2, hitBox.y + hitBox.height);
         }
+        if (isGroundSlamming) {
+            isGroundSlamming = false;
+            if (playStates != null) {
+                if (playStates.getParticlePool() != null) {
+                    playStates.getParticlePool().spawnDust(hitBox.x + hitBox.width / 2, hitBox.y + hitBox.height, 14);
+                    playStates.getParticlePool().spawnHitSparks(hitBox.x + hitBox.width / 2, hitBox.y + hitBox.height, 8);
+                }
+                playStates.shakeScreen(5, 3);
+                if (playStates.getEnemyManager() != null) {
+                    scratchHitbox.setRect(hitBox.x - 30, hitBox.y, hitBox.width + 60, hitBox.height);
+                    int slamDamage = (int) (stats.getDps() * 2.2f);
+                    playStates.getEnemyManager().checkEnemyHit(scratchHitbox, slamDamage, this);
+                }
+                if (playStates.getGameCore() != null && playStates.getGameCore().getAudioPlayer() != null) {
+                    playStates.getGameCore().getAudioPlayer().playEffect(audio.AudioPlayer.ATTACK_TWO);
+                }
+            }
+        }
         inAir = false;
         airSpeed = 0;
         canDoubleJump = true;
@@ -656,6 +728,8 @@ public class Player extends Entity implements Damageable {
     public boolean isAttacking() { return attacking; }
     public boolean isDashing() { return dashing; }
     public boolean isCharging() { return charging; }
+    public boolean isGroundSlamming() { return isGroundSlamming; }
+    public int getCurseCooldownTick() { return curseCooldownTick; }
     public void setAttack(boolean attacking) { this.attacking = attacking; }
     public PlayStates getPlayStates() { return playStates; }
     public int getFlipW() { return flipW; }

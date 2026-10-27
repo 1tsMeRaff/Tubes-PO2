@@ -18,6 +18,7 @@ public class FloatingTextPool {
     public static final Color DAMAGE_TAKEN = new Color(255, 70, 70);   // Red
     public static final Color HEAL_TEXT    = new Color(80, 240, 90);   // Green
     public static final Color MANA_TEXT    = new Color(80, 160, 255);  // Blue
+    public static final Color CURSE_TEXT   = new Color(210, 80, 255);  // Purple/Curse
 
     public FloatingTextPool() {
         this(DEFAULT_CAPACITY);
@@ -46,6 +47,10 @@ public class FloatingTextPool {
 
     public void spawnDamageDealt(float x, float y, int amount) {
         spawn(x, y, "-" + amount, DAMAGE_DEALT);
+    }
+
+    public void spawnCurseDamage(float x, float y, int amount) {
+        spawn(x, y, "HEX! -" + amount, CURSE_TEXT);
     }
 
     public void spawnDamageTaken(float x, float y, int amount) {
