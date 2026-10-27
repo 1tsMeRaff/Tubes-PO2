@@ -653,6 +653,9 @@ public class Player extends Entity implements Damageable {
 
     // GETTER & SETTER
     public boolean isChargeAttack() { return isExecutingChargeAttack; }
+    public boolean isAttacking() { return attacking; }
+    public boolean isDashing() { return dashing; }
+    public boolean isCharging() { return charging; }
     public void setAttack(boolean attacking) { this.attacking = attacking; }
     public PlayStates getPlayStates() { return playStates; }
     public int getFlipW() { return flipW; }
@@ -665,6 +668,7 @@ public class Player extends Entity implements Damageable {
     public boolean isDown() { return down; }
     public void setDown(boolean down) { this.down = down; }
     public void setJump(boolean jump) { this.jump = jump; }
+    public boolean isJump() { return jump; }
     public java.awt.geom.Rectangle2D.Float getHitbox() { return hitBox; }
 
     // Equipment Getter untuk UI Inventory & Persistence (Delegated to PlayerInventory)
