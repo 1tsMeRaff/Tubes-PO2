@@ -14,6 +14,9 @@ public class HelpMethods {
     }
 
     public static boolean isSolid(float x, float y, int[][] lvlData) {
+        if (lvlData == null) {
+            return false;
+        }
         int xIndex = (int) (x / GameCore.TILES_SIZE);
         int yIndex = (int) (y / GameCore.TILES_SIZE);
 
@@ -26,6 +29,9 @@ public class HelpMethods {
     }
 
     public static boolean isSolidTile(int xTile, int yTile, int[][] lvlData) {
+        if (lvlData == null) {
+            return false;
+        }
         if (yTile < 0 || yTile >= lvlData.length ||
             xTile < 0 || xTile >= lvlData[yTile].length) {
             return true;
@@ -34,6 +40,9 @@ public class HelpMethods {
     }
 
     public static boolean canMoveHere(float x, float y, float width, float height, int[][] tilesData) {
+        if (tilesData == null) {
+            return true;
+        }
         float leftX = x;
         float rightX = x + width - 0.01f;  // Ganti -1 menjadi -0.01f
         float topY = y;
@@ -119,6 +128,9 @@ public class HelpMethods {
 //    }
     
     public static boolean IsEntityOnFloor(Rectangle2D.Float hitbox, int[][] lvlData) {
+        if (lvlData == null) {
+            return true;
+        }
         // Gunakan && (DAN) - Pemain baru jatuh jika KEDUA titik kakinya tidak ada lantai
         // Kurangi 0.01f pada pengecekan sisi kanan untuk menghindari pembacaan tile tetangga
         if (!isSolid(hitbox.x, hitbox.y + hitbox.height + 1, lvlData) &&

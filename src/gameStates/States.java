@@ -20,4 +20,8 @@ public class States {
 	public GameCore GetGame() {
 		return gc;
 	}
+
+	public GameCore getGameCore() {
+		return gc;
+	}
 }

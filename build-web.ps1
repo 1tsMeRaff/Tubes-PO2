@@ -29,6 +29,8 @@ java "-Djava.awt.headless=true" -cp "bin;resources" entity.PlayerStatsTest
 java "-Djava.awt.headless=true" -cp "bin;resources" entity.WitchCurseMechanicTest
 java "-Djava.awt.headless=true" -cp "bin;resources" inputs.InputDispatcherTest
 java "-Djava.awt.headless=true" -cp "bin;resources" inputs.KeybindingsWiringTest
+java "-Djava.awt.headless=true" -cp "bin;resources" ui.GameOverOverlayTest
+java "-Djava.awt.headless=true" -cp "bin;resources" ui.SelectLevelOverlayTest
 java "-Djava.awt.headless=true" -cp "bin;resources" utilitytools.HelpMethodsTest
 java "-Djava.awt.headless=true" -cp "bin;resources" utilitytools.ResourceLoaderTest
 java "-Djava.awt.headless=true" -cp "bin;resources" world.CampaignProgressionTest
@@ -37,7 +39,7 @@ if ($LASTEXITCODE -ne 0) {
     Write-Host "❌ Pengujian unit gagal!" -ForegroundColor Red
     exit 1
 }
-Write-Host "✓ Seluruh 36 unit tests lulus (100%)!" -ForegroundColor Green
+Write-Host "✓ Seluruh 44 unit tests lulus (100%)!" -ForegroundColor Green
 
 # 4. Salin aset dan kemas Tubes-PO2.jar
 Write-Host "`n[3/4] Mengemas Tubes-PO2.jar dengan aset resources..." -ForegroundColor Green

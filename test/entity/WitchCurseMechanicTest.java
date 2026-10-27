@@ -150,7 +150,8 @@ public class WitchCurseMechanicTest {
     private static boolean testFelineGroundSlamMechanic() {
         Player player = new Player(100, 100, 64, 40, null);
 
-        // Ground slam only works in air
+        // Ground slam only works in air - first verify ground state blocks it
+        player.setInAir(false);
         player.setDown(true);
         player.setCharging(true);
         // On ground, normal charge attack starts, not ground slam
@@ -158,9 +159,8 @@ public class WitchCurseMechanicTest {
 
         // Now simulate mid-air state
         player.setCharging(false);
+        player.setInAir(true);
         player.setDown(true);
-        // Trigger jump to be inAir
-        player.setJump(true);
 
         // Now Down + Attack in air triggers ground slam
         player.setCharging(true);
