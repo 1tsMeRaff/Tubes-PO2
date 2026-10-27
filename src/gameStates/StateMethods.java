@@ -27,4 +27,6 @@ public interface StateMethods extends Updatable, Renderable {
 	
 	public void keyReleased(KeyEvent e);
 
+	default void mouseDragged(MouseEvent e) {}
+
 }

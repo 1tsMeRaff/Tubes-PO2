@@ -18,7 +18,10 @@ import ui.LevelCompletedOverlay;
 import ui.PauseOverlay;
 import ui.InventoryOverlay;
 import utilitytools.LoadSave;
+import world.World;
 import world.WorldManager;
+import effects.ParticlePool;
+import effects.FloatingTextPool;
 import static utilitytools.Konstanta.Environment.*;
 
 public class PlayStates extends States implements StateMethods {
@@ -30,6 +33,10 @@ public class PlayStates extends States implements StateMethods {
     private PauseOverlay pauseOverlay;
     private LevelCompletedOverlay levelCompletedOverlay;
     private GameOverOverlay gameOverOverlay; 
+
+    private final ParticlePool particlePool = new ParticlePool();
+    private final FloatingTextPool floatingTextPool = new FloatingTextPool();
+    private float smoothLvlOffsetX = 0f;
 
     private boolean paused = false;
     private boolean lvlCompleted = false;
@@ -83,21 +90,22 @@ public class PlayStates extends States implements StateMethods {
 
     public void loadSelectedLevel(String mapFilePath, String tilesetName) {
         worldManager.loadSpecificWorld(mapFilePath, tilesetName);
-        int[][] newMapData = worldManager.getCurrentMap().getWorldData();
+        World currentWorld = worldManager.getCurrentMap();
+        int[][] newMapData = currentWorld.getWorldData();
         
         player.loadmapData(newMapData);
         objectManager = new ObjectManager(this); 
         objectManager.loadObjectsFromMap(newMapData);
-        enemyManager = new EnemyManager(this); 
+        enemyManager.loadEnemies(currentWorld.getEnemies());
         
         calcLvlOffset();
+        lvlCompleted = false;
         
         // PASTIKAN PEMAIN JATUH DARI ATAS AGAR TIDAK NYANGKUT
         resetAll(200, 400); 
 
-     // --- LOGIKA BACKGROUND BARU ---
+        // --- LOGIKA BACKGROUND BARU ---
         if(tilesetName.equals("main_tileset.png")) {
-            // SEBELUMNYA backgroundImg = null; (Sekarang kita isi dengan gambar Kastil!)
             backgroundImg = LoadSave.GetSpriteAtlas(LoadSave.CASTLE_BACKGROUND_IMG);
         } else {
             backgroundImg = LoadSave.GetSpriteAtlas(LoadSave.PLAY_BACKGROUND_IMG);
@@ -113,15 +121,17 @@ public class PlayStates extends States implements StateMethods {
     }
 
     private void checkCloseToBorder() {
-        int playerX = (int) player.getHitbox().x;
-        int diff = playerX - xLvlOffset;
+        float playerCenterX = player.getHitbox().x + (player.getHitbox().width / 2.0f);
+        float targetOffset = playerCenterX - (GameCore.GAME_WIDTH * 0.45f);
 
-        if (diff > rightBorder) {
-            xLvlOffset += diff - rightBorder;
-        } 
-        else if (diff < leftBorder) {
-            xLvlOffset += diff - leftBorder;
+        if (targetOffset < 0) {
+            targetOffset = 0;
+        } else if (targetOffset > maxLvlOffsetX) {
+            targetOffset = maxLvlOffsetX;
         }
+
+        smoothLvlOffsetX += (targetOffset - smoothLvlOffsetX) * 0.08f;
+        xLvlOffset = Math.round(smoothLvlOffsetX);
 
         if (xLvlOffset > maxLvlOffsetX) {
             xLvlOffset = maxLvlOffsetX;
@@ -164,6 +174,8 @@ public class PlayStates extends States implements StateMethods {
             objectManager.update();
             player.update();
             enemyManager.update(worldManager.getCurrentMap().getWorldData(), player);
+            particlePool.update();
+            floatingTextPool.update();
             checkCloseToBorder();
             
             int endOfMapX = (worldManager.getCurrentMap().getWorldData()[0].length * GameCore.TILES_SIZE) - 50;
@@ -206,6 +218,8 @@ public class PlayStates extends States implements StateMethods {
         objectManager.draw(g, xLvlOffset);
         player.render(g, xLvlOffset);
         enemyManager.draw(g, xLvlOffset);
+        particlePool.draw(g, xLvlOffset);
+        floatingTextPool.draw(g, xLvlOffset);
 
         g2.translate(-shakeX, -shakeY);
 
@@ -222,14 +236,25 @@ public class PlayStates extends States implements StateMethods {
 
     public void loadNextLevel() {
         worldManager.loadNextWorld();
-        int[][] newMapData = worldManager.getCurrentMap().getWorldData();
+        World currentWorld = worldManager.getCurrentMap();
+        int[][] newMapData = currentWorld.getWorldData();
         float newX = 200;
         float newY = 200;
         resetAll(newX, newY); 
         player.loadmapData(newMapData); 
+        objectManager = new ObjectManager(this);
         objectManager.loadObjectsFromMap(newMapData);
+        enemyManager.loadEnemies(currentWorld.getEnemies());
         calcLvlOffset();
-        gc.getAudioPlayer().playSong(audio.AudioPlayer.LEVEL_2);
+        lvlCompleted = false;
+
+        if ("main_tileset.png".equals(currentWorld.getTilesetName())) {
+            backgroundImg = LoadSave.GetSpriteAtlas(LoadSave.CASTLE_BACKGROUND_IMG);
+            gc.getAudioPlayer().playSong(audio.AudioPlayer.LEVEL_2);
+        } else {
+            backgroundImg = LoadSave.GetSpriteAtlas(LoadSave.PLAY_BACKGROUND_IMG);
+            gc.getAudioPlayer().playSong(audio.AudioPlayer.LEVEL_1);
+        }
     }
 
     public void equipPlayerItem(int itemIndex, String slotType) {
@@ -345,7 +370,11 @@ public class PlayStates extends States implements StateMethods {
         lvlCompleted = false;
         gameOver = false; 
         inventoryOpen = false;
-        xLvlOffset = 0; 
+        particlePool.clear();
+        floatingTextPool.clear();
+        smoothLvlOffsetX = targetX - (GameCore.GAME_WIDTH * 0.45f);
+        if (smoothLvlOffsetX < 0) smoothLvlOffsetX = 0;
+        xLvlOffset = Math.round(smoothLvlOffsetX);
     }
     
     public void setGameOver(boolean gameOver) {
@@ -376,14 +405,25 @@ public class PlayStates extends States implements StateMethods {
 
     public void loadWorldByIndex(int index) {
         worldManager.setWorldIndex(index);
-        int[][] currentMapData = worldManager.getCurrentMap().getWorldData();
+        World currentWorld = worldManager.getCurrentMap();
+        int[][] currentMapData = currentWorld.getWorldData();
         
         player.loadmapData(currentMapData);
         objectManager = new ObjectManager(this);
         objectManager.loadObjectsFromMap(currentMapData);
-        enemyManager = new EnemyManager(this); 
+        enemyManager.loadEnemies(currentWorld.getEnemies());
         
         calcLvlOffset();
+        lvlCompleted = false;
+        resetAll(200, 200);
+
+        if ("main_tileset.png".equals(currentWorld.getTilesetName())) {
+            backgroundImg = LoadSave.GetSpriteAtlas(LoadSave.CASTLE_BACKGROUND_IMG);
+            gc.getAudioPlayer().playSong(audio.AudioPlayer.LEVEL_2);
+        } else {
+            backgroundImg = LoadSave.GetSpriteAtlas(LoadSave.PLAY_BACKGROUND_IMG);
+            gc.getAudioPlayer().playSong(audio.AudioPlayer.LEVEL_1);
+        }
     }
 
     public void setPaused(boolean paused) { this.paused = paused; }
@@ -392,4 +432,6 @@ public class PlayStates extends States implements StateMethods {
     public Player getPlayer() { return player; }
     public ObjectManager getObjectManager() { return objectManager; }
     public GameCore getGameCore() { return gc; }
+    public ParticlePool getParticlePool() { return particlePool; }
+    public FloatingTextPool getFloatingTextPool() { return floatingTextPool; }
 }

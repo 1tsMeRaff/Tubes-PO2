@@ -18,6 +18,10 @@ public class MainMenu extends States implements StateMethods {
     private BufferedImage backgroundImage; 
     private BufferedImage panelImage; 
     
+    private static final Color COLOR_PANEL_BACKUP = new Color(60, 40, 20);
+    private static final Color COLOR_BTN_PRESSED = new Color(0, 0, 0, 100);
+    private static final Color COLOR_BTN_HOVER = new Color(255, 255, 255, 50);
+
     private int panelX, panelY, panelWidth, panelHeight;
     private Rectangle startBtn, continueBtn, optionsBtn, exitBtn;
     
@@ -75,7 +79,7 @@ public class MainMenu extends States implements StateMethods {
         if (panelImage != null) {
             g.drawImage(panelImage, panelX, panelY, panelWidth, panelHeight, null);
         } else {
-            g.setColor(new Color(60, 40, 20)); 
+            g.setColor(COLOR_PANEL_BACKUP); 
             g.fillRect(panelX, panelY, panelWidth, panelHeight);
         }
         
@@ -91,10 +95,10 @@ public class MainMenu extends States implements StateMethods {
         
     private void drawButtonHighlight(Graphics g, Rectangle bounds, boolean isHover, boolean isPressed) {
         if (isPressed) {
-            g.setColor(new Color(0, 0, 0, 100)); 
+            g.setColor(COLOR_BTN_PRESSED); 
             g.fillRoundRect(bounds.x, bounds.y, bounds.width, bounds.height, 15, 15);
         } else if (isHover) {
-            g.setColor(new Color(255, 255, 255, 50)); 
+            g.setColor(COLOR_BTN_HOVER); 
             g.fillRoundRect(bounds.x, bounds.y, bounds.width, bounds.height, 15, 15);
         }
     }

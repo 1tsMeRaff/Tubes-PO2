@@ -16,19 +16,19 @@ import core.interfaces.IAudioService;
 
 public class AudioPlayer implements IAudioService {
 
-	public static int MENU_1 = 0;
-	public static int LEVEL_1 = 1;
-	public static int LEVEL_2 = 2;
+	public static final int MENU_1 = 0;
+	public static final int LEVEL_1 = 1;
+	public static final int LEVEL_2 = 2;
 
-	public static int DIE = 0;
-	public static int JUMP = 1;
-	public static int GAMEOVER = 2;
-	public static int LVL_COMPLETED = 3;
-	public static int ATTACK_ONE = 4;
-	public static int ATTACK_TWO = 5;
-	public static int ATTACK_THREE = 6;
-	public static int POTION = 7; 
-	public static int SLASH_SOUND = 8;
+	public static final int DIE = 0;
+	public static final int JUMP = 1;
+	public static final int GAMEOVER = 2;
+	public static final int LVL_COMPLETED = 3;
+	public static final int ATTACK_ONE = 4;
+	public static final int ATTACK_TWO = 5;
+	public static final int ATTACK_THREE = 6;
+	public static final int POTION = 7; 
+	public static final int SLASH_SOUND = 8;
 	
 	private Clip[] songs, effects;
 	private int currentSongId;
@@ -62,6 +62,9 @@ public class AudioPlayer implements IAudioService {
         
         for (int i = 0; i < effects.length; i++) {
             effects[i] = getClip(names[i]);
+            if (effects[i] == null) {
+                effects[i] = ToneSynthFallback.createFallbackClip(i);
+            }
         }
         updateEffectsVolume();
 	}
@@ -93,6 +96,11 @@ public class AudioPlayer implements IAudioService {
 		this.volume = volume;
 		updateSongVolume();
 		updateEffectsVolume();
+	}
+
+	@Override
+	public float getVolume() {
+		return volume;
 	}
 
 	public void stopSong() {

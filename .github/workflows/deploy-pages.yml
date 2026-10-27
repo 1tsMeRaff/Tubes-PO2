@@ -1,0 +1,93 @@
+name: Deploy Tubes-PO2 to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java Development Kit (JDK 21)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Ensure Output Directories Exist
+        run: |
+          mkdir -p bin dist
+
+      - name: Compile Java SE Game Engine and Test Suites
+        run: |
+          javac -encoding UTF-8 -d bin $(find src test -name "*.java")
+
+      - name: Execute Headless Unit Test Suite Verification
+        run: |
+          echo "=== EXECUTING TEST SUITES IN HEADLESS CI ==="
+          java -Djava.awt.headless=true -cp "bin:resources" audio.AudioResilienceTest
+          java -Djava.awt.headless=true -cp "bin:resources" effects.ParticlePoolTest
+          java -Djava.awt.headless=true -cp "bin:resources" entity.BossPolymorphismTest
+          java -Djava.awt.headless=true -cp "bin:resources" entity.PlayerDecompositionTest
+          java -Djava.awt.headless=true -cp "bin:resources" entity.PlayerInventoryTest
+          java -Djava.awt.headless=true -cp "bin:resources" entity.PlayerStatsTest
+          java -Djava.awt.headless=true -cp "bin:resources" inputs.InputDispatcherTest
+          java -Djava.awt.headless=true -cp "bin:resources" utilitytools.HelpMethodsTest
+          java -Djava.awt.headless=true -cp "bin:resources" utilitytools.ResourceLoaderTest
+          java -Djava.awt.headless=true -cp "bin:resources" world.CampaignProgressionTest
+          echo "All unit test suites passed successfully!"
+
+      - name: Bundle Resources and Package Executable JAR
+        run: |
+          # Copy resources directly into classpath root
+          cp -r resources/* bin/
+          
+          # Create executable manifest
+          echo "Main-Class: main.Main" > manifest.txt
+          
+          # Package self-contained runnable JAR
+          jar cvfm dist/Tubes-PO2.jar manifest.txt -C bin .
+          
+          echo "JAR file packaged successfully:"
+          ls -lh dist/Tubes-PO2.jar
+
+      - name: Assemble Web Distribution Portal
+        run: |
+          # Copy web interface into deployment artifact directory
+          cp docs/index.html dist/index.html
+          mkdir -p dist/ui
+          cp resources/ui/mainn_menu.jpeg dist/ui/mainn_menu.jpeg || true
+          
+          # Check distribution directory contents
+          echo "Distribution files ready for GitHub Pages:"
+          ls -la dist/
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Artifact to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

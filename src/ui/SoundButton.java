@@ -8,6 +8,12 @@ import java.awt.Polygon;
 import java.awt.RenderingHints;
 
 public class SoundButton extends PauseButton {
+    private static final Color COLOR_FILL_DEFAULT = new Color(0, 0, 0, 200);
+    private static final Color COLOR_GOLD = new Color(240, 190, 90);
+    private static final Color COLOR_MUTED_RED = new Color(255, 50, 50);
+    private static final BasicStroke STROKE_BORDER = new BasicStroke(3f);
+    private static final BasicStroke STROKE_MUTED = new BasicStroke(4f);
+
     private boolean mouseOver;
     private boolean mousePressed;
     private boolean muted;
@@ -26,17 +32,17 @@ public class SoundButton extends PauseButton {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         // --- WARNA KHAS RETRO ---
-        Color fill = new Color(0, 0, 0, 200); // Latar hitam semi-transparan
+        Color fill = COLOR_FILL_DEFAULT; // Latar hitam semi-transparan
         Color border = Color.WHITE;
         Color icon = Color.WHITE;
         
         // Hover: Menggunakan warna kursor emas RyiSnow
         if (mouseOver) {
-            border = new Color(240, 190, 90);
+            border = COLOR_GOLD;
         }
         // Pressed: Tombol menyala
         if (mousePressed) {
-            fill = new Color(240, 190, 90);
+            fill = COLOR_GOLD;
             border = Color.WHITE;
             icon = Color.BLACK;
         }
@@ -50,7 +56,7 @@ public class SoundButton extends PauseButton {
         
         // Garis Tepi (Lebih tebal agar tegas)
         g2.setColor(border);
-        g2.setStroke(new BasicStroke(3f)); 
+        g2.setStroke(STROKE_BORDER); 
         g2.drawRoundRect(x, y, width, height, arc, arc);
 
         // --- MENGGAMBAR IKON SPEAKER ---
@@ -70,8 +76,8 @@ public class SoundButton extends PauseButton {
 
         // --- TANDA SILANG JIKA MUTED ---
         if (muted) {
-            g2.setColor(new Color(255, 50, 50)); // Merah cerah
-            g2.setStroke(new BasicStroke(4f));
+            g2.setColor(COLOR_MUTED_RED);
+            g2.setStroke(STROKE_MUTED);
             // Garis coret diagonal
             g2.drawLine(x + width / 5, y + height / 5, x + width - width / 5, y + height - height / 5);
         }

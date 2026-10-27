@@ -16,18 +16,34 @@ public class WorldManager {
 
     public WorldManager(GameCore gc) {
         this.gc = gc;
-        importOutsideSprites(LoadSave.WORLD_SPRITE);
         worlds = new ArrayList<>();
         buildAllWorlds();
+        loadCurrentWorldTileset();
     }
 
     private void buildAllWorlds() {
-        worlds.add(new World(LoadSave.GetTilesData("/map_tutorial_fix.txt")));
+        worlds.clear();
+        // Campaign Level 1: Tutorial
+        worlds.add(SinglePassLevelParser.parse("/map_tutorial_fix.txt", "outside_sprites.png", LoadSave.PLAY_BACKGROUND_IMG));
+        // Campaign Level 2: Jungle
+        worlds.add(SinglePassLevelParser.parse("/jungle_map.txt", "map_jungle_fix.png", LoadSave.PLAY_BACKGROUND_IMG));
+        // Campaign Level 3: Castle & Boss
+        worlds.add(SinglePassLevelParser.parse("/main_tileset.txt", "main_tileset.png", LoadSave.CASTLE_BACKGROUND_IMG));
+    }
+
+    public void loadCurrentWorldTileset() {
+        if (!worlds.isEmpty() && worldIndex < worlds.size()) {
+            importOutsideSprites(worlds.get(worldIndex).getTilesetName());
+        } else {
+            importOutsideSprites(LoadSave.WORLD_SPRITE);
+        }
     }
 
     public void loadSpecificWorld(String filePath, String tilesetName) {
+        String bg = tilesetName.equals("main_tileset.png") ? LoadSave.CASTLE_BACKGROUND_IMG : LoadSave.PLAY_BACKGROUND_IMG;
+        World customWorld = SinglePassLevelParser.parse(filePath, tilesetName, bg);
         worlds.clear();
-        worlds.add(new World(LoadSave.GetTilesData(filePath)));
+        worlds.add(customWorld);
         worldIndex = 0;
         importOutsideSprites(tilesetName);
     }
@@ -78,7 +94,7 @@ public class WorldManager {
     }
 
     private boolean isValidTile(int index) {
-        return index >= 0 && index < mapSprite.length;
+        return index >= 0 && mapSprite != null && index < mapSprite.length;
     }
 
     public void update() {
@@ -88,9 +104,9 @@ public class WorldManager {
         worldIndex++;
         if (worldIndex >= worlds.size()) {
             worldIndex = 0;
-            System.out.println("Game Tamat! Kembali ke Menu.");
-            gameStates.GameStates.state = gameStates.GameStates.MENU;
+            System.out.println("Game Tamat! Kembali ke Level 1.");
         }
+        loadCurrentWorldTileset();
     }
 
     public World getCurrentMap() {
@@ -98,5 +114,13 @@ public class WorldManager {
     }
     
     public int getWorldIndex() { return worldIndex; }
-    public void setWorldIndex(int index) { this.worldIndex = index; }
+    
+    public void setWorldIndex(int index) { 
+        this.worldIndex = Math.max(0, Math.min(index, worlds.size() - 1));
+        loadCurrentWorldTileset();
+    }
+
+    public int getTotalWorlds() {
+        return worlds.size();
+    }
 }

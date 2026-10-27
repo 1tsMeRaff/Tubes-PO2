@@ -18,3 +18,9 @@ ANALISIS_PROYEK.md
 *.md
 !AGENTS.md
 !.agents/**
+!docs/**
+
+# Compiled JAR binaries (built in GitHub Actions CI for Pages)
+*.jar
+docs/*.jar
+

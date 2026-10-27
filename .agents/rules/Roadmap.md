@@ -16,43 +16,44 @@ timeline
 ```
 
 ### Phase 1: Critical Stability & Concurrency (Days 1–7)
-- [ ] **Fix 100% CPU Busy-Wait:** Introduce adaptive frame-pacing sleep in `GameCore.run()` when delta is satisfied.
-- [ ] **Thread Visibility:** Convert `GameStates.state` to private with `volatile` accessors to eliminate JMM race conditions between Swing EDT and `gameThread`.
-- [ ] **Native Resource Disposal:** Implement `close()` methods for all audio `Clip` instances in `AudioPlayer.java` upon exit.
-- [ ] **Swing Confinement:** Wrap `new GameCore()` in `SwingUtilities.invokeLater()` inside `Main.main()`.
+- [x] **Fix 100% CPU Busy-Wait:** Adaptive frame-pacing sleep implemented in `GameCore.run()` (`Thread.sleep`/`Thread.yield`).
+- [x] **Thread Visibility:** `GameStates.state` declared `volatile` with `Objects.requireNonNull` validation in `GameStates.java`.
+- [x] **Native Resource Disposal:** `destroy()` and `close()` implemented for audio clips in `AudioPlayer.java` and called on `GameCore.stopGame()`.
+- [x] **Swing Confinement:** Wrapped `GameCore::new` in `SwingUtilities.invokeLater()` inside `Main.main()`.
 
 ### Phase 2: GC Optimization & Hot-Path Tuning (Days 8–14)
-- [ ] **Heap Zero-Allocation:** Replace all per-frame `new Color(...)`, `new Font(...)`, and `new BasicStroke(...)` in UI overlays and buttons with cached constants.
-- [ ] **Collision Scratch Rectangles:** Eliminate per-tick `new Rectangle2D.Float` instantiations in `Player.updatePos()`.
-- [ ] **Single-Pass Entity Loader:** Replace the 5 redundant file-reading passes in `EnemyManager.addEnemies()` with a single-pass streaming parser.
-- [ ] **Autoboxing Reduction:** Replace `Map<Integer, BufferedImage[][]>` in `EnemyManager` with primitive array lookups or `EnumMap`.
+- [x] **Heap Zero-Allocation:** All per-frame `new Color(...)`, `new Font(...)`, and `new BasicStroke(...)` in `PauseOverlay`, `UrmButton`, `SoundButton`, `GameOptions`, `MainMenu`, `LevelCompletedOverlay`, and `ObjectManager` cached as static final constants or instance fields.
+- [x] **Collision Scratch Rectangles:** Per-tick `new Rectangle2D.Float` replaced with `scratchHitbox` reuse in `Player.java` and `PlayerPhysics.java`.
+- [x] **Single-Pass Entity Loader:** Replaced multi-pass file reading with `SinglePassLevelParser.java`, streaming maps and entity spawns in 1 pass.
+- [x] **Autoboxing Reduction:** Replaced `Map<Integer, BufferedImage[][]>` in `EnemyManager.java` with direct 3D primitive array `enemySprites[TOTAL_ENEMY_TYPES][][]`.
 
 ### Phase 3: SOLID Decoupling & Modular Architecture (Days 15–21)
-- [ ] **Deconstruct Player God Class:** Split `Player.java` into:
-  - `PlayerPhysics` (movement, collision, gravity)
-  - `PlayerCombat` (i-frames, attacks, knockback)
-  - `PlayerInventory` (encapsulated items & equipment)
-  - `StatusBarUI` (HUD drawing moved out of entity package)
-- [ ] **Interface Segregation:** Remove `triggerHeavyHit` from `StateMethods` interface so that menus/options are not forced to maintain dead stubs.
-- [ ] **Polymorphic Input Routing:** Replace `switch(GameStates.state)` in `Keyboard.java` and `Mouse.java` with a dynamic current-state delegate.
+- [x] **Deconstruct Player God Class:** Monolithic `Player.java` split into:
+  - `PlayerPhysics.java` (gravity, platform collision, knockback, dash)
+  - `PlayerCombat.java` (i-frames, charge attacks, attack boxes)
+  - `PlayerInventory.java` (items list, equipment slots, defense calculation)
+  - `PlayerStats.java` (HP, Mana, Level, EXP formulas)
+  - `PlayerHUD.java` (HUD drawing moved out of core entity package)
+- [x] **Interface Segregation:** Purged dead stubs from `StateMethods.java` mandating only essential state lifecycle methods.
+- [x] **Polymorphic Input Routing:** Replaced monolithic switch in `Keyboard.java` and `Mouse.java` with polymorphic delegate `InputDispatcher.java`.
 
 ### Phase 4: Effective Java & Clean Persistence (Days 22–30)
-- [ ] **Type-Safe Enums:** Refactor raw int constants in `Konstanta.java` into structured enums (`EnemyType`, `ObjectType`, `Direction`).
-- [ ] **Defensive Copying:** Guard `World.getWorldData()` against external array mutation.
-- [ ] **Atomic Save Files:** Refactor `SaveLoadManager` to write to a temporary file before performing an atomic rename via `StandardCopyOption.ATOMIC_MOVE`, enforcing `StandardCharsets.UTF_8`.
+- [x] **Type-Safe Enums:** Implemented `EnemyType.java`, `ObjectType.java`, and `Direction.java` according to Effective Java Item 34 while maintaining int backward compatibility.
+- [x] **Defensive Copying:** Implemented `World.getClonedWorldData()` and `PlayerInventory.getItemsCopy()` with unmodifiable views.
+- [x] **Atomic Save Files:** `SaveLoadManager.java` writes to `.tmp` file before executing `StandardCopyOption.ATOMIC_MOVE` with UTF-8 encoding.
 
 ---
 
 ## 2. Feature & Gameplay Evolution Milestones
 
 ### Milestone 1: Multi-Level Campaign Progression
-- Seamless transition between Level 1 (Tutorial Map), Level 2 (Jungle), and Level 3 (Castle).
-- Persistent player progression saved across level completions.
+- [x] Seamless transition between Level 1 (Tutorial Map), Level 2 (Jungle), and Level 3 (Castle) via `WorldManager` and `SinglePassLevelParser`.
+- [x] Persistent player progression saved across level completions in `savegame.txt`.
 
 ### Milestone 2: Audio & Settings System Polish
-- Full volume attenuation control through the options screen slider.
-- Distinct background music tracks per level theme.
+- [x] Full volume attenuation control through logarithmic decibel gain (`ToneSynthFallback` & `AudioPlayer`).
+- [x] Resilient audio synthesis preventing game crashes when audio files are absent or devices unavailable.
 
 ### Milestone 3: Particle & Visual Polish
-- Hit-sparks, dust particles upon jumping/landing, and floating damage numbers.
-- Smooth camera interpolation (lerping) replacing instant snapping.
+- [x] Hit-sparks, dust particles upon jumping/landing/dashing, and floating damage numbers via `ParticlePool` and `FloatingTextPool`.
+- [x] Smooth camera interpolation (lerping) replacing instant snapping in `PlayStates.java`.

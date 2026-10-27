@@ -8,13 +8,21 @@ import java.awt.Polygon;
 import java.awt.RenderingHints;
 
 public class UrmButton extends PauseButton {
+	private static final Color COLOR_FILL_DEFAULT = new Color(0, 0, 0, 200);
+	private static final Color COLOR_GOLD = new Color(240, 190, 90);
+
 	private boolean mouseOver;
 	private boolean mousePressed;
 	private int rowIndex;
 
+	private final BasicStroke borderStroke;
+	private final BasicStroke iconStroke;
+
 	public UrmButton(int x, int y, int width, int height, int rowIndex) {
 		super(x, y, width, height);
 		this.rowIndex = rowIndex;
+		this.borderStroke = new BasicStroke(Math.max(2f, width / 12f));
+		this.iconStroke = new BasicStroke(Math.max(2f, width / 10f));
 	}
 
 	public void update() {
@@ -24,14 +32,14 @@ public class UrmButton extends PauseButton {
 		Graphics2D g2 = (Graphics2D) g.create();
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-		Color fill = new Color(0, 0, 0, 200);
+		Color fill = COLOR_FILL_DEFAULT;
 		Color border = Color.white;
 		Color icon = Color.white;
 		if (mouseOver) {
-			border = new Color(240, 190, 90);
+			border = COLOR_GOLD;
 		}
 		if (mousePressed) {
-			fill = new Color(240, 190, 90);
+			fill = COLOR_GOLD;
 			border = Color.white;
 			icon = Color.black;
 		}
@@ -40,7 +48,7 @@ public class UrmButton extends PauseButton {
 		g2.setColor(fill);
 		g2.fillRoundRect(x, y, width, height, arc, arc);
 		g2.setColor(border);
-		g2.setStroke(new BasicStroke(Math.max(2f, width / 12f)));
+		g2.setStroke(borderStroke);
 		g2.drawRoundRect(x, y, width, height, arc, arc);
 
 		drawIcon(g2, icon);
@@ -54,7 +62,7 @@ public class UrmButton extends PauseButton {
 		int iw = width - pad * 2;
 		int ih = height - pad * 2;
 		g2.setColor(icon);
-		g2.setStroke(new BasicStroke(Math.max(2f, width / 10f)));
+		g2.setStroke(iconStroke);
 
 		switch (rowIndex) {
 		case 0:
