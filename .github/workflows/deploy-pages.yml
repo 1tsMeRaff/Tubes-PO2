@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -71,8 +71,9 @@ jobs:
 
       - name: Assemble Web Distribution Portal
         run: |
-          # Copy web interface into deployment artifact directory
+          # Copy web interface and assets into deployment artifact directory
           cp docs/index.html dist/index.html
+          touch dist/.nojekyll
           mkdir -p dist/ui
           cp resources/ui/mainn_menu.jpeg dist/ui/mainn_menu.jpeg || true
           
@@ -80,14 +81,23 @@ jobs:
           echo "Distribution files ready for GitHub Pages:"
           ls -la dist/
 
-      - name: Setup GitHub Pages
+      - name: Deploy to gh-pages branch
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist
+          branch: gh-pages
+
+      - name: Setup GitHub Pages (for Actions-based deployment)
+        continue-on-error: true
         uses: actions/configure-pages@v5
 
       - name: Upload Artifact to GitHub Pages
+        continue-on-error: true
         uses: actions/upload-pages-artifact@v3
         with:
           path: 'dist'
 
       - name: Deploy to GitHub Pages
         id: deployment
+        continue-on-error: true
         uses: actions/deploy-pages@v4
