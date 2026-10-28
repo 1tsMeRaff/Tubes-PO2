@@ -24,3 +24,6 @@ ANALISIS_PROYEK.md
 *.jar
 docs/*.jar
 
+
+# MCP testing artifacts
+.playwright-mcp/
