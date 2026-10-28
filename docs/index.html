@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feline Souls : Witch Curse — 2D Retro Action RPG Platformer (Java in Browser)</title>
-    <meta name="description" content="Feline Souls : Witch Curse is a pure Java SE 2D Action RPG Platformer running directly in your browser via WebAssembly & CheerpJ 3. Battle bosses, cast soul hexes, and cleanse the cursed realm.">
-    <meta name="keywords" content="Java game, CheerpJ, WebAssembly, Action RPG, 2D Platformer, Pixel Art, Retro Game, Feline Souls">
-    <meta name="theme-color" content="#090a10">
+    <meta name="description" content="Feline Souls : Witch Curse is a pure Java SE 2D Action RPG Platformer running directly in your browser via WebAssembly & CheerpJ 3.1. Battle bosses, cast soul hexes, inspect armory relics, and cleanse the cursed realm.">
+    <meta name="keywords" content="Java game, CheerpJ, WebAssembly, Action RPG, 2D Platformer, Pixel Art, Retro Game, Feline Souls, Pure Java SE">
+    <meta name="theme-color" content="#07080d">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>">
 
     <!-- Open Graph / Social Sharing -->
@@ -15,7 +15,7 @@
     <meta property="og:description" content="Play the pure Java 2D Action RPG Platformer directly in your browser with zero plugins via WebAssembly.">
     <meta property="og:image" content="ui/mainn_menu.jpeg">
 
-    <!-- Google Fonts: Inter (Body), Cinzel (Gothic Headings), JetBrains Mono (Keycaps & Code) -->
+    <!-- Google Fonts: Inter (Body), Cinzel (Gothic Headings), JetBrains Mono (Keycaps & Code), Press Start 2P (Arcade) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -25,47 +25,48 @@
 
     <style>
         /* ==========================================================================
-           DESIGN SYSTEM: GOTHIC DARK FANTASY & ARCADE THEME (WCAG 2.1 COMPLIANT)
+           DESIGN SYSTEM: GOTHIC DARK FANTASY & ARCADE CABINET (WCAG 2.1 AAA)
            ========================================================================== */
         :root {
-            /* Backgrounds */
+            /* Background Hierarchy */
             --bg-void: #06070a;
-            --bg-surface: #0c0e15;
-            --bg-card: #141724;
-            --bg-card-hover: #1c2133;
-            --bg-card-active: #22293f;
-            --bg-glass: rgba(18, 22, 34, 0.78);
-            --bg-overlay: rgba(6, 7, 10, 0.92);
-
-            /* Atmospheric Glows & Thematic Accents */
+            --bg-surface: #0b0d14;
+            --bg-card: #121622;
+            --bg-card-hover: #191f30;
+            --bg-card-active: #20273d;
+            --bg-glass: rgba(14, 18, 28, 0.85);
+            --bg-cabinet: #040508;
+            
+            /* Atmospheric Color Tokens */
             --gold-primary: #f3c35b;
-            --gold-bright: #ffdc7a;
+            --gold-bright: #ffdf7a;
             --gold-glow: rgba(243, 195, 91, 0.45);
             --gold-subtle: rgba(243, 195, 91, 0.12);
-
-            --crimson-blood: #ff334b;
-            --crimson-glow: rgba(255, 51, 75, 0.45);
+            --gold-border: rgba(243, 195, 91, 0.35);
 
             --violet-curse: #a855f7;
+            --violet-bright: #c084fc;
             --violet-glow: rgba(168, 85, 247, 0.45);
+            --violet-subtle: rgba(168, 85, 247, 0.12);
 
+            --crimson-blood: #ff334b;
+            --crimson-bright: #ff6b7d;
+            --crimson-glow: rgba(255, 51, 75, 0.45);
+
+            --cyan-telemetry: #38bdf8;
             --emerald-spirit: #2ecc71;
             --emerald-glow: rgba(46, 204, 113, 0.4);
 
-            --cyan-telemetry: #38bdf8;
-
-            /* High Contrast Typography Tokens (WCAG AAA >= 7:1 against card) */
-            --text-high: #f8fafc;
+            /* Typography Tokens (WCAG AAA >= 7:1) */
+            --text-high: #ffffff;
             --text-normal: #e2e8f0;
             --text-muted: #94a3b8;
             --text-dim: #64748b;
 
-            /* Borders & Filigree */
+            /* Borders & Outlines */
             --border-faint: rgba(255, 255, 255, 0.08);
-            --border-subtle: #252b3d;
-            --border-gold: rgba(243, 195, 91, 0.4);
-            --border-crimson: rgba(255, 51, 75, 0.4);
-            --border-active: #f3c35b;
+            --border-subtle: #242a3c;
+            --border-strong: #37425f;
 
             /* Typography Families */
             --font-gothic: 'Cinzel', serif;
@@ -73,11 +74,31 @@
             --font-mono: 'JetBrains Mono', monospace;
             --font-pixel: 'Press Start 2P', monospace;
 
-            /* Shadows & Transitions */
-            --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.5);
-            --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(243, 195, 91, 0.05);
+            /* Shadows & Elevations */
+            --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.6);
+            --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 15px rgba(243, 195, 91, 0.05);
             --shadow-glow: 0 0 25px var(--gold-glow);
             --transition-smooth: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* High Contrast Mode */
+        body.high-contrast {
+            --bg-void: #000000;
+            --bg-surface: #050505;
+            --bg-card: #0c0c0c;
+            --bg-card-hover: #151515;
+            --border-subtle: #ffffff;
+            --border-gold: #ffff00;
+            --gold-primary: #ffd700;
+            --gold-bright: #ffff33;
+            --text-normal: #ffffff;
+            --text-muted: #e0e0e0;
+            --text-dim: #cccccc;
+        }
+
+        /* Large Font Mode */
+        body.large-font {
+            font-size: 18px;
         }
 
         /* Base Reset */
@@ -99,15 +120,28 @@
             line-height: 1.65;
             overflow-x: hidden;
             background-image: 
-                radial-gradient(circle at 10% 20%, rgba(168, 85, 247, 0.06) 0%, transparent 45%),
+                radial-gradient(circle at 10% 20%, rgba(168, 85, 247, 0.08) 0%, transparent 45%),
                 radial-gradient(circle at 90% 10%, rgba(243, 195, 91, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 50% 70%, rgba(255, 51, 75, 0.05) 0%, transparent 60%),
-                linear-gradient(to bottom, #06070a 0%, #0c0e15 100%);
+                radial-gradient(circle at 50% 70%, rgba(255, 51, 75, 0.06) 0%, transparent 60%),
+                linear-gradient(to bottom, #06070a 0%, #0b0d14 100%);
             background-attachment: fixed;
             min-height: 100vh;
+            position: relative;
         }
 
-        /* Accessibility: Skip to Content */
+        /* Background Particle Canvas */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.55;
+        }
+
+        /* Accessibility Skip Link */
         .skip-link {
             position: absolute;
             top: -60px;
@@ -127,18 +161,67 @@
             outline: 3px solid #ffffff;
         }
 
-        /* Accessibility Focus Indicator */
         :focus-visible {
             outline: 3px solid var(--gold-primary);
             outline-offset: 3px;
         }
 
-        /* Container Constraint */
         .container {
             width: 100%;
             max-width: 1280px;
             margin: 0 auto;
             padding: 0 1.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ==========================================================================
+           ACCESSIBILITY & PREFERENCES BAR
+           ========================================================================== */
+        .a11y-toolbar {
+            background: #040508;
+            border-bottom: 1px solid var(--border-faint);
+            font-size: 0.75rem;
+            padding: 0.35rem 0;
+            color: var(--text-dim);
+            position: relative;
+            z-index: 1000;
+        }
+
+        .a11y-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .a11y-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-a11y {
+            background: transparent;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-muted);
+            padding: 0.2rem 0.55rem;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-family: var(--font-mono);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .btn-a11y:hover, .btn-a11y.active {
+            color: var(--gold-bright);
+            border-color: var(--gold-primary);
+            background: rgba(243, 195, 91, 0.1);
         }
 
         /* ==========================================================================
@@ -159,7 +242,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0.9rem 0;
+            padding: 0.85rem 0;
         }
 
         .brand-link {
@@ -171,8 +254,8 @@
         }
 
         .brand-paw {
-            font-size: 1.7rem;
-            filter: drop-shadow(0 0 10px var(--gold-glow));
+            font-size: 1.8rem;
+            filter: drop-shadow(0 0 12px var(--gold-glow));
             transform: translateY(-1px);
         }
 
@@ -183,15 +266,15 @@
 
         .brand-title {
             font-family: var(--font-gothic);
-            font-size: 1.15rem;
+            font-size: 1.2rem;
             font-weight: 900;
             letter-spacing: 0.08em;
             color: var(--gold-primary);
-            text-shadow: 0 0 12px var(--gold-glow);
+            text-shadow: 0 0 14px var(--gold-glow);
         }
 
         .brand-subtitle {
-            font-size: 0.7rem;
+            font-size: 0.68rem;
             text-transform: uppercase;
             letter-spacing: 0.12em;
             color: var(--text-muted);
@@ -201,17 +284,17 @@
         .nav-menu {
             display: flex;
             align-items: center;
-            gap: 1.5rem;
+            gap: 1.4rem;
             list-style: none;
         }
 
         .nav-item a {
             color: var(--text-normal);
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             font-weight: 600;
             letter-spacing: 0.02em;
-            padding: 0.4rem 0.6rem;
+            padding: 0.4rem 0.65rem;
             border-radius: 6px;
             transition: var(--transition-smooth);
             display: inline-flex;
@@ -227,7 +310,7 @@
         .btn-nav-download {
             background: linear-gradient(135deg, #f3c35b 0%, #d4982c 100%);
             color: #06070a !important;
-            padding: 0.5rem 1.1rem !important;
+            padding: 0.45rem 1.1rem !important;
             border-radius: 6px;
             font-weight: 800 !important;
             box-shadow: 0 2px 12px rgba(243, 195, 91, 0.3);
@@ -238,20 +321,19 @@
             box-shadow: 0 4px 18px rgba(243, 195, 91, 0.5);
         }
 
-        /* Mobile Hamburger Toggle */
         .mobile-toggle {
             display: none;
             background: none;
             border: 1px solid var(--border-subtle);
             color: var(--text-high);
             font-size: 1.5rem;
-            padding: 0.4rem 0.6rem;
+            padding: 0.35rem 0.6rem;
             border-radius: 6px;
             cursor: pointer;
         }
 
         /* ==========================================================================
-           HERO SECTION: THE CALL TO ADVENTURE
+           HERO SECTION: THE WITCH CURSE SAGA
            ========================================================================== */
         .hero {
             padding: 3.5rem 0 2rem;
@@ -278,11 +360,11 @@
             display: inline-flex;
             align-items: center;
             gap: 0.4rem;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
         }
 
         .badge-gold {
-            border-color: var(--border-gold);
+            border-color: var(--gold-border);
             color: var(--gold-bright);
             background: rgba(243, 195, 91, 0.08);
         }
@@ -303,23 +385,23 @@
 
         .hero-headline {
             font-family: var(--font-gothic);
-            font-size: clamp(2.4rem, 5vw, 3.8rem);
+            font-size: clamp(2.3rem, 5vw, 3.8rem);
             font-weight: 900;
             line-height: 1.1;
             letter-spacing: 0.03em;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, #ffffff 30%, var(--gold-bright) 80%, #ff8c42 100%);
+            margin-bottom: 1.1rem;
+            background: linear-gradient(135deg, #ffffff 25%, var(--gold-bright) 75%, #ff8c42 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 30px rgba(243, 195, 91, 0.2);
+            text-shadow: 0 0 30px rgba(243, 195, 91, 0.25);
         }
 
         .hero-tagline {
             font-size: clamp(1rem, 2vw, 1.2rem);
             color: var(--text-muted);
             max-width: 820px;
-            margin: 0 auto 2rem;
-            line-height: 1.6;
+            margin: 0 auto 2.2rem;
+            line-height: 1.65;
         }
 
         .hero-actions {
@@ -327,7 +409,7 @@
             justify-content: center;
             gap: 1rem;
             flex-wrap: wrap;
-            margin-bottom: 2.5rem;
+            margin-bottom: 2.75rem;
         }
 
         .btn-hero-play {
@@ -337,21 +419,21 @@
             font-size: 1.15rem;
             font-weight: 800;
             letter-spacing: 0.04em;
-            padding: 0.9rem 2.2rem;
+            padding: 0.9rem 2.4rem;
             border-radius: 8px;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 0.75rem;
-            box-shadow: 0 4px 25px rgba(243, 195, 91, 0.4);
+            box-shadow: 0 4px 25px rgba(243, 195, 91, 0.45);
             transition: var(--transition-smooth);
-            border: none;
+            border: 2px solid #ffe89e;
             cursor: pointer;
         }
 
         .btn-hero-play:hover {
             transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 8px 35px rgba(243, 195, 91, 0.6);
+            box-shadow: 0 8px 35px rgba(243, 195, 91, 0.65);
         }
 
         .btn-hero-secondary {
@@ -376,7 +458,7 @@
             transform: translateY(-2px);
         }
 
-        /* Hero Telemetry Grid */
+        /* Telemetry Bar */
         .telemetry-bar {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -398,6 +480,7 @@
             padding: 0.5rem;
             border-right: 1px solid var(--border-faint);
         }
+
         .telemetry-item:last-child {
             border-right: none;
         }
@@ -419,19 +502,53 @@
         }
 
         /* ==========================================================================
-           ARCADE STAGE (CHEERPJ CANVAS CABINET)
+           ARCADE CABINET STAGE (CHEERPJ CANVAS)
            ========================================================================== */
         .arcade-section {
             padding: 2.5rem 0 4rem;
         }
 
         .arcade-cabinet {
-            background: #020305;
-            border-radius: 16px;
-            border: 3px solid #282f42;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.9), 0 0 40px rgba(243, 195, 91, 0.12);
+            background: var(--bg-cabinet);
+            border-radius: 18px;
+            border: 3px solid #2a3147;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 40px rgba(243, 195, 91, 0.12);
             overflow: hidden;
             position: relative;
+        }
+
+        /* Arcade Marquee Header */
+        .arcade-marquee {
+            background: linear-gradient(90deg, #12101a 0%, #201a35 50%, #12101a 100%);
+            border-bottom: 2px solid #3c2a63;
+            padding: 0.85rem 1.5rem;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .marquee-title {
+            font-family: var(--font-pixel);
+            font-size: clamp(0.75rem, 1.5vw, 1.05rem);
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7), 0 0 20px rgba(168, 85, 247, 0.8);
+            letter-spacing: 0.1em;
+            margin: 0 auto;
+        }
+
+        .marquee-credit {
+            font-family: var(--font-pixel);
+            font-size: 0.65rem;
+            color: #ff334b;
+            text-shadow: 0 0 8px rgba(255, 51, 75, 0.8);
+            animation: blink 1.2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0.2; }
         }
 
         .cabinet-header {
@@ -491,18 +608,23 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            transition: var(--transition-smooth);
         }
 
-        /* Optional Retro CRT Scanline Overlay */
+        /* Retro CRT Scanlines & Screen Curve */
         .crt-scanlines {
             position: absolute;
             inset: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%);
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.4) 50%);
             background-size: 100% 4px;
             pointer-events: none;
             z-index: 5;
-            opacity: 0.6;
+            opacity: 0.65;
             display: none;
+        }
+
+        .crt-curve {
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.85);
         }
 
         /* Splash Screen & Activation Gate */
@@ -520,9 +642,9 @@
         }
 
         .splash-emblem {
-            font-size: 3rem;
+            font-size: 3.2rem;
             margin-bottom: 0.5rem;
-            filter: drop-shadow(0 0 15px var(--gold-glow));
+            filter: drop-shadow(0 0 18px var(--gold-glow));
             animation: float 3s ease-in-out infinite;
         }
 
@@ -533,17 +655,17 @@
 
         .splash-title {
             font-family: var(--font-gothic);
-            font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+            font-size: clamp(1.8rem, 3.5vw, 2.7rem);
             font-weight: 900;
             color: var(--gold-primary);
-            text-shadow: 0 0 20px var(--gold-glow);
+            text-shadow: 0 0 22px var(--gold-glow);
             margin-bottom: 0.4rem;
         }
 
         .splash-desc {
             color: var(--text-muted);
             font-size: 0.95rem;
-            max-width: 580px;
+            max-width: 620px;
             margin-bottom: 2rem;
             line-height: 1.6;
         }
@@ -555,7 +677,7 @@
             font-size: 1.25rem;
             font-weight: 900;
             letter-spacing: 0.05em;
-            padding: 1.1rem 3rem;
+            padding: 1.15rem 3.2rem;
             border-radius: 8px;
             border: 2px solid #ffe89e;
             cursor: pointer;
@@ -571,7 +693,7 @@
             box-shadow: 0 8px 45px rgba(243, 195, 91, 0.7);
         }
 
-        /* Loading Panel & Progress */
+        /* Loading Panel */
         #loading-panel {
             display: none;
             flex-direction: column;
@@ -698,7 +820,171 @@
         }
 
         /* ==========================================================================
-           COMBAT MECHANICS CARDS
+           INTERACTIVE ARMORY & RELICS INSPECTOR
+           ========================================================================== */
+        .armory-section {
+            padding: 3.5rem 0;
+        }
+
+        .armory-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 2rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 2.25rem;
+            box-shadow: var(--shadow-card);
+        }
+
+        .armory-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .gear-slot-btn {
+            background: #090b12;
+            border: 2px solid #23293a;
+            border-radius: 12px;
+            padding: 1rem 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            text-align: center;
+            color: var(--text-normal);
+        }
+
+        .gear-slot-btn:hover, .gear-slot-btn.active {
+            border-color: var(--gold-primary);
+            background: rgba(243, 195, 91, 0.08);
+            box-shadow: 0 0 15px var(--gold-glow);
+            transform: translateY(-3px);
+        }
+
+        .gear-img-frame {
+            width: 54px;
+            height: 54px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
+        }
+
+        .gear-img-frame img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            image-rendering: pixelated;
+        }
+
+        .gear-slot-name {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        .armory-inspector-panel {
+            background: #090b12;
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .inspector-header {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            margin-bottom: 1.25rem;
+            border-bottom: 1px solid var(--border-faint);
+            padding-bottom: 1.25rem;
+        }
+
+        .inspector-img-large {
+            width: 80px;
+            height: 80px;
+            background: #141824;
+            border: 2px solid var(--gold-border);
+            border-radius: 10px;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .inspector-img-large img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            image-rendering: pixelated;
+        }
+
+        .inspector-title-group h3 {
+            font-family: var(--font-gothic);
+            font-size: 1.4rem;
+            color: var(--gold-bright);
+            margin-bottom: 0.25rem;
+        }
+
+        .rarity-badge {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 0.2rem 0.55rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .rarity-mythic { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #a855f7; }
+        .rarity-rare { background: rgba(56, 189, 248, 0.2); color: #7dd3fc; border: 1px solid #38bdf8; }
+        .rarity-epic { background: rgba(243, 195, 91, 0.2); color: #ffdf7a; border: 1px solid #f3c35b; }
+
+        .inspector-stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.85rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .stat-pill {
+            background: #121622;
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            padding: 0.55rem 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.82rem;
+        }
+
+        .stat-name { color: var(--text-muted); }
+        .stat-val { font-weight: 700; font-family: var(--font-mono); color: var(--gold-bright); }
+
+        .inspector-lore {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 1.25rem;
+            font-style: italic;
+        }
+
+        .inspector-synergy {
+            background: rgba(243, 195, 91, 0.06);
+            border-left: 3px solid var(--gold-primary);
+            padding: 0.65rem 0.95rem;
+            border-radius: 0 6px 6px 0;
+            font-size: 0.8rem;
+            color: var(--text-normal);
+        }
+
+        /* ==========================================================================
+           SIGNATURE COMBAT MECHANICS
            ========================================================================== */
         .mechanics-section {
             padding: 3.5rem 0;
@@ -810,7 +1096,7 @@
 
         .controls-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
             gap: 1.25rem;
         }
 
@@ -896,7 +1182,7 @@
 
         .realm-img-holder {
             width: 100%;
-            height: 160px;
+            height: 170px;
             background-color: #000;
             position: relative;
             overflow: hidden;
@@ -925,7 +1211,7 @@
             font-size: 0.72rem;
             font-weight: 700;
             color: var(--gold-bright);
-            border: 1px solid var(--border-gold);
+            border: 1px solid var(--gold-border);
         }
 
         .realm-body {
@@ -973,7 +1259,7 @@
         }
 
         /* ==========================================================================
-           BESTIARY & BOSS HALL
+           BESTIARY & BOSS HALL V2
            ========================================================================== */
         .boss-section {
             padding: 3.5rem 0;
@@ -999,7 +1285,26 @@
         .boss-card:hover {
             transform: translateY(-5px);
             border-color: var(--crimson-blood);
-            box-shadow: 0 10px 30px rgba(255, 51, 75, 0.15);
+            box-shadow: 0 10px 30px rgba(255, 51, 75, 0.2);
+        }
+
+        .boss-img-preview {
+            height: 110px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #090b12;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-faint);
+            overflow: hidden;
+        }
+
+        .boss-img-preview img {
+            max-height: 90px;
+            object-fit: contain;
+            image-rendering: pixelated;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.8));
         }
 
         .boss-badge {
@@ -1008,20 +1313,20 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            color: var(--crimson-blood);
-            margin-bottom: 0.5rem;
+            color: var(--crimson-bright);
+            margin-bottom: 0.4rem;
         }
 
         .boss-title {
             font-family: var(--font-gothic);
-            font-size: 1.4rem;
+            font-size: 1.35rem;
             font-weight: 800;
             color: var(--text-high);
             margin-bottom: 0.5rem;
         }
 
         .boss-desc {
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             color: var(--text-muted);
             line-height: 1.6;
             margin-bottom: 1rem;
@@ -1029,7 +1334,7 @@
         }
 
         .boss-tip-box {
-            background: rgba(255, 51, 75, 0.06);
+            background: rgba(255, 51, 75, 0.08);
             border-left: 3px solid var(--crimson-blood);
             padding: 0.6rem 0.85rem;
             border-radius: 0 6px 6px 0;
@@ -1046,7 +1351,7 @@
 
         .download-card {
             background: linear-gradient(135deg, rgba(20, 24, 38, 0.95), rgba(12, 14, 22, 0.98));
-            border: 2px solid var(--border-gold);
+            border: 2px solid var(--gold-border);
             border-radius: 16px;
             padding: 2.75rem 2.25rem;
             display: flex;
@@ -1138,11 +1443,13 @@
            ========================================================================== */
         footer {
             border-top: 1px solid var(--border-subtle);
-            background: #050609;
+            background: #040508;
             padding: 3rem 0 2rem;
             text-align: center;
             font-size: 0.88rem;
             color: var(--text-muted);
+            position: relative;
+            z-index: 2;
         }
 
         .footer-brand {
@@ -1178,7 +1485,7 @@
             margin-top: 1.5rem;
         }
 
-        /* Toast Notification Popup */
+        /* Toast Popup */
         #toast {
             position: fixed;
             bottom: 25px;
@@ -1207,6 +1514,9 @@
            RESPONSIVE BREAKPOINTS
            ========================================================================== */
         @media (max-width: 900px) {
+            .armory-layout {
+                grid-template-columns: 1fr;
+            }
             .nav-menu {
                 display: none;
                 flex-direction: column;
@@ -1247,13 +1557,51 @@
             .telemetry-item {
                 border-right: none;
             }
+            .armory-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+            #particle-canvas {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
 
+    <!-- Ambient Particle Canvas for Subtle Runic Dust -->
+    <canvas id="particle-canvas" aria-hidden="true"></canvas>
+
     <!-- Accessibility Skip Link -->
     <a href="#game-section" class="skip-link">Skip directly to Playable Game</a>
+
+    <!-- Top Accessibility & Preferences Toolbar -->
+    <aside class="a11y-toolbar" aria-label="Accessibility and Display Preferences">
+        <div class="container a11y-inner">
+            <div>
+                <span>⚙️ Preferences:</span>
+            </div>
+            <div class="a11y-controls">
+                <button class="btn-a11y" id="btn-contrast" onclick="toggleContrast()" aria-pressed="false" aria-label="Toggle High Contrast Mode">
+                    🌓 Contrast: Standard
+                </button>
+                <button class="btn-a11y" id="btn-text-size" onclick="toggleTextSize()" aria-pressed="false" aria-label="Toggle Text Sizing">
+                    🔍 Text Size: Normal
+                </button>
+                <button class="btn-a11y" id="btn-sfx" onclick="toggleSfx()" aria-pressed="true" aria-label="Toggle Web Audio Sound Effects">
+                    🔊 Web Audio: ON
+                </button>
+            </div>
+        </div>
+    </aside>
 
     <!-- Toast Notification -->
     <div id="toast" role="status" aria-live="polite">✓ Copied to clipboard!</div>
@@ -1276,7 +1624,8 @@
             <nav role="navigation" aria-label="Main Navigation">
                 <ul class="nav-menu" id="nav-menu">
                     <li class="nav-item"><a href="#game-section">▶ Play Online</a></li>
-                    <li class="nav-item"><a href="#mechanics-section">🔮 Signature Spells</a></li>
+                    <li class="nav-item"><a href="#armory-section">🛡️ Armory</a></li>
+                    <li class="nav-item"><a href="#mechanics-section">🔮 Spells</a></li>
                     <li class="nav-item"><a href="#controls-section">🎮 Controls</a></li>
                     <li class="nav-item"><a href="#realms-section">🗺️ Realms</a></li>
                     <li class="nav-item"><a href="#bosses-section">💀 Bestiary</a></li>
@@ -1343,6 +1692,12 @@
         <!-- Arcade Canvas Showcase (CheerpJ Player) -->
         <section id="game-section" class="arcade-section container" aria-label="Playable Web Arcade Stage">
             <div class="arcade-cabinet">
+                <!-- Arcade Marquee -->
+                <div class="arcade-marquee" aria-hidden="true">
+                    <span class="marquee-title">★ FELINE SOULS : WITCH CURSE ARCADE ★</span>
+                    <span class="marquee-credit">INSERT COIN // 1 CREDIT READY</span>
+                </div>
+
                 <!-- Chassis Top Bar -->
                 <div class="cabinet-header">
                     <div class="cabinet-chassis-dots" aria-hidden="true">
@@ -1372,7 +1727,7 @@
                         </p>
                         
                         <button id="btn-start" class="btn-launch-engine" onclick="launchGame()" aria-label="Launch Feline Souls game in browser">
-                            <span>▶</span> INITIALIZE WEBASSEMBLY ENGINE
+                            <span>▶</span> INSERT COIN & INITIALIZE
                         </button>
 
                         <!-- Dynamic Loading Feedback -->
@@ -1397,6 +1752,9 @@
                         <button class="btn-tool" onclick="toggleScanlines()" id="btn-crt" aria-label="Toggle CRT Scanlines">
                             📺 Scanlines: OFF
                         </button>
+                        <button class="btn-tool" onclick="toggleCrtCurve()" id="btn-curve" aria-label="Toggle CRT Screen Curvature">
+                            🖥️ CRT Curve: OFF
+                        </button>
                         <button class="btn-tool" onclick="location.reload()" aria-label="Restart Game Page">
                             🔄 Restart
                         </button>
@@ -1405,6 +1763,95 @@
                     <div class="audio-advisory">
                         <span>🔊</span>
                         <span>Ensure your browser allows audio playback for full orchestral immersion.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Cursed Sanctum Armory (Interactive Gear & Stats) -->
+        <section id="armory-section" class="armory-section container" aria-labelledby="armory-title">
+            <div class="section-header">
+                <span class="section-eyebrow">Equipment & Artifacts</span>
+                <h2 class="section-title" id="armory-title">The Cursed Sanctum Armory</h2>
+                <p class="section-subtitle">
+                    Inspect the sacred relics recovered from fallen feline ancestors. Equip gear to augment your combat defense, hex potency, and agility.
+                </p>
+            </div>
+
+            <div class="armory-layout">
+                <!-- Gear Selection Grid -->
+                <div class="armory-grid" role="region" aria-label="Equipment Relics Grid">
+                    <button class="gear-slot-btn active" onclick="inspectGear('helmet', this)" aria-label="Inspect Chimera Skull Helm">
+                        <div class="gear-img-frame">
+                            <img src="assets/helmet-removebg-preview.png" alt="Chimera Skull Helm">
+                        </div>
+                        <span class="gear-slot-name">Horned Helm</span>
+                    </button>
+
+                    <button class="gear-slot-btn" onclick="inspectGear('armor', this)" aria-label="Inspect Obsidian Cuirass">
+                        <div class="gear-img-frame">
+                            <img src="assets/armor-removebg-preview.png" alt="Obsidian Cuirass">
+                        </div>
+                        <span class="gear-slot-name">Obsidian Mail</span>
+                    </button>
+
+                    <button class="gear-slot-btn" onclick="inspectGear('gloves', this)" aria-label="Inspect Shadowclaw Gauntlets">
+                        <div class="gear-img-frame">
+                            <img src="assets/gloves-removebg-preview.png" alt="Shadowclaw Gauntlets">
+                        </div>
+                        <span class="gear-slot-name">Shadow Claws</span>
+                    </button>
+
+                    <button class="gear-slot-btn" onclick="inspectGear('legs', this)" aria-label="Inspect Windstrider Greaves">
+                        <div class="gear-img-frame">
+                            <img src="assets/Legs-removebg-preview.png" alt="Windstrider Greaves">
+                        </div>
+                        <span class="gear-slot-name">Wind Greaves</span>
+                    </button>
+
+                    <button class="gear-slot-btn" onclick="inspectGear('necklace', this)" aria-label="Inspect Morgana's Hex Amulet">
+                        <div class="gear-img-frame">
+                            <img src="assets/necklace-removebg-preview.png" alt="Morgana's Hex Amulet">
+                        </div>
+                        <span class="gear-slot-name">Hex Pendant</span>
+                    </button>
+
+                    <button class="gear-slot-btn" onclick="inspectGear('ring', this)" aria-label="Inspect Ring of Nine Souls">
+                        <div class="gear-img-frame">
+                            <img src="assets/ring-removebg-preview.png" alt="Ring of Nine Souls">
+                        </div>
+                        <span class="gear-slot-name">Soul Ring</span>
+                    </button>
+                </div>
+
+                <!-- Dynamic Gear Inspector -->
+                <div class="armory-inspector-panel" id="inspector-display" aria-live="polite">
+                    <div>
+                        <div class="inspector-header">
+                            <div class="inspector-img-large">
+                                <img src="assets/helmet-removebg-preview.png" id="inspect-img" alt="Horned Helm">
+                            </div>
+                            <div class="inspector-title-group">
+                                <span class="rarity-badge rarity-mythic" id="inspect-rarity">MYTHIC RELIC</span>
+                                <h3 id="inspect-name">Curse-Forged Horned Helm</h3>
+                                <div style="font-size: 0.78rem; color: var(--text-dim);" id="inspect-slot">Slot: Head Armor • Item ID: #01</div>
+                            </div>
+                        </div>
+
+                        <div class="inspector-stats-grid" id="inspect-stats">
+                            <div class="stat-pill"><span class="stat-name">Physical Defense</span><span class="stat-val">+18 DEF</span></div>
+                            <div class="stat-pill"><span class="stat-name">Curse Resistance</span><span class="stat-val">+15% RES</span></div>
+                            <div class="stat-pill"><span class="stat-name">Stagger Poise</span><span class="stat-val">+25 POISE</span></div>
+                            <div class="stat-pill"><span class="stat-name">Bonus Mana</span><span class="stat-val">+20 MP</span></div>
+                        </div>
+
+                        <p class="inspector-lore" id="inspect-lore">
+                            "Forged from the calcified skull of an ancient chimera, this horned helm shields the feline mind against demonic mental curses and reduces incoming stagger."
+                        </p>
+                    </div>
+
+                    <div class="inspector-synergy" id="inspect-synergy">
+                        ⚡ <strong>Combat Synergy:</strong> Grants resistance to Demon Boss roar stun, allowing you to sustain aggressive melee combos.
                     </div>
                 </div>
             </div>
@@ -1660,7 +2107,7 @@
             </div>
         </section>
 
-        <!-- Bestiary & Boss Hall -->
+        <!-- Bestiary & Boss Hall V2 -->
         <section id="bosses-section" class="boss-section container" aria-labelledby="bosses-title">
             <div class="section-header">
                 <span class="section-eyebrow">Threat Intelligence</span>
@@ -1673,6 +2120,9 @@
             <div class="boss-grid">
                 <!-- Boss 1 -->
                 <article class="boss-card">
+                    <div class="boss-img-preview">
+                        <img src="assets/demon_boss_spritesheet.png" alt="Demon Boss sprite">
+                    </div>
                     <span class="boss-badge">Colossal Overlord • Phase 1 & 2</span>
                     <h3 class="boss-title">Demon Boss</h3>
                     <p class="boss-desc">
@@ -1685,6 +2135,9 @@
 
                 <!-- Boss 2 -->
                 <article class="boss-card">
+                    <div class="boss-img-preview">
+                        <img src="assets/Bringer_of_Death.png" alt="Bringer of Death sprite">
+                    </div>
                     <span class="boss-badge">Necromantic Caster</span>
                     <h3 class="boss-title">Bringer of Death</h3>
                     <p class="boss-desc">
@@ -1697,6 +2150,9 @@
 
                 <!-- Boss 3 -->
                 <article class="boss-card">
+                    <div class="boss-img-preview">
+                        <img src="assets/golem_blue.png" alt="Blue Golem sprite">
+                    </div>
                     <span class="boss-badge">Ancient Stone Golem</span>
                     <h3 class="boss-title">Blue Golem</h3>
                     <p class="boss-desc">
@@ -1709,8 +2165,11 @@
 
                 <!-- Mob 4 -->
                 <article class="boss-card">
+                    <div class="boss-img-preview">
+                        <img src="assets/skullwolf.png" alt="Skullwolf sprite">
+                    </div>
                     <span class="boss-badge">Corrupted Territorial Mobs</span>
-                    <h3 class="boss-title">Skullwolf & Slime</h3>
+                    <h3 class="boss-title">Skullwolf Pack</h3>
                     <p class="boss-desc">
                         Aggressive pack hunters that leap across platforms to ambush unwary wanderers. They drop valuable soul experience and restorative red potions.
                     </p>
@@ -1753,6 +2212,7 @@
 
             <ul class="footer-links">
                 <li><a href="#game-section">Play WebAssembly</a></li>
+                <li><a href="#armory-section">Armory</a></li>
                 <li><a href="#controls-section">Keybindings</a></li>
                 <li><a href="#mechanics-section">Spells</a></li>
                 <li><a href="https://github.com/1tsMeRaff/Tubes-PO2" target="_blank" rel="noopener">GitHub Repository</a></li>
@@ -1767,27 +2227,324 @@
 
     <!-- Interactive Logic & CheerpJ WebAssembly Coordinator -->
     <script>
+        // =========================================================================
+        // RETRO WEB AUDIO SYNTHESIZER (Pure JS Web Audio API - Zero External Files)
+        // =========================================================================
+        class RetroAudioSynthesizer {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+            init() {
+                if (!this.ctx) {
+                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContextClass) this.ctx = new AudioContextClass();
+                }
+            }
+            playCoin() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(987.77, now); // B5
+                osc.frequency.setValueAtTime(1318.51, now + 0.08); // E6
+                gain.gain.setValueAtTime(0.12, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.35);
+            }
+            playClick() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(500, now);
+                osc.frequency.exponentialRampToValueAtTime(180, now + 0.06);
+                gain.gain.setValueAtTime(0.08, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.06);
+            }
+            playRunic() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(320, now);
+                osc.frequency.exponentialRampToValueAtTime(640, now + 0.18);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.22);
+            }
+        }
+
+        const sfx = new RetroAudioSynthesizer();
+
+        // =========================================================================
+        // AMBIENT RUNIC DUST PARTICLES (Pure Canvas 2D)
+        // =========================================================================
+        (function initParticles() {
+            const canvas = document.getElementById('particle-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            let w, h;
+
+            function resize() {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            for (let i = 0; i < 35; i++) {
+                particles.push({
+                    x: Math.random() * w,
+                    y: Math.random() * h,
+                    size: Math.random() * 2 + 0.8,
+                    speedY: Math.random() * 0.4 + 0.1,
+                    speedX: (Math.random() - 0.5) * 0.2,
+                    opacity: Math.random() * 0.5 + 0.2,
+                    color: Math.random() > 0.4 ? '#f3c35b' : '#a855f7'
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, w, h);
+                for (let p of particles) {
+                    p.y -= p.speedY;
+                    p.x += p.speedX;
+                    if (p.y < 0) {
+                        p.y = h;
+                        p.x = Math.random() * w;
+                    }
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = p.opacity;
+                    ctx.shadowBlur = 8;
+                    ctx.shadowColor = p.color;
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1.0;
+                ctx.shadowBlur = 0;
+                requestAnimationFrame(animate);
+            }
+            animate();
+        })();
+
+        // =========================================================================
+        // INTERACTIVE ARMORY DATA & INSPECTOR
+        // =========================================================================
+        const armoryData = {
+            helmet: {
+                name: "Curse-Forged Horned Helm",
+                rarity: "MYTHIC RELIC",
+                rarityClass: "rarity-mythic",
+                slot: "Slot: Head Armor • Item ID: #01",
+                img: "assets/helmet-removebg-preview.png",
+                stats: [
+                    { name: "Physical Defense", val: "+18 DEF" },
+                    { name: "Curse Resistance", val: "+15% RES" },
+                    { name: "Stagger Poise", val: "+25 POISE" },
+                    { name: "Bonus Mana", val: "+20 MP" }
+                ],
+                lore: '"Forged from the calcified skull of an ancient chimera, this horned helm shields the feline mind against demonic mental curses and reduces incoming stagger."',
+                synergy: "⚡ <strong>Combat Synergy:</strong> Grants resistance to Demon Boss roar stun, allowing you to sustain aggressive melee combos."
+            },
+            armor: {
+                name: "Abyssal Obsidian Mail",
+                rarity: "EPIC RELIC",
+                rarityClass: "rarity-epic",
+                slot: "Slot: Chest Armor • Item ID: #02",
+                img: "assets/armor-removebg-preview.png",
+                stats: [
+                    { name: "Physical Defense", val: "+35 DEF" },
+                    { name: "Max Health", val: "+60 HP" },
+                    { name: "Knockback Dampening", val: "+40%" },
+                    { name: "Impact Reflection", val: "10% DMG" }
+                ],
+                lore: '"Forged in the heart of obsidian vents, this cuirass deflects colossal blunt trauma from stone sentinels and towering overlords."',
+                synergy: "⚡ <strong>Combat Synergy:</strong> Mitigates Blue Golem shockwaves, preventing fatal pit drops."
+            },
+            gloves: {
+                name: "Claws of Spectral Shadow",
+                rarity: "RARE RELIC",
+                rarityClass: "rarity-rare",
+                slot: "Slot: Hand Gauntlets • Item ID: #03",
+                img: "assets/gloves-removebg-preview.png",
+                stats: [
+                    { name: "Primary Attack Power", val: "+22 ATK" },
+                    { name: "Critical Strike Chance", val: "+14%" },
+                    { name: "Charge Cleave Speed", val: "+20%" },
+                    { name: "Bleed Infliction", val: "3s DoT" }
+                ],
+                lore: '"Infused with the razor spirits of spectral wildcats, these claws carve clean through armor plates with lightning speed."',
+                synergy: "⚡ <strong>Combat Synergy:</strong> Accelerates Heavy Charge Blade accumulation for quick burst damage."
+            },
+            legs: {
+                name: "Windstrider Greaves",
+                rarity: "RARE RELIC",
+                rarityClass: "rarity-rare",
+                slot: "Slot: Leg Greaves • Item ID: #04",
+                img: "assets/Legs-removebg-preview.png",
+                stats: [
+                    { name: "Movement Agility", val: "+15% SPD" },
+                    { name: "Dash I-Frames Duration", val: "+0.15s" },
+                    { name: "Double Jump Dust Boost", val: "+20%" },
+                    { name: "Ground Slam Shock Radius", val: "+30%" }
+                ],
+                lore: '"Lightweight feline greaves etched with aerial air glyphs. Grants agile platforming across treacherous castle spikes."',
+                synergy: "⚡ <strong>Combat Synergy:</strong> Expands Ground Slam shockwave radius to obliterate surrounding skullwolf packs."
+            },
+            necklace: {
+                name: "Morgana's Cursed Hex Pendant",
+                rarity: "MYTHIC RELIC",
+                rarityClass: "rarity-mythic",
+                slot: "Slot: Neck Amulet • Item ID: #05",
+                img: "assets/necklace-removebg-preview.png",
+                stats: [
+                    { name: "Spell Hex Damage", val: "+35 DMG" },
+                    { name: "Mana Pool", val: "+45 MP" },
+                    { name: "Mana Recovery on Kill", val: "+8 MP" },
+                    { name: "Hex Piercing Limit", val: "+2 Mobs" }
+                ],
+                lore: '"A stolen shard of the witch Morgana\'s own soul-mirror. Radiates an unearthly violet aura that empowers the Feline Soul Hex."',
+                synergy: "⚡ <strong>Combat Synergy:</strong> Recharges mana upon enemy defeat, enabling continuous ranged spellcasting."
+            },
+            ring: {
+                name: "Band of Nine Spirits",
+                rarity: "MYTHIC RELIC",
+                rarityClass: "rarity-mythic",
+                slot: "Slot: Mystic Ring • Item ID: #06",
+                img: "assets/ring-removebg-preview.png",
+                stats: [
+                    { name: "Nine Lives Resilience", val: "+1 Revive" },
+                    { name: "Post-Revive Shield", val: "3s Invuln" },
+                    { name: "Soul EXP Multiplier", val: "+25%" },
+                    { name: "Gold Drop Rate", val: "+30%" }
+                ],
+                lore: '"The legendary token of the Feline Sanctum. Grants the bearer the divine blessing of nine souls to conquer death itself."',
+                synergy: "⚡ <strong>Combat Synergy:</strong> Grants an extra life cushion during the grueling Phase 2 Demon Boss battle."
+            }
+        };
+
+        function inspectGear(key, btnEl) {
+            sfx.playRunic();
+            const data = armoryData[key];
+            if (!data) return;
+
+            document.querySelectorAll('.gear-slot-btn').forEach(b => b.classList.remove('active'));
+            if (btnEl) btnEl.classList.add('active');
+
+            document.getElementById('inspect-name').textContent = data.name;
+            const rarityEl = document.getElementById('inspect-rarity');
+            rarityEl.textContent = data.rarity;
+            rarityEl.className = 'rarity-badge ' + data.rarityClass;
+
+            document.getElementById('inspect-slot').textContent = data.slot;
+            document.getElementById('inspect-img').src = data.img;
+            document.getElementById('inspect-img').alt = data.name;
+
+            const statsContainer = document.getElementById('inspect-stats');
+            statsContainer.innerHTML = '';
+            for (let s of data.stats) {
+                const statPill = document.createElement('div');
+                statPill.className = 'stat-pill';
+                statPill.innerHTML = `<span class="stat-name">${s.name}</span><span class="stat-val">${s.val}</span>`;
+                statsContainer.appendChild(statPill);
+            }
+
+            document.getElementById('inspect-lore').textContent = data.lore;
+            document.getElementById('inspect-synergy').innerHTML = data.synergy;
+        }
+
+        // =========================================================================
+        // ACCESSIBILITY & PREFERENCE CONTROLS
+        // =========================================================================
+        let highContrastActive = false;
+        let largeFontActive = false;
+        let crtCurveActive = false;
+
+        function toggleContrast() {
+            highContrastActive = !highContrastActive;
+            document.body.classList.toggle('high-contrast', highContrastActive);
+            const btn = document.getElementById('btn-contrast');
+            btn.textContent = highContrastActive ? '🌓 Contrast: High (AAA)' : '🌓 Contrast: Standard';
+            btn.setAttribute('aria-pressed', highContrastActive);
+            sfx.playClick();
+            showToast(highContrastActive ? 'High Contrast Mode Activated' : 'Standard Contrast Mode Restored');
+        }
+
+        function toggleTextSize() {
+            largeFontActive = !largeFontActive;
+            document.body.classList.toggle('large-font', largeFontActive);
+            const btn = document.getElementById('btn-text-size');
+            btn.textContent = largeFontActive ? '🔍 Text Size: Large (+20%)' : '🔍 Text Size: Normal';
+            btn.setAttribute('aria-pressed', largeFontActive);
+            sfx.playClick();
+            showToast(largeFontActive ? 'Large Text Scaling Enabled' : 'Normal Text Scaling Restored');
+        }
+
+        function toggleSfx() {
+            sfx.enabled = !sfx.enabled;
+            const btn = document.getElementById('btn-sfx');
+            btn.textContent = sfx.enabled ? '🔊 Web Audio: ON' : '🔇 Web Audio: MUTED';
+            btn.setAttribute('aria-pressed', sfx.enabled);
+            if (sfx.enabled) sfx.playCoin();
+            showToast(sfx.enabled ? 'Web Audio Sound Effects Enabled' : 'Web Audio Muted');
+        }
+
+        function toggleCrtCurve() {
+            const wrapper = document.getElementById('game-wrapper');
+            const btn = document.getElementById('btn-curve');
+            crtCurveActive = !crtCurveActive;
+            wrapper.classList.toggle('crt-curve', crtCurveActive);
+            btn.textContent = crtCurveActive ? '🖥️ CRT Curve: ON' : '🖥️ CRT Curve: OFF';
+            sfx.playClick();
+            showToast(crtCurveActive ? 'Retro CRT Screen Curvature Activated' : 'CRT Curvature Disabled');
+        }
+
+        // =========================================================================
+        // CHEERPJ RUNTIME LAUNCHER & CANVAS COORDINATOR
+        // =========================================================================
         let gameLaunched = false;
         let scanlinesEnabled = false;
 
-        // Mobile Nav Toggle
         function toggleMobileNav() {
             const nav = document.getElementById('nav-menu');
             const toggle = document.querySelector('.mobile-toggle');
             const isShown = nav.classList.toggle('show');
             toggle.setAttribute('aria-expanded', isShown);
+            sfx.playClick();
         }
 
-        // Focus Game Screen
         function focusGame() {
+            sfx.playCoin();
             const wrapper = document.getElementById('game-wrapper');
             wrapper.focus();
         }
 
-        // CheerpJ 3.1 WebAssembly Game Launcher
         async function launchGame() {
             if (gameLaunched) return;
             gameLaunched = true;
+            sfx.playCoin();
 
             const btnStart = document.getElementById('btn-start');
             const loadingPanel = document.getElementById('loading-panel');
@@ -1800,7 +2557,6 @@
             loadingPanel.style.display = 'flex';
 
             try {
-                // Step 1: Initialize CheerpJ Runtime
                 loadingStatus.textContent = 'STAGE 1/3: INITIALIZING WEBASSEMBLY RUNTIME...';
                 cabinetStatus.textContent = 'BOOTING WEBASSEMBLY RUNTIME...';
                 progressFill.style.width = '30%';
@@ -1812,19 +2568,16 @@
                 await cheerpjInit();
                 progressFill.style.width = '60%';
 
-                // Step 2: Create Swing Canvas Display (1248 x 672)
                 loadingStatus.textContent = 'STAGE 2/3: ATTACHING SWING 60FPS GRAPHICS CANVAS...';
                 cabinetStatus.textContent = 'ATTACHING DISPLAY ADAPTER (1248x672)...';
                 const wrapper = document.getElementById('game-wrapper');
                 cheerpjCreateDisplay(1248, 672, wrapper);
                 progressFill.style.width = '85%';
 
-                // Step 3: Mount & Execute Standalone Game JAR
                 loadingStatus.textContent = 'STAGE 3/3: LAUNCHING FELINE SOULS : WITCH CURSE...';
                 cabinetStatus.textContent = 'EXECUTING JVM BYTECODE...';
                 progressFill.style.width = '98%';
 
-                // Smoothly fade out splash screen overlay
                 setTimeout(() => {
                     splashScreen.style.opacity = '0';
                     splashScreen.style.transition = 'opacity 0.6s ease';
@@ -1835,7 +2588,6 @@
                     }, 600);
                 }, 800);
 
-                // Run JAR directly from virtual web directory
                 await cheerpjRunJar('/app/Tubes-PO2.jar');
 
             } catch (err) {
@@ -1846,8 +2598,8 @@
             }
         }
 
-        // Fullscreen Toggle
         function toggleFullscreen() {
+            sfx.playClick();
             const wrapper = document.getElementById('game-wrapper');
             if (!document.fullscreenElement) {
                 if (wrapper.requestFullscreen) {
@@ -1862,8 +2614,8 @@
             }
         }
 
-        // CRT Scanline Toggle
         function toggleScanlines() {
+            sfx.playClick();
             const crt = document.getElementById('crt-overlay');
             const btn = document.getElementById('btn-crt');
             scanlinesEnabled = !scanlinesEnabled;
@@ -1872,8 +2624,8 @@
             showToast(scanlinesEnabled ? 'CRT Retro Scanlines Activated' : 'Scanlines Disabled');
         }
 
-        // Controls Filtering
         function filterControls(category, buttonEl) {
+            sfx.playClick();
             const cards = document.querySelectorAll('.key-card');
             const buttons = document.querySelectorAll('.btn-filter');
 
@@ -1893,8 +2645,8 @@
             });
         }
 
-        // Copy Terminal Command
         function copyCommand() {
+            sfx.playClick();
             const text = document.getElementById('cmd-run').textContent;
             navigator.clipboard.writeText(text).then(() => {
                 showToast('✓ Command copied: ' + text);
@@ -1903,7 +2655,6 @@
             });
         }
 
-        // Show Toast Notification
         function showToast(message) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
