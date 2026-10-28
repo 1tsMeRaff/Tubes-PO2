@@ -1,8 +1,10 @@
 # run-all-tests.ps1 - Headless Test Runner
 $ErrorActionPreference = "Stop"
 Write-Host "Compiling test sources..." -ForegroundColor Cyan
-$javaFiles = (Get-ChildItem -Path src,test -Filter *.java -Recurse).FullName
-javac -encoding UTF-8 -d bin $javaFiles
+$sources = (Get-ChildItem -Path src,test -Filter *.java -Recurse | ForEach-Object { $_.FullName.Replace('\', '/') })
+Set-Content -Path "sources.txt" -Value $sources -Encoding ASCII
+javac -encoding UTF-8 -d bin "@sources.txt"
+Remove-Item "sources.txt" -Force
 
 Write-Host "Running 14 test suites (Core Engine + Design Division UI)..." -ForegroundColor Cyan
 $suites = @(
@@ -32,7 +34,7 @@ foreach ($suite in $suites) {
 }
 
 if ($allPassed) {
-    Write-Host "`nAll 12 test suites passed successfully!" -ForegroundColor Green
+    Write-Host "`nAll 14 test suites passed successfully!" -ForegroundColor Green
     exit 0
 } else {
     Write-Host "`nSome test suites failed!" -ForegroundColor Red

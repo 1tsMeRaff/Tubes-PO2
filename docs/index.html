@@ -20,8 +20,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Press+Start+2P&display=swap" rel="stylesheet">
     
-    <!-- CheerpJ 3.1 WebAssembly Runtime Loader -->
-    <script src="https://cjrtnc.leaningtech.com/3.1/loader.js"></script>
+    <!-- CheerpJ 3.1 WebAssembly Runtime Loader (Official CDN) -->
+    <script src="https://cjrtnc.leaningtech.com/3.1/cj3loader.js"></script>
 
     <style>
         /* ==========================================================================
@@ -609,6 +609,31 @@
             align-items: center;
             overflow: hidden;
             transition: var(--transition-smooth);
+        }
+
+        /* CheerpJ Display Adapter & Responsive Canvas Scaling */
+        #cheerpjDisplay {
+            max-width: 100% !important;
+            max-height: 100% !important;
+            width: 100% !important;
+            height: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        #cheerpjDisplay canvas,
+        #game-wrapper canvas,
+        #game-container canvas {
+            max-width: 100% !important;
+            max-height: 100% !important;
+            width: auto !important;
+            height: auto !important;
+            object-fit: contain !important;
+            image-rendering: -moz-crisp-edges !important;
+            image-rendering: -webkit-crisp-edges !important;
+            image-rendering: pixelated !important;
+            image-rendering: crisp-edges !important;
         }
 
         /* Retro CRT Scanlines & Screen Curve */
@@ -1511,9 +1536,329 @@
         }
 
         /* ==========================================================================
+           PROTOCOL & DIAGNOSTIC MODAL DESIGN SYSTEM
+           ========================================================================== */
+        .protocol-warning-banner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(90deg, rgba(255, 51, 75, 0.95), rgba(168, 85, 247, 0.95));
+            color: #ffffff;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 0.65rem 1rem;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 50;
+            box-shadow: 0 4px 20px rgba(255, 51, 75, 0.5);
+            letter-spacing: 0.03em;
+        }
+
+        .btn-banner-action {
+            background: #06070a;
+            color: var(--gold-bright);
+            border: 1px solid var(--gold-primary);
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.3rem 0.8rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            margin-left: 0.75rem;
+            white-space: nowrap;
+        }
+
+        .btn-banner-action:hover {
+            background: var(--gold-primary);
+            color: #06070a;
+        }
+
+        .diag-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(4, 5, 8, 0.88);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 100000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            animation: diagFadeIn 0.25s ease-out;
+        }
+
+        @keyframes diagFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .diag-modal-box {
+            background: var(--bg-card);
+            border: 2px solid var(--gold-primary);
+            border-radius: 12px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.9), 0 0 30px var(--gold-glow);
+            max-width: 720px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            animation: diagSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes diagSlideUp {
+            from { transform: translateY(30px) scale(0.97); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        .diag-modal-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1.5rem 1.75rem 1.25rem;
+            border-bottom: 1px solid var(--border-subtle);
+            background: rgba(243, 195, 91, 0.04);
+        }
+
+        .diag-modal-icon {
+            font-size: 2rem;
+            line-height: 1;
+        }
+
+        .diag-modal-headings {
+            flex: 1;
+        }
+
+        .diag-title {
+            font-family: var(--font-gothic);
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--crimson-bright);
+            letter-spacing: 0.04em;
+            margin-bottom: 0.25rem;
+        }
+
+        .diag-title.gold {
+            color: var(--gold-primary);
+        }
+
+        .diag-subtitle {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--cyan-telemetry);
+            letter-spacing: 0.08em;
+        }
+
+        .diag-modal-close {
+            background: transparent;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-muted);
+            border-radius: 6px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: var(--transition-smooth);
+        }
+
+        .diag-modal-close:hover {
+            color: var(--crimson-bright);
+            border-color: var(--crimson-bright);
+        }
+
+        .diag-modal-body {
+            padding: 1.5rem 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .diag-description {
+            color: var(--text-normal);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .diag-description code {
+            background: rgba(0, 0, 0, 0.5);
+            color: var(--gold-bright);
+            font-family: var(--font-mono);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.88rem;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .diag-options-title {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--gold-primary);
+            letter-spacing: 0.08em;
+            font-weight: 700;
+        }
+
+        .diag-cards-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .diag-card {
+            background: rgba(11, 13, 20, 0.8);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 1.15rem 1.25rem;
+            transition: var(--transition-smooth);
+        }
+
+        .diag-card:hover {
+            border-color: var(--gold-border);
+        }
+
+        .diag-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .diag-card-tag {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--cyan-telemetry);
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
+        .diag-card-tag.gold {
+            color: var(--gold-primary);
+            background: rgba(243, 195, 91, 0.12);
+            border-color: rgba(243, 195, 91, 0.3);
+        }
+
+        .diag-card-title {
+            font-family: var(--font-gothic);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-high);
+        }
+
+        .diag-card-desc {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+            line-height: 1.5;
+        }
+
+        .diag-cmd-box {
+            display: flex;
+            align-items: center;
+            background: #06070a;
+            border: 1px solid #1f273b;
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .diag-cmd-box code {
+            flex: 1;
+            font-family: var(--font-mono);
+            color: var(--gold-bright);
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+
+        .btn-diag-copy {
+            background: rgba(243, 195, 91, 0.15);
+            color: var(--gold-bright);
+            border: 1px solid var(--gold-primary);
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.25rem 0.6rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            margin-left: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .btn-diag-copy:hover {
+            background: var(--gold-primary);
+            color: #06070a;
+        }
+
+        .diag-cmd-sub, .diag-cmd-note {
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            margin-top: 0.25rem;
+        }
+
+        .diag-cmd-note a {
+            color: var(--cyan-telemetry);
+            text-decoration: underline;
+        }
+
+        .diag-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            padding: 1rem 1.75rem 1.25rem;
+            border-top: 1px solid var(--border-subtle);
+            background: rgba(11, 13, 20, 0.5);
+        }
+
+        .btn-diag-action {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 0.6rem 1.4rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .btn-diag-action.close {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .btn-diag-action.close:hover {
+            color: var(--text-high);
+            border-color: var(--text-muted);
+        }
+
+        .btn-diag-action.retry {
+            background: linear-gradient(135deg, #f3c35b 0%, #d4982c 100%);
+            color: #06070a;
+            border: 1px solid #ffe89e;
+        }
+
+        .btn-diag-action.retry:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 15px var(--gold-glow);
+        }
+
+        /* ==========================================================================
            RESPONSIVE BREAKPOINTS
            ========================================================================== */
         @media (max-width: 900px) {
+            #game-wrapper {
+                min-height: 0 !important;
+            }
             .armory-layout {
                 grid-template-columns: 1fr;
             }
@@ -1546,7 +1891,7 @@
 
         @media (max-width: 600px) {
             #game-wrapper {
-                min-height: 300px;
+                min-height: 0 !important;
             }
             .hero-headline {
                 font-size: 2.1rem;
@@ -1605,6 +1950,68 @@
 
     <!-- Toast Notification -->
     <div id="toast" role="status" aria-live="polite">✓ Copied to clipboard!</div>
+
+    <!-- Protocol & Diagnostic Warning Modal -->
+    <div id="diagnostic-modal" class="diag-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="diag-title" style="display: none;">
+        <div class="diag-modal-box">
+            <div class="diag-modal-header">
+                <span class="diag-modal-icon" aria-hidden="true">⚠️</span>
+                <div class="diag-modal-headings">
+                    <h3 id="diag-title" class="diag-title">LOCAL FILE PROTOCOL DETECTED</h3>
+                    <div id="diag-subtitle" class="diag-subtitle">PROTOCOL: file:// — WEB BROWSER RESTRICTION</div>
+                </div>
+                <button class="diag-modal-close" onclick="closeDiagnosticModal()" aria-label="Close Diagnostic Modal">✕</button>
+            </div>
+            
+            <div id="diag-body" class="diag-modal-body">
+                <p id="diag-description" class="diag-description">
+                    Modern web browsers (Google Chrome, Microsoft Edge, Mozilla Firefox, Apple Safari) strictly block <strong>WebAssembly execution</strong>, <strong>Web Workers</strong>, and <strong>CORS asset requests</strong> when opened directly from the local file system (<code>file://</code>).
+                </p>
+                
+                <div class="diag-options-title">RECOMMENDED ACTIONS // CHOOSE AN EXECUTION METHOD:</div>
+                
+                <div class="diag-cards-container" id="diag-cards">
+                    <!-- Option A: Local HTTP Server -->
+                    <div class="diag-card">
+                        <div class="diag-card-header">
+                            <span class="diag-card-tag">OPTION A // IN-BROWSER</span>
+                            <h4 class="diag-card-title">Launch Local HTTP Server</h4>
+                        </div>
+                        <p class="diag-card-desc">Serve the web portal locally with standard HTTP headers so WebAssembly & CheerpJ execute smoothly:</p>
+                        <div class="diag-cmd-box">
+                            <code id="diag-cmd-web">npx -y http-server docs -p 8080</code>
+                            <button class="btn-diag-copy" onclick="copyDiagnosticCmd('diag-cmd-web')" title="Copy Command">📋 Copy</button>
+                        </div>
+                        <div class="diag-cmd-sub">Or using Python: <code>python -m http.server 8080 --directory docs</code></div>
+                        <div class="diag-cmd-note">Then open: <a href="http://localhost:8080" target="_blank" rel="noopener">http://localhost:8080</a></div>
+                    </div>
+
+                    <!-- Option B: Standalone Native JAR -->
+                    <div class="diag-card">
+                        <div class="diag-card-header">
+                            <span class="diag-card-tag gold">OPTION B // DESKTOP RUNTIME</span>
+                            <h4 class="diag-card-title">Play Standalone Desktop JAR</h4>
+                        </div>
+                        <p class="diag-card-desc">Execute the standalone Java application natively with 60 FPS hardware acceleration and zero browser overhead:</p>
+                        <div class="diag-cmd-box">
+                            <code id="diag-cmd-jar">java -jar Tubes-PO2.jar</code>
+                            <button class="btn-diag-copy" onclick="copyDiagnosticCmd('diag-cmd-jar')" title="Copy Command">📋 Copy</button>
+                        </div>
+                        <div class="diag-cmd-note">From root or: <code>java -jar docs/Tubes-PO2.jar</code></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="diag-modal-footer">
+                <button id="btn-diag-retry" class="btn-diag-action retry" style="display: none;" onclick="retryGameLaunch()">
+                    🔄 RETRY INITIALIZATION
+                </button>
+                <button class="btn-diag-action close" onclick="closeDiagnosticModal()">
+                    DISMISS
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Header Navigation -->
     <header role="banner">
@@ -1715,6 +2122,12 @@
 
                 <!-- Display Canvas Target -->
                 <div id="game-wrapper" role="region" aria-label="Game Canvas Viewport" tabindex="0">
+                    <!-- Protocol Warning Banner for file:// -->
+                    <div id="file-protocol-banner" class="protocol-warning-banner" role="alert">
+                        <span>⚠️ <strong>LOCAL FILE PROTOCOL (file://) DETECTED:</strong> Web browsers block WebAssembly runtime workers over file://.</span>
+                        <button class="btn-banner-action" onclick="showDiagnosticModal()">VIEW FIX OPTIONS</button>
+                    </div>
+
                     <!-- Retro CRT Scanline Overlay -->
                     <div class="crt-scanlines" id="crt-overlay" aria-hidden="true"></div>
 
@@ -2541,8 +2954,181 @@
             wrapper.focus();
         }
 
+        // Protocol & Compatibility Diagnostics
+        function checkEnvironment() {
+            const isFileProtocol = window.location.protocol === 'file:';
+            const isWasmSupported = typeof WebAssembly === 'object' && typeof WebAssembly.instantiate === 'function';
+            const isWorkerSupported = typeof Worker !== 'undefined';
+
+            if (isFileProtocol) {
+                showFatalDiagnostic(
+                    "LOCAL FILE PROTOCOL DETECTED (file://)",
+                    "Web browsers strictly block <strong>WebAssembly execution</strong>, <strong>Web Workers</strong>, and <strong>CORS asset requests</strong> when opened directly via <code>file://</code> protocol.",
+                    [
+                        { 
+                            label: "OPTION A // IN-BROWSER", 
+                            desc: "Serve the web portal locally with standard HTTP headers so WebAssembly & CheerpJ execute smoothly:",
+                            cmd: "npx -y http-server docs -p 8080", 
+                            sub: "Or using Python: <code>python -m http.server 8080 --directory docs</code>", 
+                            note: 'Then open: <a href="http://localhost:8080" target="_blank" rel="noopener">http://localhost:8080</a>' 
+                        },
+                        { 
+                            label: "OPTION B // DESKTOP RUNTIME", 
+                            desc: "Execute the standalone Java application natively with 60 FPS hardware acceleration and zero browser overhead:",
+                            cmd: "java -jar Tubes-PO2.jar", 
+                            sub: "From repository root or: <code>java -jar docs/Tubes-PO2.jar</code>" 
+                        }
+                    ],
+                    false
+                );
+                return false;
+            }
+
+            if (!isWasmSupported || !isWorkerSupported) {
+                showFatalDiagnostic(
+                    "BROWSER COMPATIBILITY ERROR",
+                    "Your browser lacks WebAssembly or Web Worker support required to execute the Java JVM in-browser.",
+                    [
+                        { 
+                            label: "RECOMMENDED FIX", 
+                            desc: "Please use an updated modern browser such as Google Chrome, Mozilla Firefox, Microsoft Edge, or Apple Safari.",
+                            cmd: "https://www.google.com/chrome/" 
+                        },
+                        { 
+                            label: "OPTION B // DESKTOP RUNTIME", 
+                            desc: "Play the native offline Java standalone JAR instead:",
+                            cmd: "java -jar Tubes-PO2.jar" 
+                        }
+                    ],
+                    false
+                );
+                return false;
+            }
+
+            return true;
+        }
+
+        function showDiagnosticModal() {
+            sfx.playClick();
+            checkEnvironment();
+            const modal = document.getElementById('diagnostic-modal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeDiagnosticModal() {
+            sfx.playClick();
+            const modal = document.getElementById('diagnostic-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function copyDiagnosticCmd(elementId) {
+            sfx.playClick();
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const text = el.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('✓ Command copied: ' + text);
+            }).catch(() => {
+                showToast('Press Ctrl+C to copy command.');
+            });
+        }
+
+        function retryGameLaunch() {
+            closeDiagnosticModal();
+            gameLaunched = false;
+            const btnStart = document.getElementById('btn-start');
+            const loadingPanel = document.getElementById('loading-panel');
+            if (btnStart) btnStart.style.display = 'inline-flex';
+            if (loadingPanel) loadingPanel.style.display = 'none';
+            launchGame();
+        }
+
+        function showFatalDiagnostic(title, description, options, isRecoverable) {
+            const modal = document.getElementById('diagnostic-modal');
+            const titleEl = document.getElementById('diag-title');
+            const descEl = document.getElementById('diag-description');
+            const cardsEl = document.getElementById('diag-cards');
+            const btnRetry = document.getElementById('btn-diag-retry');
+            const loadingStatus = document.getElementById('loading-status');
+            const cabinetStatus = document.getElementById('cabinet-status');
+
+            if (titleEl) titleEl.textContent = title;
+            if (descEl) descEl.innerHTML = description;
+
+            if (cardsEl && options && options.length > 0) {
+                cardsEl.innerHTML = '';
+                options.forEach((opt, idx) => {
+                    const card = document.createElement('div');
+                    card.className = 'diag-card';
+                    const cmdId = `diag-dyn-cmd-${idx}`;
+                    
+                    let cardHtml = `
+                        <div class="diag-card-header">
+                            <span class="diag-card-tag ${idx === 1 ? 'gold' : ''}">${opt.label}</span>
+                        </div>
+                    `;
+                    if (opt.desc) {
+                        cardHtml += `<p class="diag-card-desc">${opt.desc}</p>`;
+                    }
+                    if (opt.cmd) {
+                        cardHtml += `
+                            <div class="diag-cmd-box">
+                                <code id="${cmdId}">${opt.cmd}</code>
+                                <button class="btn-diag-copy" onclick="copyDiagnosticCmd('${cmdId}')" title="Copy Command">📋 Copy</button>
+                            </div>
+                        `;
+                    }
+                    if (opt.sub) {
+                        cardHtml += `<div class="diag-cmd-sub">${opt.sub}</div>`;
+                    }
+                    if (opt.note) {
+                        cardHtml += `<div class="diag-cmd-note">${opt.note}</div>`;
+                    }
+                    card.innerHTML = cardHtml;
+                    cardsEl.appendChild(card);
+                });
+            }
+
+            if (btnRetry) {
+                btnRetry.style.display = isRecoverable ? 'inline-block' : 'none';
+            }
+
+            if (loadingStatus) {
+                loadingStatus.textContent = 'FAULT: ' + title;
+                loadingStatus.style.color = '#ff334b';
+            }
+            if (cabinetStatus) {
+                cabinetStatus.textContent = 'FAULT // OFFLINE JAR RECOMMENDED';
+            }
+
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        }
+
+        // Upfront Protocol Diagnostic on Load
+        function initDiagnostics() {
+            if (window.location.protocol === 'file:') {
+                const banner = document.getElementById('file-protocol-banner');
+                if (banner) banner.style.display = 'flex';
+                const cabinetStatus = document.getElementById('cabinet-status');
+                if (cabinetStatus) cabinetStatus.textContent = 'OFFLINE: file:// PROTOCOL (LOCAL SERVER REQUIRED)';
+                checkEnvironment();
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initDiagnostics);
+        } else {
+            initDiagnostics();
+        }
+
         async function launchGame() {
             if (gameLaunched) return;
+
+            // Upfront environment & protocol check
+            if (!checkEnvironment()) return;
+
             gameLaunched = true;
             sfx.playCoin();
 
@@ -2557,26 +3143,78 @@
             loadingPanel.style.display = 'flex';
 
             try {
-                loadingStatus.textContent = 'STAGE 1/3: INITIALIZING WEBASSEMBLY RUNTIME...';
-                cabinetStatus.textContent = 'BOOTING WEBASSEMBLY RUNTIME...';
-                progressFill.style.width = '30%';
+                // Step 1: Dynamic Subpath and Base URL Resolution
+                let basePath = window.location.pathname;
+                basePath = basePath.substring(0, basePath.lastIndexOf('/') + 1);
+                if (!basePath.startsWith('/')) basePath = '/' + basePath;
+                if (!basePath.endsWith('/')) basePath = basePath + '/';
 
-                if (typeof cheerpjInit === 'undefined') {
-                    throw new Error('CheerpJ loader script is unavailable or blocked by browser extensions.');
+                const jarName = "Tubes-PO2.jar";
+                const jarHttpUrl = `${window.location.origin}${basePath}${jarName}`;
+                const jarVirtualPath = `/app${basePath}${jarName}`.replace(/\/{2,}/g, '/');
+
+                // Step 2: Pre-flight HEAD / GET Check for Tubes-PO2.jar
+                loadingStatus.textContent = 'STAGE 1/4: VERIFYING GAME ARCHIVE (Tubes-PO2.jar)...';
+                cabinetStatus.textContent = 'VERIFYING GAME ARCHIVE...';
+                progressFill.style.width = '15%';
+
+                let jarAccessible = false;
+                let httpStatus = 0;
+                try {
+                    const headResp = await fetch(jarHttpUrl, { method: 'HEAD' });
+                    httpStatus = headResp.status;
+                    if (headResp.ok) {
+                        jarAccessible = true;
+                    } else if (headResp.status === 405 || headResp.status === 501) {
+                        const getResp = await fetch(jarHttpUrl, { method: 'GET', headers: { Range: 'bytes=0-0' } });
+                        httpStatus = getResp.status;
+                        if (getResp.ok || getResp.status === 206) {
+                            jarAccessible = true;
+                        }
+                    }
+                } catch (fetchErr) {
+                    try {
+                        const getResp = await fetch(jarHttpUrl, { method: 'GET', headers: { Range: 'bytes=0-0' } });
+                        httpStatus = getResp.status;
+                        if (getResp.ok || getResp.status === 206) {
+                            jarAccessible = true;
+                        }
+                    } catch (fallbackErr) {
+                        console.warn('Pre-flight fetch failed:', fetchErr);
+                    }
                 }
 
-                await cheerpjInit();
-                progressFill.style.width = '60%';
+                if (!jarAccessible) {
+                    throw new Error(`Game archive '${jarName}' was not accessible at ${jarHttpUrl} (HTTP ${httpStatus || 'Network Error'}). Please verify that the JAR has been compiled and placed in the web distribution directory.`);
+                }
 
-                loadingStatus.textContent = 'STAGE 2/3: ATTACHING SWING 60FPS GRAPHICS CANVAS...';
+                // Step 3: Initialize CheerpJ 3.1 WebAssembly Runtime
+                loadingStatus.textContent = 'STAGE 2/4: INITIALIZING WEBASSEMBLY RUNTIME...';
+                cabinetStatus.textContent = 'BOOTING WEBASSEMBLY RUNTIME...';
+                progressFill.style.width = '45%';
+
+                if (typeof cheerpjInit === 'undefined') {
+                    throw new Error('CheerpJ 3 loader script failed to load from CDN. Please check network connectivity or ad-blocking extensions.');
+                }
+
+                await cheerpjInit({
+                    version: 8,
+                    status: "splash",
+                    overrideDocumentBase: window.location.origin + basePath
+                });
+                progressFill.style.width = '70%';
+
+                // Step 4: Attach Display Canvas
+                loadingStatus.textContent = 'STAGE 3/4: ATTACHING SWING GRAPHICS CANVAS...';
                 cabinetStatus.textContent = 'ATTACHING DISPLAY ADAPTER (1248x672)...';
                 const wrapper = document.getElementById('game-wrapper');
                 cheerpjCreateDisplay(1248, 672, wrapper);
                 progressFill.style.width = '85%';
 
-                loadingStatus.textContent = 'STAGE 3/3: LAUNCHING FELINE SOULS : WITCH CURSE...';
+                // Step 5: Launch Executable JAR in JVM
+                loadingStatus.textContent = 'STAGE 4/4: LAUNCHING FELINE SOULS : WITCH CURSE...';
                 cabinetStatus.textContent = 'EXECUTING JVM BYTECODE...';
-                progressFill.style.width = '98%';
+                progressFill.style.width = '100%';
 
                 setTimeout(() => {
                     splashScreen.style.opacity = '0';
@@ -2586,15 +3224,32 @@
                         splashScreen.style.display = 'none';
                         wrapper.focus();
                     }, 600);
-                }, 800);
+                }, 1000);
 
-                await cheerpjRunJar('/app/Tubes-PO2.jar');
+                await cheerpjRunJar(jarVirtualPath);
 
             } catch (err) {
-                console.error('CheerpJ launch error:', err);
-                loadingStatus.textContent = 'LAUNCH ERROR: ' + (err.message || 'Check browser WebAssembly support or try desktop JAR.');
-                loadingStatus.style.color = '#ff334b';
-                cabinetStatus.textContent = 'JVM FAULT: OFFLINE JAR RECOMMENDED';
+                console.error('CheerpJ launch exception:', err);
+                gameLaunched = false; // Allow retry
+                showFatalDiagnostic(
+                    "GAME INITIALIZATION FAULT",
+                    err.message || "An unexpected error occurred while launching CheerpJ WebAssembly.",
+                    [
+                        { 
+                            label: "OPTION A // IN-BROWSER FIX", 
+                            desc: "Compile the standalone JAR and copy it into the web directory:",
+                            cmd: "powershell -ExecutionPolicy Bypass -File build-web.ps1", 
+                            sub: "Builds Tubes-PO2.jar and updates docs/Tubes-PO2.jar" 
+                        },
+                        { 
+                            label: "OPTION B // DESKTOP RUNTIME", 
+                            desc: "Run directly in native desktop Java SE (zero browser overhead):",
+                            cmd: "java -jar Tubes-PO2.jar", 
+                            sub: "From root or: <code>java -jar docs/Tubes-PO2.jar</code>" 
+                        }
+                    ],
+                    true
+                );
             }
         }
 
