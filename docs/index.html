@@ -1,233 +1,491 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Feline Souls : Witch Curse | 2D Action RPG Platformer (Java in Browser)</title>
-    <meta name="description" content="Feline Souls : Witch Curse - Pure Java SE 2D Action RPG Platformer running directly in the browser via WebAssembly & CheerpJ 3. Zero external dependencies.">
+    <title>Feline Souls : Witch Curse — 2D Retro Action RPG Platformer (Java in Browser)</title>
+    <meta name="description" content="Feline Souls : Witch Curse is a pure Java SE 2D Action RPG Platformer running directly in your browser via WebAssembly & CheerpJ 3. Battle bosses, cast soul hexes, and cleanse the cursed realm.">
+    <meta name="keywords" content="Java game, CheerpJ, WebAssembly, Action RPG, 2D Platformer, Pixel Art, Retro Game, Feline Souls">
+    <meta name="theme-color" content="#090a10">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>">
+
+    <!-- Open Graph / Social Sharing -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Feline Souls : Witch Curse — 2D Action RPG">
+    <meta property="og:description" content="Play the pure Java 2D Action RPG Platformer directly in your browser with zero plugins via WebAssembly.">
+    <meta property="og:image" content="ui/mainn_menu.jpeg">
+
+    <!-- Google Fonts: Inter (Body), Cinzel (Gothic Headings), JetBrains Mono (Keycaps & Code) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@600;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&family=Press+Start+2P&display=swap" rel="stylesheet">
     
     <!-- CheerpJ 3.1 WebAssembly Runtime Loader -->
     <script src="https://cjrtnc.leaningtech.com/3.1/loader.js"></script>
 
     <style>
+        /* ==========================================================================
+           DESIGN SYSTEM: GOTHIC DARK FANTASY & ARCADE THEME (WCAG 2.1 COMPLIANT)
+           ========================================================================== */
         :root {
-            --bg-main: #0b0c10;
-            --bg-card: #14161f;
-            --bg-card-hover: #1c1f2c;
-            --accent-gold: #f0be5a;
-            --accent-gold-glow: rgba(240, 190, 90, 0.4);
-            --accent-crimson: #ff3344;
-            --accent-blue: #3a86ff;
-            --text-primary: #f0f2f5;
-            --text-secondary: #9da3af;
-            --border-color: #272a38;
-            --font-display: 'Orbitron', sans-serif;
-            --font-body: 'Inter', sans-serif;
+            /* Backgrounds */
+            --bg-void: #06070a;
+            --bg-surface: #0c0e15;
+            --bg-card: #141724;
+            --bg-card-hover: #1c2133;
+            --bg-card-active: #22293f;
+            --bg-glass: rgba(18, 22, 34, 0.78);
+            --bg-overlay: rgba(6, 7, 10, 0.92);
+
+            /* Atmospheric Glows & Thematic Accents */
+            --gold-primary: #f3c35b;
+            --gold-bright: #ffdc7a;
+            --gold-glow: rgba(243, 195, 91, 0.45);
+            --gold-subtle: rgba(243, 195, 91, 0.12);
+
+            --crimson-blood: #ff334b;
+            --crimson-glow: rgba(255, 51, 75, 0.45);
+
+            --violet-curse: #a855f7;
+            --violet-glow: rgba(168, 85, 247, 0.45);
+
+            --emerald-spirit: #2ecc71;
+            --emerald-glow: rgba(46, 204, 113, 0.4);
+
+            --cyan-telemetry: #38bdf8;
+
+            /* High Contrast Typography Tokens (WCAG AAA >= 7:1 against card) */
+            --text-high: #f8fafc;
+            --text-normal: #e2e8f0;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+
+            /* Borders & Filigree */
+            --border-faint: rgba(255, 255, 255, 0.08);
+            --border-subtle: #252b3d;
+            --border-gold: rgba(243, 195, 91, 0.4);
+            --border-crimson: rgba(255, 51, 75, 0.4);
+            --border-active: #f3c35b;
+
+            /* Typography Families */
+            --font-gothic: 'Cinzel', serif;
+            --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
             --font-pixel: 'Press Start 2P', monospace;
+
+            /* Shadows & Transitions */
+            --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.5);
+            --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(243, 195, 91, 0.05);
+            --shadow-glow: 0 0 25px var(--gold-glow);
+            --transition-smooth: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        * {
+        /* Base Reset */
+        *, *::before, *::after {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
         body {
-            background-color: var(--bg-main);
-            color: var(--text-primary);
+            background-color: var(--bg-void);
+            color: var(--text-normal);
             font-family: var(--font-body);
-            line-height: 1.6;
+            line-height: 1.65;
             overflow-x: hidden;
             background-image: 
-                radial-gradient(circle at 15% 15%, rgba(240, 190, 90, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 85% 85%, rgba(255, 51, 68, 0.05) 0%, transparent 40%);
+                radial-gradient(circle at 10% 20%, rgba(168, 85, 247, 0.06) 0%, transparent 45%),
+                radial-gradient(circle at 90% 10%, rgba(243, 195, 91, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 50% 70%, rgba(255, 51, 75, 0.05) 0%, transparent 60%),
+                linear-gradient(to bottom, #06070a 0%, #0c0e15 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
         }
 
-        /* Header & Navigation */
+        /* Accessibility: Skip to Content */
+        .skip-link {
+            position: absolute;
+            top: -60px;
+            left: 20px;
+            background: var(--gold-primary);
+            color: #06070a;
+            padding: 0.75rem 1.25rem;
+            font-weight: 700;
+            border-radius: 6px;
+            z-index: 10000;
+            transition: top 0.2s ease;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+        }
+        .skip-link:focus {
+            top: 20px;
+            outline: 3px solid #ffffff;
+        }
+
+        /* Accessibility Focus Indicator */
+        :focus-visible {
+            outline: 3px solid var(--gold-primary);
+            outline-offset: 3px;
+        }
+
+        /* Container Constraint */
+        .container {
+            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* ==========================================================================
+           HEADER & NAVIGATION BAR
+           ========================================================================== */
         header {
-            background: rgba(14, 16, 23, 0.85);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border-color);
             position: sticky;
             top: 0;
-            z-index: 100;
-            padding: 1rem 2rem;
+            z-index: 999;
+            background: var(--bg-glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-subtle);
+            transition: var(--transition-smooth);
+        }
+
+        .nav-inner {
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            align-items: center;
+            padding: 0.9rem 0;
         }
 
-        .brand {
+        .brand-link {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.85rem;
             text-decoration: none;
-            color: var(--text-primary);
+            color: var(--text-high);
         }
 
-        .brand-logo {
-            font-size: 1.5rem;
-            filter: drop-shadow(0 0 8px var(--accent-gold-glow));
+        .brand-paw {
+            font-size: 1.7rem;
+            filter: drop-shadow(0 0 10px var(--gold-glow));
+            transform: translateY(-1px);
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
         }
 
         .brand-title {
-            font-family: var(--font-display);
-            font-size: 1.25rem;
-            font-weight: 800;
+            font-family: var(--font-gothic);
+            font-size: 1.15rem;
+            font-weight: 900;
             letter-spacing: 0.08em;
-            color: var(--accent-gold);
-            text-shadow: 0 0 12px var(--accent-gold-glow);
+            color: var(--gold-primary);
+            text-shadow: 0 0 12px var(--gold-glow);
         }
 
-        .nav-links {
+        .brand-subtitle {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .nav-menu {
             display: flex;
-            gap: 1.5rem;
             align-items: center;
+            gap: 1.5rem;
             list-style: none;
         }
 
-        .nav-links a {
-            color: var(--text-secondary);
+        .nav-item a {
+            color: var(--text-normal);
             text-decoration: none;
             font-size: 0.9rem;
-            font-weight: 500;
-            transition: color 0.2s, text-shadow 0.2s;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent-gold);
-            text-shadow: 0 0 8px var(--accent-gold-glow);
-        }
-
-        .btn-download-nav {
-            background: linear-gradient(135deg, #f0be5a, #d4982c);
-            color: #0b0c10 !important;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-weight: 700 !important;
-            box-shadow: 0 2px 10px rgba(240, 190, 90, 0.3);
-            transition: transform 0.2s, box-shadow 0.2s !important;
-        }
-
-        .btn-download-nav:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(240, 190, 90, 0.5);
-        }
-
-        /* Hero / Main Section */
-        .main-container {
-            max-width: 1300px;
-            margin: 2rem auto;
-            padding: 0 1.5rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3rem;
-        }
-
-        .hero-banner {
-            text-align: center;
-            max-width: 800px;
-        }
-
-        .badges {
-            display: flex;
-            justify-content: center;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            margin-bottom: 1rem;
-        }
-
-        .badge {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
             font-weight: 600;
-            color: var(--text-secondary);
+            letter-spacing: 0.02em;
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+            transition: var(--transition-smooth);
             display: inline-flex;
             align-items: center;
             gap: 0.4rem;
         }
 
-        .badge-gold {
-            border-color: var(--accent-gold);
-            color: var(--accent-gold);
+        .nav-item a:hover {
+            color: var(--gold-primary);
+            background: var(--gold-subtle);
         }
 
-        .hero-title {
-            font-family: var(--font-display);
-            font-size: 2.75rem;
+        .btn-nav-download {
+            background: linear-gradient(135deg, #f3c35b 0%, #d4982c 100%);
+            color: #06070a !important;
+            padding: 0.5rem 1.1rem !important;
+            border-radius: 6px;
+            font-weight: 800 !important;
+            box-shadow: 0 2px 12px rgba(243, 195, 91, 0.3);
+        }
+
+        .btn-nav-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 18px rgba(243, 195, 91, 0.5);
+        }
+
+        /* Mobile Hamburger Toggle */
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-high);
+            font-size: 1.5rem;
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        /* ==========================================================================
+           HERO SECTION: THE CALL TO ADVENTURE
+           ========================================================================== */
+        .hero {
+            padding: 3.5rem 0 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .badges-cluster {
+            display: flex;
+            justify-content: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.25rem;
+        }
+
+        .badge {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            padding: 0.35rem 0.85rem;
+            border-radius: 30px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-normal);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .badge-gold {
+            border-color: var(--border-gold);
+            color: var(--gold-bright);
+            background: rgba(243, 195, 91, 0.08);
+        }
+
+        .badge-pulse {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--emerald-spirit);
+            box-shadow: 0 0 8px var(--emerald-spirit);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.2); }
+        }
+
+        .hero-headline {
+            font-family: var(--font-gothic);
+            font-size: clamp(2.4rem, 5vw, 3.8rem);
             font-weight: 900;
-            line-height: 1.15;
-            margin-bottom: 0.75rem;
-            background: linear-gradient(to right, #ffffff, #f0be5a);
+            line-height: 1.1;
+            letter-spacing: 0.03em;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #ffffff 30%, var(--gold-bright) 80%, #ff8c42 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(243, 195, 91, 0.2);
         }
 
-        .hero-desc {
-            color: var(--text-secondary);
-            font-size: 1.05rem;
+        .hero-tagline {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            color: var(--text-muted);
+            max-width: 820px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
         }
 
-        /* Arcade Stage (Game Frame) */
-        .arcade-stage {
-            width: 100%;
-            max-width: 1256px;
-            background: #000;
+        .hero-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2.5rem;
+        }
+
+        .btn-hero-play {
+            background: linear-gradient(135deg, #f3c35b 0%, #d4982c 100%);
+            color: #06070a;
+            font-family: var(--font-gothic);
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            padding: 0.9rem 2.2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 4px 25px rgba(243, 195, 91, 0.4);
+            transition: var(--transition-smooth);
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-hero-play:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 35px rgba(243, 195, 91, 0.6);
+        }
+
+        .btn-hero-secondary {
+            background: var(--bg-card);
+            color: var(--text-high);
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 0.9rem 1.6rem;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            border: 1px solid var(--border-subtle);
+            transition: var(--transition-smooth);
+        }
+
+        .btn-hero-secondary:hover {
+            border-color: var(--gold-primary);
+            color: var(--gold-primary);
+            transform: translateY(-2px);
+        }
+
+        /* Hero Telemetry Grid */
+        .telemetry-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            max-width: 960px;
+            margin: 0 auto;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-subtle);
             border-radius: 12px;
-            border: 3px solid #2e3346;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(240, 190, 90, 0.15);
-            position: relative;
-            overflow: hidden;
+            padding: 1.25rem;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .telemetry-item {
             display: flex;
             flex-direction: column;
             align-items: center;
+            text-align: center;
+            padding: 0.5rem;
+            border-right: 1px solid var(--border-faint);
+        }
+        .telemetry-item:last-child {
+            border-right: none;
         }
 
-        .arcade-header-bar {
-            width: 100%;
-            background: #181b26;
-            border-bottom: 2px solid #2a2f42;
-            padding: 0.6rem 1.25rem;
+        .telemetry-val {
+            font-family: var(--font-gothic);
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--gold-primary);
+        }
+
+        .telemetry-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-top: 0.2rem;
+        }
+
+        /* ==========================================================================
+           ARCADE STAGE (CHEERPJ CANVAS CABINET)
+           ========================================================================== */
+        .arcade-section {
+            padding: 2.5rem 0 4rem;
+        }
+
+        .arcade-cabinet {
+            background: #020305;
+            border-radius: 16px;
+            border: 3px solid #282f42;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.9), 0 0 40px rgba(243, 195, 91, 0.12);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .cabinet-header {
+            background: linear-gradient(to bottom, #181c28, #10131d);
+            border-bottom: 2px solid #282f42;
+            padding: 0.75rem 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 0.85rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
         }
 
-        .cabinet-dots {
+        .cabinet-chassis-dots {
             display: flex;
-            gap: 6px;
+            align-items: center;
+            gap: 8px;
         }
 
-        .dot {
-            width: 10px;
-            height: 10px;
+        .dot-rivet {
+            width: 11px;
+            height: 11px;
             border-radius: 50%;
+            display: inline-block;
         }
-        .dot-red { background: #ff5f56; }
-        .dot-yellow { background: #ffbd2e; }
-        .dot-green { background: #27c93f; }
+        .dot-red { background: #ff5f56; box-shadow: 0 0 6px #ff5f56; }
+        .dot-yellow { background: #ffbd2e; box-shadow: 0 0 6px #ffbd2e; }
+        .dot-green { background: #27c93f; box-shadow: 0 0 6px #27c93f; }
 
-        .cabinet-status {
-            font-family: var(--font-pixel);
-            font-size: 0.65rem;
-            color: var(--accent-gold);
-            letter-spacing: 0.05em;
+        .cabinet-status-text {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--gold-bright);
+            letter-spacing: 0.06em;
+            font-weight: 700;
         }
 
-        /* Game Screen Container */
+        .cabinet-spec-badge {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--cyan-telemetry);
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+        }
+
+        /* Screen Wrapper (1248 x 672 Native Aspect Ratio) */
         #game-wrapper {
             width: 100%;
             aspect-ratio: 1248 / 672;
             min-height: 480px;
-            background: #050608;
+            background: #000000;
             position: relative;
             display: flex;
             justify-content: center;
@@ -235,103 +493,133 @@
             overflow: hidden;
         }
 
-        /* Pre-launch / Loading Splash */
+        /* Optional Retro CRT Scanline Overlay */
+        .crt-scanlines {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0.6;
+            display: none;
+        }
+
+        /* Splash Screen & Activation Gate */
         #splash-screen {
             position: absolute;
             inset: 0;
-            background: linear-gradient(rgba(10, 12, 18, 0.95), rgba(5, 6, 8, 0.98)), url('ui/mainn_menu.jpeg') center/cover no-repeat;
+            background: linear-gradient(rgba(8, 10, 16, 0.94), rgba(4, 5, 8, 0.98)), url('assets/Background_0.png') center/cover no-repeat;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 10;
-            padding: 2rem;
+            padding: 2.5rem;
             text-align: center;
         }
 
-        .splash-title {
-            font-family: var(--font-display);
-            font-size: 2.25rem;
-            color: var(--accent-gold);
+        .splash-emblem {
+            font-size: 3rem;
             margin-bottom: 0.5rem;
-            text-shadow: 0 0 15px rgba(240, 190, 90, 0.6);
+            filter: drop-shadow(0 0 15px var(--gold-glow));
+            animation: float 3s ease-in-out infinite;
         }
 
-        .splash-subtitle {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            margin-bottom: 2rem;
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
         }
 
-        .btn-launch {
-            background: linear-gradient(135deg, #f0be5a, #d4982c);
-            color: #0d0e15;
-            font-family: var(--font-display);
-            font-size: 1.15rem;
+        .splash-title {
+            font-family: var(--font-gothic);
+            font-size: clamp(1.8rem, 3.5vw, 2.6rem);
             font-weight: 900;
-            padding: 1rem 2.5rem;
-            border: none;
+            color: var(--gold-primary);
+            text-shadow: 0 0 20px var(--gold-glow);
+            margin-bottom: 0.4rem;
+        }
+
+        .splash-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            max-width: 580px;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .btn-launch-engine {
+            background: linear-gradient(135deg, #f3c35b 0%, #d4982c 100%);
+            color: #06070a;
+            font-family: var(--font-gothic);
+            font-size: 1.25rem;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            padding: 1.1rem 3rem;
             border-radius: 8px;
+            border: 2px solid #ffe89e;
             cursor: pointer;
-            box-shadow: 0 4px 25px rgba(240, 190, 90, 0.4);
-            transition: all 0.2s ease;
-            display: flex;
+            box-shadow: 0 6px 30px rgba(243, 195, 91, 0.45);
+            transition: var(--transition-smooth);
+            display: inline-flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.85rem;
         }
 
-        .btn-launch:hover {
-            transform: scale(1.04);
-            box-shadow: 0 6px 35px rgba(240, 190, 90, 0.6);
+        .btn-launch-engine:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 45px rgba(243, 195, 91, 0.7);
         }
 
-        /* Loading Progress */
+        /* Loading Panel & Progress */
         #loading-panel {
             display: none;
             flex-direction: column;
             align-items: center;
             width: 100%;
-            max-width: 450px;
+            max-width: 480px;
         }
 
-        .progress-bar-container {
+        .loading-title {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--gold-bright);
+            letter-spacing: 0.08em;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+
+        .progress-track {
             width: 100%;
             height: 18px;
-            background: #141722;
-            border: 2px solid var(--border-color);
-            border-radius: 9px;
+            background: #141824;
+            border: 2px solid var(--border-subtle);
+            border-radius: 12px;
             overflow: hidden;
-            margin: 1.25rem 0 0.75rem;
             position: relative;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.8);
         }
 
-        .progress-bar-fill {
+        .progress-fill {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, #3a86ff, #f0be5a);
-            transition: width 0.3s ease;
-            box-shadow: 0 0 10px var(--accent-gold);
-        }
-
-        .loading-text {
-            font-family: var(--font-pixel);
-            font-size: 0.7rem;
-            color: var(--accent-gold);
+            background: linear-gradient(90deg, #a855f7, #38bdf8 50%, #f3c35b 100%);
+            transition: width 0.4s ease;
+            box-shadow: 0 0 14px var(--gold-primary);
         }
 
         .loading-tip {
-            margin-top: 0.75rem;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
             font-style: italic;
         }
 
-        /* Controls Bottom Bar */
-        .arcade-footer-bar {
-            width: 100%;
-            background: #181b26;
-            border-top: 2px solid #2a2f42;
-            padding: 0.75rem 1.25rem;
+        /* Arcade Footer Control Bar */
+        .cabinet-footer {
+            background: #10131d;
+            border-top: 2px solid #282f42;
+            padding: 0.85rem 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -339,99 +627,359 @@
             gap: 1rem;
         }
 
-        .quick-actions {
+        .cabinet-tools {
             display: flex;
-            gap: 0.75rem;
+            gap: 0.6rem;
+            flex-wrap: wrap;
         }
 
-        .btn-action {
-            background: #242938;
-            color: var(--text-primary);
-            border: 1px solid #3b4257;
-            padding: 0.4rem 0.85rem;
-            border-radius: 5px;
-            font-size: 0.8rem;
+        .btn-tool {
+            background: #1e2436;
+            color: var(--text-normal);
+            border: 1px solid #333d59;
+            padding: 0.45rem 0.95rem;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-weight: 600;
             cursor: pointer;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 0.4rem;
-            transition: all 0.2s;
+            transition: var(--transition-smooth);
         }
 
-        .btn-action:hover {
-            background: #31384c;
-            border-color: var(--accent-gold);
-            color: var(--accent-gold);
+        .btn-tool:hover {
+            background: #2b334d;
+            border-color: var(--gold-primary);
+            color: var(--gold-bright);
         }
 
-        /* Controls Card Section */
-        .section-title {
-            font-family: var(--font-display);
-            font-size: 1.75rem;
-            color: #ffffff;
-            margin-bottom: 1.5rem;
+        .audio-advisory {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* ==========================================================================
+           SECTION HEADING COMMON STYLES
+           ========================================================================== */
+        .section-header {
             text-align: center;
-            position: relative;
+            margin-bottom: 2.75rem;
         }
 
-        .section-title::after {
+        .section-eyebrow {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--gold-primary);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .section-title {
+            font-family: var(--font-gothic);
+            font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+            font-weight: 800;
+            color: var(--text-high);
+            line-height: 1.2;
+            margin-bottom: 0.75rem;
+        }
+
+        .section-subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        /* ==========================================================================
+           COMBAT MECHANICS CARDS
+           ========================================================================== */
+        .mechanics-section {
+            padding: 3.5rem 0;
+        }
+
+        .mechanics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .mechanic-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 1.8rem;
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .mechanic-card::before {
             content: '';
-            display: block;
-            width: 60px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
             height: 3px;
-            background: var(--accent-gold);
-            margin: 0.5rem auto 0;
-            border-radius: 2px;
+            background: var(--accent-stripe, var(--gold-primary));
+        }
+
+        .mechanic-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--accent-stripe, var(--gold-primary));
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6), 0 0 20px var(--accent-glow, var(--gold-glow));
+        }
+
+        .mechanic-icon {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .mechanic-title {
+            font-family: var(--font-gothic);
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--text-high);
+            margin-bottom: 0.5rem;
+        }
+
+        .mechanic-key {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--gold-bright);
+            display: inline-block;
+            margin-bottom: 1rem;
+            align-self: flex-start;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .mechanic-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            flex-grow: 1;
+        }
+
+        /* ==========================================================================
+           INTERACTIVE CONTROLS HUB & KEYBIND FILTER
+           ========================================================================== */
+        .controls-section {
+            padding: 3.5rem 0;
+        }
+
+        .controls-filter-bar {
+            display: flex;
+            justify-content: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .btn-filter {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-muted);
+            padding: 0.5rem 1.25rem;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .btn-filter:hover, .btn-filter.active {
+            background: var(--gold-primary);
+            color: #06070a;
+            border-color: var(--gold-primary);
+            box-shadow: 0 2px 12px var(--gold-glow);
         }
 
         .controls-grid {
-            width: 100%;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.25rem;
         }
 
-        .control-card {
+        .key-card {
             background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 1.25rem;
+            border: 1px solid var(--border-subtle);
             border-radius: 10px;
-            text-align: center;
-            transition: transform 0.2s, border-color 0.2s;
+            padding: 1.4rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            transition: var(--transition-smooth);
         }
 
-        .control-card:hover {
+        .key-card:hover {
             transform: translateY(-4px);
-            border-color: var(--accent-gold);
+            border-color: var(--gold-primary);
+            box-shadow: var(--shadow-card);
         }
 
-        .key-badge {
-            background: #202433;
-            border: 2px solid #3a4159;
+        .key-pill-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .key-pill {
+            background: #1d2232;
+            border: 2px solid #3b4461;
+            border-bottom: 4px solid #141724;
             border-radius: 6px;
-            padding: 0.4rem 0.8rem;
-            font-family: var(--font-pixel);
+            padding: 0.35rem 0.75rem;
+            font-family: var(--font-mono);
             font-size: 0.8rem;
-            color: var(--accent-gold);
+            font-weight: 700;
+            color: var(--gold-bright);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
             display: inline-block;
-            margin-bottom: 0.75rem;
-            box-shadow: 0 3px 0 #12141c;
         }
 
-        .control-action {
-            font-weight: 600;
-            font-size: 0.95rem;
-            margin-bottom: 0.25rem;
+        .key-action-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-high);
         }
 
-        .control-detail {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
+        .key-action-detail {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
         }
 
-        /* Boss Showcase & Story Grid */
-        .showcase-grid {
+        /* ==========================================================================
+           CHRONICLES OF THE REALM (LEVEL EXPEDITIONS)
+           ========================================================================== */
+        .realms-section {
+            padding: 3.5rem 0;
+        }
+
+        .realms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.75rem;
+        }
+
+        .realm-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition-smooth);
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .realm-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--gold-primary);
+            box-shadow: var(--shadow-card);
+        }
+
+        .realm-img-holder {
             width: 100%;
+            height: 160px;
+            background-color: #000;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .realm-img-holder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .realm-card:hover .realm-img-holder img {
+            transform: scale(1.08);
+        }
+
+        .realm-badge-overlay {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(6, 7, 10, 0.85);
+            backdrop-filter: blur(8px);
+            padding: 0.25rem 0.7rem;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--gold-bright);
+            border: 1px solid var(--border-gold);
+        }
+
+        .realm-body {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .realm-name {
+            font-family: var(--font-gothic);
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--text-high);
+            margin-bottom: 0.4rem;
+        }
+
+        .realm-difficulty {
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            font-weight: 700;
+            margin-bottom: 0.85rem;
+        }
+
+        .diff-novice { color: var(--emerald-spirit); }
+        .diff-veteran { color: var(--gold-primary); }
+        .diff-nightmare { color: var(--crimson-blood); }
+
+        .realm-lore {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 1.25rem;
+            flex-grow: 1;
+        }
+
+        .realm-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border-faint);
+            padding-top: 0.85rem;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        /* ==========================================================================
+           BESTIARY & BOSS HALL
+           ========================================================================== */
+        .boss-section {
+            padding: 3.5rem 0;
+        }
+
+        .boss-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 1.5rem;
@@ -439,318 +987,804 @@
 
         .boss-card {
             background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 1.5rem;
-            transition: all 0.3s;
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 1.75rem;
+            transition: var(--transition-smooth);
             position: relative;
-            overflow: hidden;
-        }
-
-        .boss-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: var(--accent-gold);
+            display: flex;
+            flex-direction: column;
         }
 
         .boss-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-            border-color: var(--accent-gold);
+            transform: translateY(-5px);
+            border-color: var(--crimson-blood);
+            box-shadow: 0 10px 30px rgba(255, 51, 75, 0.15);
         }
 
-        .boss-name {
-            font-family: var(--font-display);
-            font-size: 1.2rem;
-            color: var(--accent-gold);
-            margin-bottom: 0.4rem;
-        }
-
-        .boss-role {
-            font-size: 0.8rem;
-            color: var(--accent-crimson);
+        .boss-badge {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
             font-weight: 700;
-            letter-spacing: 0.05em;
-            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--crimson-blood);
+            margin-bottom: 0.5rem;
+        }
+
+        .boss-title {
+            font-family: var(--font-gothic);
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-high);
+            margin-bottom: 0.5rem;
         }
 
         .boss-desc {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            flex-grow: 1;
         }
 
-        /* Desktop Download Banner */
-        .download-box {
-            width: 100%;
-            background: linear-gradient(135deg, rgba(20, 22, 31, 0.95), rgba(30, 34, 48, 0.95));
-            border: 2px solid var(--accent-gold);
-            border-radius: 12px;
-            padding: 2.5rem 2rem;
+        .boss-tip-box {
+            background: rgba(255, 51, 75, 0.06);
+            border-left: 3px solid var(--crimson-blood);
+            padding: 0.6rem 0.85rem;
+            border-radius: 0 6px 6px 0;
+            font-size: 0.8rem;
+            color: var(--text-normal);
+        }
+
+        /* ==========================================================================
+           DESKTOP DOWNLOAD ARCHIVE
+           ========================================================================== */
+        .download-section {
+            padding: 3rem 0 4rem;
+        }
+
+        .download-card {
+            background: linear-gradient(135deg, rgba(20, 24, 38, 0.95), rgba(12, 14, 22, 0.98));
+            border: 2px solid var(--border-gold);
+            border-radius: 16px;
+            padding: 2.75rem 2.25rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 2rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(240, 190, 90, 0.15);
+            box-shadow: var(--shadow-card);
         }
 
-        .download-info h3 {
-            font-family: var(--font-display);
-            font-size: 1.6rem;
-            color: #fff;
+        .download-text-group {
+            max-width: 650px;
+        }
+
+        .download-heading {
+            font-family: var(--font-gothic);
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--gold-bright);
+            margin-bottom: 0.75rem;
+        }
+
+        .download-body {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1.25rem;
+            line-height: 1.6;
+        }
+
+        .terminal-box {
+            background: #06070a;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            max-width: 460px;
+        }
+
+        .terminal-code {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--gold-bright);
+        }
+
+        .btn-copy {
+            background: #1c2132;
+            border: 1px solid #333c56;
+            color: var(--text-normal);
+            padding: 0.35rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .btn-copy:hover {
+            background: var(--gold-primary);
+            color: #06070a;
+        }
+
+        .btn-main-download {
+            background: linear-gradient(135deg, #f3c35b 0%, #d4982c 100%);
+            color: #06070a;
+            font-family: var(--font-gothic);
+            font-size: 1.15rem;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            padding: 1.1rem 2.2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 4px 20px rgba(243, 195, 91, 0.4);
+            transition: var(--transition-smooth);
+        }
+
+        .btn-main-download:hover {
+            transform: scale(1.04);
+            box-shadow: 0 6px 30px rgba(243, 195, 91, 0.6);
+        }
+
+        /* ==========================================================================
+           FOOTER & COPYRIGHT
+           ========================================================================== */
+        footer {
+            border-top: 1px solid var(--border-subtle);
+            background: #050609;
+            padding: 3rem 0 2rem;
+            text-align: center;
+            font-size: 0.88rem;
+            color: var(--text-muted);
+        }
+
+        .footer-brand {
+            font-family: var(--font-gothic);
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--gold-primary);
             margin-bottom: 0.5rem;
         }
 
-        .download-info p {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            margin-bottom: 1rem;
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin: 1.25rem 0;
+            flex-wrap: wrap;
+            list-style: none;
         }
 
-        .code-box {
-            background: #090a0e;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-family: monospace;
-            font-size: 0.9rem;
-            color: var(--accent-gold);
-            border: 1px solid #232736;
-            display: inline-block;
-        }
-
-        .btn-large-download {
-            background: linear-gradient(135deg, #f0be5a, #d4982c);
-            color: #0b0c10;
-            font-family: var(--font-display);
-            font-size: 1.1rem;
-            font-weight: 800;
-            padding: 1rem 2rem;
-            border-radius: 8px;
+        .footer-links a {
+            color: var(--text-normal);
             text-decoration: none;
-            box-shadow: 0 4px 20px rgba(240, 190, 90, 0.35);
-            transition: all 0.2s;
-            display: inline-flex;
+            transition: var(--transition-smooth);
+        }
+
+        .footer-links a:hover {
+            color: var(--gold-primary);
+        }
+
+        .footer-copyright {
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Toast Notification Popup */
+        #toast {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: var(--bg-card);
+            border: 1px solid var(--gold-primary);
+            color: var(--text-high);
+            padding: 0.85rem 1.4rem;
+            border-radius: 8px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.8);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            z-index: 100000;
+            display: none;
             align-items: center;
             gap: 0.6rem;
+            animation: slideIn 0.3s ease;
         }
 
-        .btn-large-download:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 30px rgba(240, 190, 90, 0.5);
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
-        /* Footer */
-        footer {
-            border-top: 1px solid var(--border-color);
-            background: #08090d;
-            padding: 2.5rem 1.5rem;
-            text-align: center;
-            color: var(--text-secondary);
-            font-size: 0.85rem;
+        /* ==========================================================================
+           RESPONSIVE BREAKPOINTS
+           ========================================================================== */
+        @media (max-width: 900px) {
+            .nav-menu {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--bg-card);
+                border-bottom: 2px solid var(--border-subtle);
+                padding: 1.5rem;
+                gap: 1rem;
+            }
+            .nav-menu.show {
+                display: flex;
+            }
+            .mobile-toggle {
+                display: block;
+            }
+            .download-card {
+                text-align: center;
+                justify-content: center;
+            }
+            .terminal-box {
+                margin: 0 auto;
+            }
         }
 
-        footer a {
-            color: var(--accent-gold);
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .hero-title { font-size: 2rem; }
-            .nav-links { display: none; }
-            .download-box { text-align: center; justify-content: center; }
-            #game-wrapper { min-height: 320px; }
+        @media (max-width: 600px) {
+            #game-wrapper {
+                min-height: 300px;
+            }
+            .hero-headline {
+                font-size: 2.1rem;
+            }
+            .telemetry-bar {
+                grid-template-columns: 1fr 1fr;
+            }
+            .telemetry-item {
+                border-right: none;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- Header / Navbar -->
-    <header>
-        <a href="#" class="brand">
-            <span class="brand-logo">🐾</span>
-            <span class="brand-title">FELINE SOULS : WITCH CURSE</span>
-        </a>
-        <ul class="nav-links">
-            <li><a href="#play-section">Play Online</a></li>
-            <li><a href="#controls-section">Controls</a></li>
-            <li><a href="#bosses-section">Bosses</a></li>
-            <li><a href="#download-section" class="btn-download-nav">Download .JAR</a></li>
-            <li><a href="https://github.com/1tsMeRaff/Tubes-PO2" target="_blank" rel="noopener">GitHub Repo ↗</a></li>
-        </ul>
+    <!-- Accessibility Skip Link -->
+    <a href="#game-section" class="skip-link">Skip directly to Playable Game</a>
+
+    <!-- Toast Notification -->
+    <div id="toast" role="status" aria-live="polite">✓ Copied to clipboard!</div>
+
+    <!-- Header Navigation -->
+    <header role="banner">
+        <div class="container nav-inner">
+            <a href="#" class="brand-link" aria-label="Feline Souls : Witch Curse Home">
+                <span class="brand-paw" aria-hidden="true">🐾</span>
+                <div class="brand-text">
+                    <span class="brand-title">FELINE SOULS</span>
+                    <span class="brand-subtitle">Witch Curse Edition</span>
+                </div>
+            </a>
+
+            <button class="mobile-toggle" onclick="toggleMobileNav()" aria-label="Toggle navigation menu" aria-expanded="false">
+                ☰
+            </button>
+
+            <nav role="navigation" aria-label="Main Navigation">
+                <ul class="nav-menu" id="nav-menu">
+                    <li class="nav-item"><a href="#game-section">▶ Play Online</a></li>
+                    <li class="nav-item"><a href="#mechanics-section">🔮 Signature Spells</a></li>
+                    <li class="nav-item"><a href="#controls-section">🎮 Controls</a></li>
+                    <li class="nav-item"><a href="#realms-section">🗺️ Realms</a></li>
+                    <li class="nav-item"><a href="#bosses-section">💀 Bestiary</a></li>
+                    <li class="nav-item"><a href="#download-section" class="btn-nav-download">⬇ Offline .JAR</a></li>
+                    <li class="nav-item">
+                        <a href="https://github.com/1tsMeRaff/Tubes-PO2" target="_blank" rel="noopener" aria-label="GitHub Repository (opens in new tab)">
+                            GitHub ↗
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
     </header>
 
-    <div class="main-container">
+    <main id="main-content" role="main">
 
-        <!-- Hero Title & Badges -->
-        <section class="hero-banner">
-            <div class="badges">
-                <span class="badge badge-gold">⚡ Pure Java SE 8+</span>
-                <span class="badge">🌐 CheerpJ 3 WebAssembly</span>
+        <!-- Hero Presentation -->
+        <section class="hero container" aria-labelledby="hero-title">
+            <div class="badges-cluster">
+                <span class="badge badge-gold"><span class="badge-pulse" aria-hidden="true"></span> Pure Java SE 8+ Standard Edition</span>
+                <span class="badge">🌐 CheerpJ 3.1 WebAssembly Runtime</span>
                 <span class="badge">📦 Zero External Dependencies</span>
-                <span class="badge">🛡️ Headless Verified (28/28 Tests)</span>
+                <span class="badge">🛡️ 14 Headless Test Suites (44 Tests Pass)</span>
             </div>
-            <h1 class="hero-title">2D Retro Action RPG Platformer</h1>
-            <p class="hero-desc">Rasakan sensasi aksi platformer petualangan bergaya arcade klasik dengan pertarungan real-time, sistem equipment modular, dan boss battles epik langsung di browser Anda.</p>
+
+            <h1 class="hero-headline" id="hero-title">
+                Nine Lives Defying an Ancient Witch's Curse
+            </h1>
+
+            <p class="hero-tagline">
+                Step into a high-octane 2D Action RPG platformer built in pure standard Java. Run real-time combat, cast piercing Soul Hexes, plunge through enemies with Feline Ground Slams, and conquer colossal bosses directly inside your modern web browser.
+            </p>
+
+            <div class="hero-actions">
+                <a href="#game-section" class="btn-hero-play" onclick="focusGame()">
+                    <span>▶</span> PLAY IN BROWSER
+                </a>
+                <a href="#download-section" class="btn-hero-secondary">
+                    <span>⬇</span> Download Desktop JAR (47.24 MB)
+                </a>
+            </div>
+
+            <!-- Engine Telemetry Overview -->
+            <div class="telemetry-bar" aria-label="Game Engine Telemetry">
+                <div class="telemetry-item">
+                    <span class="telemetry-val">60 FPS</span>
+                    <span class="telemetry-label">Game Loop Precision</span>
+                </div>
+                <div class="telemetry-item">
+                    <span class="telemetry-val">44 / 44</span>
+                    <span class="telemetry-label">Unit Tests (100% Pass)</span>
+                </div>
+                <div class="telemetry-item">
+                    <span class="telemetry-val">3 Realms</span>
+                    <span class="telemetry-label">Handcrafted Expeditions</span>
+                </div>
+                <div class="telemetry-item">
+                    <span class="telemetry-val">Zero GC</span>
+                    <span class="telemetry-label">Allocation Render Pool</span>
+                </div>
+            </div>
         </section>
 
-        <!-- Arcade Screen Container -->
-        <section id="play-section" class="arcade-stage">
-            <div class="arcade-header-bar">
-                <div class="cabinet-dots">
-                    <span class="dot dot-red"></span>
-                    <span class="dot dot-yellow"></span>
-                    <span class="dot dot-green"></span>
-                </div>
-                <div class="cabinet-status">SYSTEM READY // CHEERPJ JVM RUNTIME</div>
-                <div>RESOLUTION: 1248 x 672 (60 FPS)</div>
-            </div>
-
-            <div id="game-wrapper">
-                <!-- Splash & Start Prompt -->
-                <div id="splash-screen">
-                    <h2 class="splash-title">🐾 FELINE SOULS : WITCH CURSE</h2>
-                    <p class="splash-subtitle">Tekan tombol di bawah untuk memuat WebAssembly JVM dan mengaktifkan audio game.</p>
-                    
-                    <button id="btn-start" class="btn-launch" onclick="launchGame()">
-                        <span>▶</span> MULAI PERMAINAN
-                    </button>
-
-                    <!-- Loading Progress -->
-                    <div id="loading-panel">
-                        <div class="loading-text" id="loading-status">MEMUAT JVM RUNTIME...</div>
-                        <div class="progress-bar-container">
-                            <div class="progress-bar-fill" id="progress-fill"></div>
-                        </div>
-                        <div class="loading-tip">Tips: Tekan tombol J untuk menebas dan tahan J untuk Heavy Charge Attack!</div>
+        <!-- Arcade Canvas Showcase (CheerpJ Player) -->
+        <section id="game-section" class="arcade-section container" aria-label="Playable Web Arcade Stage">
+            <div class="arcade-cabinet">
+                <!-- Chassis Top Bar -->
+                <div class="cabinet-header">
+                    <div class="cabinet-chassis-dots" aria-hidden="true">
+                        <span class="dot-rivet dot-red"></span>
+                        <span class="dot-rivet dot-yellow"></span>
+                        <span class="dot-rivet dot-green"></span>
+                    </div>
+                    <div class="cabinet-status-text" id="cabinet-status">
+                        VIRTUAL JVM STATUS: READY FOR BOOT
+                    </div>
+                    <div class="cabinet-spec-badge">
+                        1248 x 672 NATIVE RESOLUTION
                     </div>
                 </div>
 
-                <!-- CheerpJ Display target will be dynamically attached here -->
-            </div>
+                <!-- Display Canvas Target -->
+                <div id="game-wrapper" role="region" aria-label="Game Canvas Viewport" tabindex="0">
+                    <!-- Retro CRT Scanline Overlay -->
+                    <div class="crt-scanlines" id="crt-overlay" aria-hidden="true"></div>
 
-            <!-- Stage Quick Actions Bar -->
-            <div class="arcade-footer-bar">
-                <div class="quick-actions">
-                    <button class="btn-action" onclick="toggleFullscreen()">⛶ Fullscreen</button>
-                    <button class="btn-action" onclick="location.reload()">🔄 Restart</button>
+                    <!-- Pre-launch Splash & Activation -->
+                    <div id="splash-screen">
+                        <div class="splash-emblem" aria-hidden="true">🐾</div>
+                        <h2 class="splash-title">FELINE SOULS : WITCH CURSE</h2>
+                        <p class="splash-desc">
+                            Click below to compile Java bytecode into client-side WebAssembly via CheerpJ 3.1 and activate web audio context.
+                        </p>
+                        
+                        <button id="btn-start" class="btn-launch-engine" onclick="launchGame()" aria-label="Launch Feline Souls game in browser">
+                            <span>▶</span> INITIALIZE WEBASSEMBLY ENGINE
+                        </button>
+
+                        <!-- Dynamic Loading Feedback -->
+                        <div id="loading-panel" aria-live="polite">
+                            <div class="loading-title" id="loading-status">INITIALIZING WEBASSEMBLY RUNTIME...</div>
+                            <div class="progress-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                <div class="progress-fill" id="progress-fill"></div>
+                            </div>
+                            <div class="loading-tip" id="loading-tip">
+                                💡 Tip: Press [J] or [Left Click] to slash. Hold [J] for heavy charge attack!
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div style="font-size: 0.8rem; color: var(--text-secondary);">
-                    💡 Jika audio tidak terdengar, pastikan browser Anda mengizinkan suara untuk halaman ini.
+
+                <!-- Chassis Bottom Toolbar -->
+                <div class="cabinet-footer">
+                    <div class="cabinet-tools">
+                        <button class="btn-tool" onclick="toggleFullscreen()" aria-label="Toggle Fullscreen">
+                            ⛶ Fullscreen
+                        </button>
+                        <button class="btn-tool" onclick="toggleScanlines()" id="btn-crt" aria-label="Toggle CRT Scanlines">
+                            📺 Scanlines: OFF
+                        </button>
+                        <button class="btn-tool" onclick="location.reload()" aria-label="Restart Game Page">
+                            🔄 Restart
+                        </button>
+                    </div>
+
+                    <div class="audio-advisory">
+                        <span>🔊</span>
+                        <span>Ensure your browser allows audio playback for full orchestral immersion.</span>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- Controls Reference Section -->
-        <section id="controls-section" style="width: 100%;">
-            <h2 class="section-title">KONTROL PERMAINAN</h2>
-            <div class="controls-grid">
-                <div class="control-card">
-                    <div class="key-badge">A / D &nbsp;atau&nbsp; ← / →</div>
-                    <div class="control-action">Pergerakan</div>
-                    <div class="control-detail">Berjalan lincah ke kiri atau kanan di peta</div>
+        <!-- Signature Combat Mechanics -->
+        <section id="mechanics-section" class="mechanics-section container" aria-labelledby="mechanics-title">
+            <div class="section-header">
+                <span class="section-eyebrow">Arsenal of the Cursed Feline</span>
+                <h2 class="section-title" id="mechanics-title">Signature Combat & Magic Mechanics</h2>
+                <p class="section-subtitle">
+                    Master the ancient abilities granted to the feline warrior to pierce through legions of the witch's cursed abominations.
+                </p>
+            </div>
+
+            <div class="mechanics-grid">
+                <!-- Mechanic 1 -->
+                <article class="mechanic-card" style="--accent-stripe: var(--violet-curse); --accent-glow: var(--violet-glow);">
+                    <span class="mechanic-icon" aria-hidden="true">🔮</span>
+                    <h3 class="mechanic-title">Witch Curse : Soul Hex</h3>
+                    <span class="mechanic-key">[U] / [H] / Right Click (25 Mana)</span>
+                    <p class="mechanic-desc">
+                        Unleash a high-velocity ethereal projectile that pierces through enemy ranks, triggering screen shake and continuous magic damage scaling with character level.
+                    </p>
+                </article>
+
+                <!-- Mechanic 2 -->
+                <article class="mechanic-card" style="--accent-stripe: var(--gold-primary); --accent-glow: var(--gold-glow);">
+                    <span class="mechanic-icon" aria-hidden="true">🐾</span>
+                    <h3 class="mechanic-title">Feline Ground Slam</h3>
+                    <span class="mechanic-key">[Down] + Attack (In Air)</span>
+                    <p class="mechanic-desc">
+                        Plunge downwards from the sky at supersonic speed to crash into the stone floor, detonating a devastating shockwave that damages and knocks back all surrounding foes.
+                    </p>
+                </article>
+
+                <!-- Mechanic 3 -->
+                <article class="mechanic-card" style="--accent-stripe: var(--cyan-telemetry); --accent-glow: rgba(56, 189, 248, 0.4);">
+                    <span class="mechanic-icon" aria-hidden="true">⚡</span>
+                    <h3 class="mechanic-title">Spectral Dash & I-Frames</h3>
+                    <span class="mechanic-key">[Shift] / [L] / [Q]</span>
+                    <p class="mechanic-desc">
+                        Phase through enemy strikes with brief invulnerability frames (I-Frames). Essential for evading boss sweep attacks and repositioning behind colossal adversaries.
+                    </p>
+                </article>
+
+                <!-- Mechanic 4 -->
+                <article class="mechanic-card" style="--accent-stripe: var(--crimson-blood); --accent-glow: var(--crimson-glow);">
+                    <span class="mechanic-icon" aria-hidden="true">⚔️</span>
+                    <h3 class="mechanic-title">Heavy Charge Blade</h3>
+                    <span class="mechanic-key">Hold [J] / [X] & Release</span>
+                    <p class="mechanic-desc">
+                        Channel internal feline fury into the blade. Releasing after full charge delivers a 2.5x critical cleave that can stun smaller mobs and stagger lumbering giants.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <!-- Interactive Controls Hub -->
+        <section id="controls-section" class="controls-section container" aria-labelledby="controls-title">
+            <div class="section-header">
+                <span class="section-eyebrow">Input Mastery</span>
+                <h2 class="section-title" id="controls-title">Interactive Keybinding Center</h2>
+                <p class="section-subtitle">
+                    Dual keyboard and mouse controls engineered for ergonomic arcade gameplay and retro platformer muscle memory.
+                </p>
+            </div>
+
+            <!-- Controls Filter Tabs -->
+            <div class="controls-filter-bar" role="tablist" aria-label="Control Category Filter">
+                <button class="btn-filter active" role="tab" aria-selected="true" onclick="filterControls('all', this)">All Controls</button>
+                <button class="btn-filter" role="tab" aria-selected="false" onclick="filterControls('movement', this)">Movement & Agility</button>
+                <button class="btn-filter" role="tab" aria-selected="false" onclick="filterControls('combat', this)">Combat & Spells</button>
+                <button class="btn-filter" role="tab" aria-selected="false" onclick="filterControls('system', this)">Inventory & System</button>
+            </div>
+
+            <div class="controls-grid" id="controls-container">
+                <!-- Move Left/Right -->
+                <div class="key-card" data-category="movement">
+                    <div class="key-pill-row">
+                        <span class="key-pill">A</span>
+                        <span class="key-pill">D</span>
+                        <span style="color: var(--text-dim);">or</span>
+                        <span class="key-pill">←</span>
+                        <span class="key-pill">→</span>
+                    </div>
+                    <div class="key-action-title">Horizontal Movement</div>
+                    <div class="key-action-detail">Run smoothly across the terrain with responsive acceleration and turn-around physics.</div>
                 </div>
-                <div class="control-card">
-                    <div class="key-badge">SPASI / W / K / ↑</div>
-                    <div class="control-action">Lompat & Double Jump</div>
-                    <div class="control-detail">Lompatan standar dan lompatan ganda di udara</div>
+
+                <!-- Jump & Double Jump -->
+                <div class="key-card" data-category="movement">
+                    <div class="key-pill-row">
+                        <span class="key-pill">SPACE</span>
+                        <span class="key-pill">W</span>
+                        <span class="key-pill">K</span>
+                        <span class="key-pill">↑</span>
+                    </div>
+                    <div class="key-action-title">Jump & Air Double Jump</div>
+                    <div class="key-action-detail">Perform high vertical leaps. Press again mid-air to trigger double jump dust bursts.</div>
                 </div>
-                <div class="control-card">
-                    <div class="key-badge">J / X &nbsp;atau&nbsp; KLIK KIRI</div>
-                    <div class="control-action">Serangan Pedang</div>
-                    <div class="control-detail">Tebasan pedang atau tahan untuk Heavy Charge Attack</div>
+
+                <!-- Dash -->
+                <div class="key-card" data-category="movement">
+                    <div class="key-pill-row">
+                        <span class="key-pill">SHIFT</span>
+                        <span class="key-pill">L</span>
+                        <span class="key-pill">Q</span>
+                        <span class="key-pill">C</span>
+                    </div>
+                    <div class="key-action-title">Rapid Dash (I-Frames)</div>
+                    <div class="key-action-detail">Burst horizontally through projectiles and monster hitboxes with temporary invulnerability.</div>
                 </div>
-                <div class="control-card">
-                    <div class="key-badge">SHIFT / L / Q</div>
-                    <div class="control-action">Dash Kilat</div>
-                    <div class="control-detail">Meluncur kencang dengan kekebalan sementara (I-Frames)</div>
+
+                <!-- Primary Attack -->
+                <div class="key-card" data-category="combat">
+                    <div class="key-pill-row">
+                        <span class="key-pill">J</span>
+                        <span class="key-pill">X</span>
+                        <span style="color: var(--text-dim);">or</span>
+                        <span class="key-pill">LEFT CLICK</span>
+                    </div>
+                    <div class="key-action-title">Blade Strike / Charge</div>
+                    <div class="key-action-detail">Tap for rapid 3-hit combo slashes. Hold down to charge and unleash a heavy devastating cleave.</div>
                 </div>
-                <div class="control-card">
-                    <div class="key-badge">I / TAB / E / F</div>
-                    <div class="control-action">Inventaris & Gear</div>
-                    <div class="control-detail">Buka dan tutup tas perlengkapan karakter</div>
+
+                <!-- Witch Curse Spell -->
+                <div class="key-card" data-category="combat">
+                    <div class="key-pill-row">
+                        <span class="key-pill">U</span>
+                        <span class="key-pill">H</span>
+                        <span style="color: var(--text-dim);">or</span>
+                        <span class="key-pill">RIGHT CLICK</span>
+                    </div>
+                    <div class="key-action-title">Witch Curse Spell (25 MP)</div>
+                    <div class="key-action-detail">Cast a piercing soul hex projectile towards your facing direction, bypassing enemy shields.</div>
                 </div>
-                <div class="control-card">
-                    <div class="key-badge">ESC / P</div>
-                    <div class="control-action">Jeda & Batal</div>
-                    <div class="control-detail">Tutup overlay aktif atau buka menu jeda & audio</div>
+
+                <!-- Feline Ground Slam -->
+                <div class="key-card" data-category="combat">
+                    <div class="key-pill-row">
+                        <span class="key-pill">S / ↓</span>
+                        <span>+</span>
+                        <span class="key-pill">ATTACK</span>
+                        <span style="color: var(--gold-bright); font-size: 0.75rem;">(In Air)</span>
+                    </div>
+                    <div class="key-action-title">Feline Ground Slam</div>
+                    <div class="key-action-detail">Drop with extreme velocity to crush mobs below and unleash a radial ground shockwave.</div>
                 </div>
-                <div class="control-card" style="border-color: rgba(190, 80, 255, 0.4);">
-                    <div class="key-badge" style="background: rgba(190, 80, 255, 0.15); color: #df9eff; border-color: rgba(190, 80, 255, 0.5);">U / H &nbsp;atau&nbsp; KLIK KANAN</div>
-                    <div class="control-action" style="color: #df9eff;">🔮 Sihir Witch Curse</div>
-                    <div class="control-detail">Lontarkan gelombang sihir kutukan penembus musuh (25 Mana)</div>
+
+                <!-- Inventory -->
+                <div class="key-card" data-category="system">
+                    <div class="key-pill-row">
+                        <span class="key-pill">I</span>
+                        <span class="key-pill">TAB</span>
+                        <span class="key-pill">E</span>
+                        <span class="key-pill">F</span>
+                    </div>
+                    <div class="key-action-title">Inventory & Equipment</div>
+                    <div class="key-action-detail">Toggle the 24-slot inventory overlay to equip helmets, armor, boots, and mystical rings.</div>
                 </div>
-                <div class="control-card" style="border-color: rgba(240, 190, 90, 0.4);">
-                    <div class="key-badge" style="background: rgba(240, 190, 90, 0.15); color: #f0be5a; border-color: rgba(240, 190, 90, 0.5);">↓ / S + SERANG (DI UDARA)</div>
-                    <div class="control-action" style="color: #f0be5a;">🐾 Feline Ground Slam</div>
-                    <div class="control-detail">Hunjamkan serangan dari udara menciptakan gelombang kejut AoE</div>
+
+                <!-- Pause & Navigation -->
+                <div class="key-card" data-category="system">
+                    <div class="key-pill-row">
+                        <span class="key-pill">ESC</span>
+                        <span class="key-pill">P</span>
+                    </div>
+                    <div class="key-action-title">Pause / Return Menu</div>
+                    <div class="key-action-detail">Open the pause menu to adjust music and sound effect volumes, or exit to the main title screen.</div>
+                </div>
+
+                <!-- Level Quick Select -->
+                <div class="key-card" data-category="system">
+                    <div class="key-pill-row">
+                        <span class="key-pill">1</span>
+                        <span class="key-pill">2</span>
+                        <span class="key-pill">3</span>
+                    </div>
+                    <div class="key-action-title">Level Quick Selection</div>
+                    <div class="key-action-detail">On the Chronicles screen, press 1, 2, or 3 for instant expedition launching.</div>
                 </div>
             </div>
         </section>
 
-        <!-- Boss Battles & Story Showcase -->
-        <section id="bosses-section" style="width: 100%;">
-            <h2 class="section-title">MUSUH & BOSS UTAMA</h2>
-            <div class="showcase-grid">
-                <div class="boss-card">
-                    <h3 class="boss-name">Demon Boss</h3>
-                    <div class="boss-role">COLOSSAL OVERLORD (MULTI-PHASE)</div>
-                    <p class="boss-desc">Penguasa kegelapan bertubuh raksasa dengan serangan tebasan beruntun dan fase amarah khusus saat HP mencapai batas tertentu.</p>
+        <!-- Chronicles of the Realm -->
+        <section id="realms-section" class="realms-section container" aria-labelledby="realms-title">
+            <div class="section-header">
+                <span class="section-eyebrow">Expedition Domains</span>
+                <h2 class="section-title" id="realms-title">Chronicles of the Realm</h2>
+                <p class="section-subtitle">
+                    Travel through diverse biomes corrupted by dark sorcery. Cleanse each territory to unlock the witch's inner sanctum.
+                </p>
+            </div>
+
+            <div class="realms-grid">
+                <!-- Chapter 1 -->
+                <article class="realm-card">
+                    <div class="realm-img-holder">
+                        <img src="assets/Background_0.png" alt="Abandoned Outskirts background" loading="lazy">
+                        <span class="realm-badge-overlay">CHAPTER I • [KEY 1]</span>
+                    </div>
+                    <div class="realm-body">
+                        <h3 class="realm-name">Abandoned Outskirts</h3>
+                        <div class="realm-difficulty diff-novice">★☆☆ NOVICE EXPEDITION</div>
+                        <p class="realm-lore">
+                            Whispering pine forests and crumbling stone archways under eternal twilight. Learn fundamental acrobatics, collect health potions, and duel wild skullwolves.
+                        </p>
+                        <div class="realm-meta">
+                            <span>Tileset: Outside Sprites</span>
+                            <span>Map: /map_tutorial_fix.txt</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Chapter 2 -->
+                <article class="realm-card">
+                    <div class="realm-img-holder">
+                        <img src="assets/Background_jungle.png" alt="Deep Jungle Canopy background" loading="lazy">
+                        <span class="realm-badge-overlay">CHAPTER II • [KEY 2]</span>
+                    </div>
+                    <div class="realm-body">
+                        <h3 class="realm-name">Deep Jungle Ruins</h3>
+                        <div class="realm-difficulty diff-veteran">★★☆ VETERAN EXPEDITION</div>
+                        <p class="realm-lore">
+                            Dense venomous canopies, poisonous moss marshes, and ancient stone golems that guard forgotten altars. Requires high agility and dash timing.
+                        </p>
+                        <div class="realm-meta">
+                            <span>Tileset: Jungle Fix</span>
+                            <span>Map: /jungle_map.txt</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Chapter 3 -->
+                <article class="realm-card">
+                    <div class="realm-img-holder">
+                        <img src="ui/mainn_menu.jpeg" alt="The Witch's Citadel artwork" loading="lazy">
+                        <span class="realm-badge-overlay">CHAPTER III • [KEY 3]</span>
+                    </div>
+                    <div class="realm-body">
+                        <h3 class="realm-name">The Witch's Citadel</h3>
+                        <div class="realm-difficulty diff-nightmare">★★★ NIGHTMARE EXPEDITION</div>
+                        <p class="realm-lore">
+                            The obsidian fortress towering above the cursed land. Face the multi-phase Demon Overlord and the Bringer of Death to shatter the witch's dark curse once and for all.
+                        </p>
+                        <div class="realm-meta">
+                            <span>Tileset: Main Castle</span>
+                            <span>Map: /main_tileset.txt</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- Bestiary & Boss Hall -->
+        <section id="bosses-section" class="boss-section container" aria-labelledby="bosses-title">
+            <div class="section-header">
+                <span class="section-eyebrow">Threat Intelligence</span>
+                <h2 class="section-title" id="bosses-title">Bestiary of the Cursed Realm</h2>
+                <p class="section-subtitle">
+                    Study the lethal attack patterns and behaviors of the abominations summoned by the witch's hexes.
+                </p>
+            </div>
+
+            <div class="boss-grid">
+                <!-- Boss 1 -->
+                <article class="boss-card">
+                    <span class="boss-badge">Colossal Overlord • Phase 1 & 2</span>
+                    <h3 class="boss-title">Demon Boss</h3>
+                    <p class="boss-desc">
+                        A towering horned beast wielding massive cleaves. At low health, enrages with increased movement speed, continuous knockbacks, and multi-directional ground stomps.
+                    </p>
+                    <div class="boss-tip-box">
+                        💡 Tactical Tip: Utilize Dash I-Frames during his ground cleave recovery to strike his rear.
+                    </div>
+                </article>
+
+                <!-- Boss 2 -->
+                <article class="boss-card">
+                    <span class="boss-badge">Necromantic Caster</span>
+                    <h3 class="boss-title">Bringer of Death</h3>
+                    <p class="boss-desc">
+                        A shadowy sorcerer that conjures dark energy spheres from afar and teleports across the arena when cornered, summoning soul minions to distract your blade.
+                    </p>
+                    <div class="boss-tip-box">
+                        💡 Tactical Tip: Cast Witch Curse from range to interrupt spell channeling before closing in.
+                    </div>
+                </article>
+
+                <!-- Boss 3 -->
+                <article class="boss-card">
+                    <span class="boss-badge">Ancient Stone Golem</span>
+                    <h3 class="boss-title">Blue Golem</h3>
+                    <p class="boss-desc">
+                        Chiseled from primordial granite, this sentinel possesses impenetrable armor against standard strikes. His seismic punches can knock you down flat.
+                    </p>
+                    <div class="boss-tip-box">
+                        💡 Tactical Tip: Use Heavy Charge Blade attacks to pierce through high physical defense.
+                    </div>
+                </article>
+
+                <!-- Mob 4 -->
+                <article class="boss-card">
+                    <span class="boss-badge">Corrupted Territorial Mobs</span>
+                    <h3 class="boss-title">Skullwolf & Slime</h3>
+                    <p class="boss-desc">
+                        Aggressive pack hunters that leap across platforms to ambush unwary wanderers. They drop valuable soul experience and restorative red potions.
+                    </p>
+                    <div class="boss-tip-box">
+                        💡 Tactical Tip: Aerial Ground Slam instantly flattens packs of smaller enemies.
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- Desktop Offline Download Card -->
+        <section id="download-section" class="download-section container" aria-labelledby="download-title">
+            <div class="download-card">
+                <div class="download-text-group">
+                    <h2 class="download-heading" id="download-title">Play Natively on Desktop (Offline)</h2>
+                    <p class="download-body">
+                        Prefer native 60 FPS performance without browser WebAssembly translation? Download the standalone executable JAR file and run it on Windows, macOS, or Linux using standard Java 8+:
+                    </p>
+                    <div class="terminal-box">
+                        <code class="terminal-code" id="cmd-run">java -jar Tubes-PO2.jar</code>
+                        <button class="btn-copy" onclick="copyCommand()" aria-label="Copy terminal run command">Copy Command</button>
+                    </div>
                 </div>
-                <div class="boss-card">
-                    <h3 class="boss-name">Bringer of Death</h3>
-                    <div class="boss-role">NECROMANCER CASTER</div>
-                    <p class="boss-desc">Penyihir maut yang mampu merapal mantra kegelapan dari jarak jauh dan memiliki gerakan manuver yang sangat mematikan.</p>
-                </div>
-                <div class="boss-card">
-                    <h3 class="boss-name">Blue Golem</h3>
-                    <div class="boss-role">ANCIENT STONE GUARDIAN</div>
-                    <p class="boss-desc">Penjaga batu purba dengan pertahanan tinggi dan hantaman keras yang mampu menjatuhkan pemain ke tanah.</p>
-                </div>
-                <div class="boss-card">
-                    <h3 class="boss-name">Skullwolf & Slime</h3>
-                    <div class="boss-role">WILD TERRITORY MOBS</div>
-                    <p class="boss-desc">Monster rimba yang lincah dan berpatroli aktif di setiap platform untuk menguji kelincahan refleks bertarung pemain.</p>
+
+                <div>
+                    <a href="Tubes-PO2.jar" download="Feline-Souls-Witch-Curse.jar" class="btn-main-download" aria-label="Download Standalone JAR file">
+                        <span>⬇</span> Download Tubes-PO2.jar (47.24 MB)
+                    </a>
                 </div>
             </div>
         </section>
 
-        <!-- Desktop Download Box -->
-        <section id="download-section" class="download-box">
-            <div class="download-info">
-                <h3>Mainkan di Komputer (Offline Desktop)</h3>
-                <p>Ingin bermain dengan performa 60 FPS native tanpa bergantung pada browser? Unduh file JAR yang sudah dipaketkan:</p>
-                <div class="code-box">java -jar Tubes-PO2.jar</div>
-            </div>
-            <div>
-                <a href="Tubes-PO2.jar" download="Feline-Souls-Witch-Curse.jar" class="btn-large-download">
-                    <span>⬇</span> Unduh Feline Souls : Witch Curse (.JAR)
-                </a>
-            </div>
-        </section>
-
-    </div>
+    </main>
 
     <!-- Footer -->
-    <footer>
-        <p>© 2026 <strong>Feline Souls : Witch Curse</strong> — 2D Action RPG Platformer.</p>
-        <p style="margin-top: 0.5rem;">
-            Dibuat dengan Java SE Standard Library oleh tim pengembang. Source code tersedia di <a href="https://github.com/1tsMeRaff/Tubes-PO2" target="_blank" rel="noopener">GitHub 1tsMeRaff/Tubes-PO2</a>.
-        </p>
+    <footer role="contentinfo">
+        <div class="container">
+            <div class="footer-brand">🐾 FELINE SOULS : WITCH CURSE</div>
+            <p>A pure Java Standard Edition 2D Action RPG Platformer developed without external game engines.</p>
+
+            <ul class="footer-links">
+                <li><a href="#game-section">Play WebAssembly</a></li>
+                <li><a href="#controls-section">Keybindings</a></li>
+                <li><a href="#mechanics-section">Spells</a></li>
+                <li><a href="https://github.com/1tsMeRaff/Tubes-PO2" target="_blank" rel="noopener">GitHub Repository</a></li>
+                <li><a href="https://github.com/1tsMeRaff/Tubes-PO2/blob/dev/AGENTS.md" target="_blank" rel="noopener">Agent Guidelines</a></li>
+            </ul>
+
+            <div class="footer-copyright">
+                © 2026 <strong>Feline Souls : Witch Curse</strong>. All assets, spritesheets, and audio resources are reserved by their respective creators. Built with CheerpJ 3.1 & Java SE 8+.
+            </div>
+        </div>
     </footer>
 
-    <!-- CheerpJ Launch Script -->
+    <!-- Interactive Logic & CheerpJ WebAssembly Coordinator -->
     <script>
         let gameLaunched = false;
+        let scanlinesEnabled = false;
 
+        // Mobile Nav Toggle
+        function toggleMobileNav() {
+            const nav = document.getElementById('nav-menu');
+            const toggle = document.querySelector('.mobile-toggle');
+            const isShown = nav.classList.toggle('show');
+            toggle.setAttribute('aria-expanded', isShown);
+        }
+
+        // Focus Game Screen
+        function focusGame() {
+            const wrapper = document.getElementById('game-wrapper');
+            wrapper.focus();
+        }
+
+        // CheerpJ 3.1 WebAssembly Game Launcher
         async function launchGame() {
             if (gameLaunched) return;
             gameLaunched = true;
@@ -760,60 +1794,123 @@
             const progressFill = document.getElementById('progress-fill');
             const loadingStatus = document.getElementById('loading-status');
             const splashScreen = document.getElementById('splash-screen');
+            const cabinetStatus = document.getElementById('cabinet-status');
 
             btnStart.style.display = 'none';
             loadingPanel.style.display = 'flex';
 
             try {
-                // Step 1: Initialize CheerpJ 3
-                loadingStatus.textContent = 'MENGINISIALISASI CHEERPJ WEBASSEMBLY...';
+                // Step 1: Initialize CheerpJ Runtime
+                loadingStatus.textContent = 'STAGE 1/3: INITIALIZING WEBASSEMBLY RUNTIME...';
+                cabinetStatus.textContent = 'BOOTING WEBASSEMBLY RUNTIME...';
                 progressFill.style.width = '30%';
 
                 if (typeof cheerpjInit === 'undefined') {
-                    throw new Error('CheerpJ loader script belum siap atau diblokir.');
+                    throw new Error('CheerpJ loader script is unavailable or blocked by browser extensions.');
                 }
 
                 await cheerpjInit();
                 progressFill.style.width = '60%';
 
-                // Step 2: Create Graphical Display matching game native resolution (1248 x 672)
-                loadingStatus.textContent = 'MEMBUAT CANVAS GRAFIS SWING...';
+                // Step 2: Create Swing Canvas Display (1248 x 672)
+                loadingStatus.textContent = 'STAGE 2/3: ATTACHING SWING 60FPS GRAPHICS CANVAS...';
+                cabinetStatus.textContent = 'ATTACHING DISPLAY ADAPTER (1248x672)...';
                 const wrapper = document.getElementById('game-wrapper');
                 cheerpjCreateDisplay(1248, 672, wrapper);
                 progressFill.style.width = '85%';
 
-                // Step 3: Run Executable JAR
-                loadingStatus.textContent = 'MEMULAI MESIN GAME FELINE SOULS : WITCH CURSE...';
-                progressFill.style.width = '95%';
+                // Step 3: Mount & Execute Standalone Game JAR
+                loadingStatus.textContent = 'STAGE 3/3: LAUNCHING FELINE SOULS : WITCH CURSE...';
+                cabinetStatus.textContent = 'EXECUTING JVM BYTECODE...';
+                progressFill.style.width = '98%';
 
-                // Fade out splash screen
+                // Smoothly fade out splash screen overlay
                 setTimeout(() => {
                     splashScreen.style.opacity = '0';
-                    splashScreen.style.transition = 'opacity 0.5s ease';
+                    splashScreen.style.transition = 'opacity 0.6s ease';
+                    cabinetStatus.textContent = 'ACTIVE // 60 FPS ENGINE ONLINE';
                     setTimeout(() => {
                         splashScreen.style.display = 'none';
-                    }, 500);
+                        wrapper.focus();
+                    }, 600);
                 }, 800);
 
                 // Run JAR directly from virtual web directory
                 await cheerpjRunJar('/app/Tubes-PO2.jar');
 
             } catch (err) {
-                console.error('CheerpJ error:', err);
-                loadingStatus.textContent = 'GAGAL MEMUAT: ' + (err.message || 'Coba unduh versi offline');
-                loadingStatus.style.color = '#ff3344';
+                console.error('CheerpJ launch error:', err);
+                loadingStatus.textContent = 'LAUNCH ERROR: ' + (err.message || 'Check browser WebAssembly support or try desktop JAR.');
+                loadingStatus.style.color = '#ff334b';
+                cabinetStatus.textContent = 'JVM FAULT: OFFLINE JAR RECOMMENDED';
             }
         }
 
+        // Fullscreen Toggle
         function toggleFullscreen() {
             const wrapper = document.getElementById('game-wrapper');
             if (!document.fullscreenElement) {
-                wrapper.requestFullscreen().catch(err => {
-                    alert(`Error attempting to enable full-screen mode: ${err.message}`);
-                });
+                if (wrapper.requestFullscreen) {
+                    wrapper.requestFullscreen();
+                } else if (wrapper.webkitRequestFullscreen) {
+                    wrapper.webkitRequestFullscreen();
+                }
             } else {
-                document.exitFullscreen();
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
             }
+        }
+
+        // CRT Scanline Toggle
+        function toggleScanlines() {
+            const crt = document.getElementById('crt-overlay');
+            const btn = document.getElementById('btn-crt');
+            scanlinesEnabled = !scanlinesEnabled;
+            crt.style.display = scanlinesEnabled ? 'block' : 'none';
+            btn.textContent = scanlinesEnabled ? '📺 Scanlines: ON' : '📺 Scanlines: OFF';
+            showToast(scanlinesEnabled ? 'CRT Retro Scanlines Activated' : 'Scanlines Disabled');
+        }
+
+        // Controls Filtering
+        function filterControls(category, buttonEl) {
+            const cards = document.querySelectorAll('.key-card');
+            const buttons = document.querySelectorAll('.btn-filter');
+
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-selected', 'false');
+            });
+            buttonEl.classList.add('active');
+            buttonEl.setAttribute('aria-selected', 'true');
+
+            cards.forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Copy Terminal Command
+        function copyCommand() {
+            const text = document.getElementById('cmd-run').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('✓ Command copied: ' + text);
+            }).catch(() => {
+                showToast('Press Ctrl+C to copy command.');
+            });
+        }
+
+        // Show Toast Notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'flex';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 2500);
         }
     </script>
 </body>
