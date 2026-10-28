@@ -52,6 +52,8 @@ jobs:
           java -Djava.awt.headless=true -cp "bin:resources" entity.WitchCurseMechanicTest
           java -Djava.awt.headless=true -cp "bin:resources" inputs.InputDispatcherTest
           java -Djava.awt.headless=true -cp "bin:resources" inputs.KeybindingsWiringTest
+          java -Djava.awt.headless=true -cp "bin:resources" ui.GameOverOverlayTest
+          java -Djava.awt.headless=true -cp "bin:resources" ui.SelectLevelOverlayTest
           java -Djava.awt.headless=true -cp "bin:resources" utilitytools.HelpMethodsTest
           java -Djava.awt.headless=true -cp "bin:resources" utilitytools.ResourceLoaderTest
           java -Djava.awt.headless=true -cp "bin:resources" world.CampaignProgressionTest
@@ -76,7 +78,9 @@ jobs:
           # Copy web interface and assets into deployment artifact directory
           cp docs/index.html dist/index.html
           touch dist/.nojekyll
+          cp -r docs/assets dist/assets
           mkdir -p dist/ui
+          cp docs/ui/* dist/ui/ || true
           cp resources/ui/mainn_menu.jpeg dist/ui/mainn_menu.jpeg || true
           
           # Check distribution directory contents

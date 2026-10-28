@@ -118,7 +118,7 @@ public class ObjectManager {
         }
         
         signImg = LoadSave.GetSpriteAtlas("MediavelFree.png");
-        kandangImg = LoadSave.GetSpriteAtlas("kandang .png");
+        kandangImg = LoadSave.GetSpriteAtlas("kandang.png");
         kandangBwImg = new BufferedImage(kandangImg.getWidth(), kandangImg.getHeight(), BufferedImage.TYPE_INT_ARGB);
         for (int y = 0; y < kandangImg.getHeight(); y++) {
             for (int x = 0; x < kandangImg.getWidth(); x++) {

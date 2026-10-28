@@ -16,9 +16,41 @@ import gameStates.PlayStates;
 public class SaveLoadManager {
     private static final String SAVE_FILE = "savegame.txt";
 
+    public static Path getSaveFilePath() {
+        Path local = Paths.get(SAVE_FILE);
+        try {
+            Path testFile = Paths.get(SAVE_FILE + ".test");
+            Files.write(testFile, new byte[0]);
+            Files.deleteIfExists(testFile);
+            return local;
+        } catch (Exception e) {
+            String userHome = System.getProperty("user.home", ".");
+            Path dir = Paths.get(userHome, ".felinesouls");
+            try {
+                Files.createDirectories(dir);
+                return dir.resolve(SAVE_FILE);
+            } catch (Exception ex) {
+                return local;
+            }
+        }
+    }
+
+    public static File getLoadFile() {
+        File localFile = new File(SAVE_FILE);
+        if (localFile.exists()) {
+            return localFile;
+        }
+        String userHome = System.getProperty("user.home", ".");
+        File fallbackFile = Paths.get(userHome, ".felinesouls", SAVE_FILE).toFile();
+        if (fallbackFile.exists()) {
+            return fallbackFile;
+        }
+        return localFile;
+    }
+
     public static void saveGame(PlayStates playStates) {
-        Path targetPath = Paths.get(SAVE_FILE);
-        Path tempPath = Paths.get(SAVE_FILE + ".tmp");
+        Path targetPath = getSaveFilePath();
+        Path tempPath = Paths.get(targetPath.toString() + ".tmp");
 
         try {
             Player p = playStates.getPlayer();
@@ -58,7 +90,7 @@ public class SaveLoadManager {
                 Files.move(tempPath, targetPath, StandardCopyOption.REPLACE_EXISTING);
             }
 
-            System.out.println("Game saved successfully to " + SAVE_FILE);
+            System.out.println("Game saved successfully to " + targetPath);
         } catch (Exception e) {
             System.err.println("Failed to save game!");
             e.printStackTrace();
@@ -66,7 +98,7 @@ public class SaveLoadManager {
     }
 
     public static boolean loadGame(GameCore gc) {
-        File file = new File(SAVE_FILE);
+        File file = getLoadFile();
         if (!file.exists()) {
             System.out.println("No save file found!");
             return false;

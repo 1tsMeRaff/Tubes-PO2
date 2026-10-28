@@ -86,6 +86,18 @@ public class LoadSave {
 				return is;
 			}
 		}
+		// Alias fallback for kandang.png vs kandang .png whitespace variance
+		if ("kandang .png".equals(clean)) {
+			for (String dir : RESOURCE_SUBDIRS) {
+				InputStream is = LoadSave.class.getResourceAsStream("/" + dir + "kandang.png");
+				if (is != null) return is;
+			}
+		} else if ("kandang.png".equals(clean)) {
+			for (String dir : RESOURCE_SUBDIRS) {
+				InputStream is = LoadSave.class.getResourceAsStream("/" + dir + "kandang .png");
+				if (is != null) return is;
+			}
+		}
 		return null;
 	}
 

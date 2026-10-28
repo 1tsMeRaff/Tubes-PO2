@@ -54,6 +54,36 @@ public class ResourceLoaderTest {
             failed++;
         }
 
+        // Test 5: Restored Level 1 tileset
+        BufferedImage outsideSprites = LoadSave.GetSpriteAtlas("outside_sprites.png");
+        if (outsideSprites != null && outsideSprites.getWidth() > 64) {
+            System.out.println("[PASS] outside_sprites.png resolved (" + outsideSprites.getWidth() + "x" + outsideSprites.getHeight() + ")");
+            passed++;
+        } else {
+            System.err.println("[FAIL] outside_sprites.png failed to load");
+            failed++;
+        }
+
+        // Test 6: Normalized asset
+        BufferedImage kandang = LoadSave.GetSpriteAtlas("kandang.png");
+        if (kandang != null && kandang.getWidth() > 0) {
+            System.out.println("[PASS] kandang.png resolved (" + kandang.getWidth() + "x" + kandang.getHeight() + ")");
+            passed++;
+        } else {
+            System.err.println("[FAIL] kandang.png failed to load");
+            failed++;
+        }
+
+        // Test 7: Alias asset support
+        BufferedImage kandangAlias = LoadSave.GetSpriteAtlas("kandang .png");
+        if (kandangAlias != null && kandangAlias.getWidth() > 0) {
+            System.out.println("[PASS] kandang .png alias resolved (" + kandangAlias.getWidth() + "x" + kandangAlias.getHeight() + ")");
+            passed++;
+        } else {
+            System.err.println("[FAIL] kandang .png alias failed to load");
+            failed++;
+        }
+
         System.out.println("======================================");
         System.out.println("Results: " + passed + " passed, " + failed + " failed.");
 

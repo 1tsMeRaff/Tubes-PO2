@@ -49,11 +49,11 @@ public class AudioPlayer implements IAudioService {
 	}
 
 	private void loadSongs() {
-		String[] names = { "Theme", "Theme", "Theme" };
-		songs = new Clip[names.length];
-		for (int i = 0; i < songs.length; i++) {
-			songs[i] = getClip(names[i]);
-		}
+		songs = new Clip[3];
+		Clip themeClip = getClip("Theme");
+		songs[0] = themeClip;
+		songs[1] = themeClip;
+		songs[2] = themeClip;
 	}
 
 	private void loadEffects() {
@@ -149,7 +149,7 @@ public class AudioPlayer implements IAudioService {
 		this.songMute = !songMute;
 		if (songs != null) {
 			for (Clip c : songs) {
-				if (c != null) {
+				if (c != null && c.isControlSupported(BooleanControl.Type.MUTE)) {
 					BooleanControl control = (BooleanControl) c.getControl(BooleanControl.Type.MUTE);
 					control.setValue(songMute);
 				}
@@ -161,7 +161,7 @@ public class AudioPlayer implements IAudioService {
 		this.effectMute = !effectMute;
 		if (effects != null) {
 			for (Clip c : effects) {
-				if (c != null) {
+				if (c != null && c.isControlSupported(BooleanControl.Type.MUTE)) {
 					BooleanControl control = (BooleanControl) c.getControl(BooleanControl.Type.MUTE);
 					control.setValue(effectMute);
 				}
@@ -174,25 +174,28 @@ public class AudioPlayer implements IAudioService {
 
 	private void updateSongVolume() {
 		if (songs != null && currentSongId >= 0 && currentSongId < songs.length && songs[currentSongId] != null) {
-			FloatControl gainControl = (FloatControl) songs[currentSongId].getControl(FloatControl.Type.MASTER_GAIN);
-			
-			// Mencegah error jika volume berada di angka 0 mutlak
-			float safeVolume = Math.max(0.0001f, volume); 
-			
-			// Rumus konversi logaritmik dari linear (0.0 - 1.0) ke Desibel (dB)
-			float gain = 20f * (float) Math.log10(safeVolume);
-			
-			// Pastikan nilai dB tidak melampaui batas maksimum atau minimum bawaan Java
-			gain = Math.max(gainControl.getMinimum(), Math.min(gainControl.getMaximum(), gain));
-			
-			gainControl.setValue(gain);
+			Clip c = songs[currentSongId];
+			if (c.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+				FloatControl gainControl = (FloatControl) c.getControl(FloatControl.Type.MASTER_GAIN);
+				
+				// Mencegah error jika volume berada di angka 0 mutlak
+				float safeVolume = Math.max(0.0001f, volume); 
+				
+				// Rumus konversi logaritmik dari linear (0.0 - 1.0) ke Desibel (dB)
+				float gain = 20f * (float) Math.log10(safeVolume);
+				
+				// Pastikan nilai dB tidak melampaui batas maksimum atau minimum bawaan Java
+				gain = Math.max(gainControl.getMinimum(), Math.min(gainControl.getMaximum(), gain));
+				
+				gainControl.setValue(gain);
+			}
 		}
 	}
 
 	private void updateEffectsVolume() {
 		if (effects != null) {
 			for (Clip c : effects) {
-				if (c != null) {
+				if (c != null && c.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
 					FloatControl gainControl = (FloatControl) c.getControl(FloatControl.Type.MASTER_GAIN);
 					
 					// Gunakan rumus logaritmik yang sama

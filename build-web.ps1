@@ -9,8 +9,10 @@ if (!(Test-Path "docs")) { New-Item -ItemType Directory -Path "docs" | Out-Null 
 
 # 2. Kompilasi source code dan unit tests
 Write-Host "`n[1/4] Mengompilasi seluruh source code & headless tests..." -ForegroundColor Green
-$javaFiles = (Get-ChildItem -Path src,test -Filter *.java -Recurse).FullName
-javac -encoding UTF-8 -d bin $javaFiles
+$sources = (Get-ChildItem -Path src,test -Filter *.java -Recurse | ForEach-Object { $_.FullName.Replace('\', '/') })
+Set-Content -Path "sources.txt" -Value $sources -Encoding ASCII
+javac -encoding UTF-8 -d bin "@sources.txt"
+Remove-Item "sources.txt" -Force
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "❌ Kompilasi GAGAL!" -ForegroundColor Red
@@ -39,17 +41,18 @@ if ($LASTEXITCODE -ne 0) {
     Write-Host "❌ Pengujian unit gagal!" -ForegroundColor Red
     exit 1
 }
-Write-Host "✓ Seluruh 44 unit tests lulus (100%)!" -ForegroundColor Green
+Write-Host "✓ Seluruh 47 unit tests lulus (100%)!" -ForegroundColor Green
 
 # 4. Salin aset dan kemas Tubes-PO2.jar
 Write-Host "`n[3/4] Mengemas Tubes-PO2.jar dengan aset resources..." -ForegroundColor Green
 Copy-Item -Path "resources\*" -Destination "bin" -Recurse -Force
 "Main-Class: main.Main`n" | Out-File -Encoding ASCII manifest.txt
-jar cvfm docs/Tubes-PO2.jar manifest.txt -C bin .
+jar cvfm Tubes-PO2.jar manifest.txt -C bin .
+Copy-Item -Path "Tubes-PO2.jar" -Destination "docs/Tubes-PO2.jar" -Force
 Remove-Item manifest.txt -Force -ErrorAction SilentlyContinue
 
-$jarSize = (Get-Item "docs/Tubes-PO2.jar").Length / 1MB
-Write-Host ("✓ Tubes-PO2.jar berhasil dibuat ({0:N2} MB) di docs/Tubes-PO2.jar!" -f $jarSize) -ForegroundColor Green
+$jarSize = (Get-Item "Tubes-PO2.jar").Length / 1MB
+Write-Host ("✓ Tubes-PO2.jar berhasil dibuat ({0:N2} MB) di root & docs/Tubes-PO2.jar!" -f $jarSize) -ForegroundColor Green
 
 # 5. Petunjuk pengujian lokal & deploy GitHub Pages
 Write-Host "`n[4/4] Setup Web Distribution Siap!" -ForegroundColor Cyan
